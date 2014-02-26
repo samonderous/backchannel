@@ -1,13 +1,16 @@
 //
-//  BCViewController.h
-//  BackChannel
+//  FUPViewController.h
+//  FollowUp
 //
-//  Created by Saureen Shah on 2/18/14.
-//  Copyright (c) 2014 Saureen Shah. All rights reserved.
+//  Created by Saureen Shah on 10/10/13.
+//  Copyright (c) 2013 Saureen Shah. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
+#import "FUPPickerViewController.h"
 
-@interface BCViewController : UIViewController
+@interface FUPViewController : UIViewController
+
+@property (strong, nonatomic) FUPPickerViewController *pickerController;
 
 @end
