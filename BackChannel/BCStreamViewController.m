@@ -211,20 +211,67 @@ static const float kRowSpacing = 0.0f;
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    NSLog(@"layout subviews is being called");
 }
 
 @end
 
+
+@interface BCCellTopLayerContainerView : UIView
+@end
+
+@interface BCCellTopLayerContainerView ()
+@end
+
+@implementation BCCellTopLayerContainerView
+
+- (id)init:(BCSecretModel*)secretModel withSize:(CGSize)size
+{
+    self = [super initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
+    
+    BOOL showHeader = secretModel.agrees || secretModel.disagrees;
+    
+    BCCellTopLayerTextView *textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel.text withWidth:size.width];
+    BCCellTopLayerFooterView *footerView = [[BCCellTopLayerFooterView alloc] init:secretModel.timeStr withWidth:size.width];
+    BCCellTopLayerHeaderView *headerView = [[BCCellTopLayerHeaderView alloc] init:secretModel.agrees withDisagree:secretModel.disagrees withWidth:size.width];
+    
+    [self addSubview:textView];
+    [self addSubview:footerView];
+    
+    [textView placeIn:self alignedAt:CENTER];
+    [footerView placeIn:self alignedAt:CENTER];
+    [headerView placeIn:self alignedAt:CENTER];
+    
+    static const float margin = 10.0;
+    
+    [footerView setY:(CGRectGetMaxY(textView.frame) + margin)];
+    if (showHeader) {
+        [self addSubview:headerView];
+        [headerView setY:CGRectGetMinY(textView.frame) - CGRectGetHeight(footerView.bounds) - margin];
+    }
+    self.backgroundColor = [UIColor whiteColor];
+    
+    return self;
+}
+
+@end
+
+
+
 @interface BCMainCollectionViewCell : UICollectionViewCell
+- (void)addPanGesture;
 @end
 
 @interface BCMainCollectionViewCell ()
 @end
 
 @implementation BCMainCollectionViewCell
-@end
 
+- (void)addPanGesture
+{
+    
+}
+
+@end
 
 
 @interface BCStreamViewController ()
@@ -286,7 +333,7 @@ static const float kRowSpacing = 0.0f;
 
     _messageTable.dataSource = self;
     _messageTable.delegate = self;
-    [_messageTable registerClass:[UICollectionViewCell  class] forCellWithReuseIdentifier:@"BCMainCollectionViewCell"];
+    [_messageTable registerClass:[BCMainCollectionViewCell class] forCellWithReuseIdentifier:@"BCMainCollectionViewCell"];
     [_messageTable setShowsHorizontalScrollIndicator:NO];
     [_messageTable setShowsVerticalScrollIndicator:NO];
     _messageTable.backgroundColor = [UIColor whiteColor];
@@ -324,23 +371,22 @@ static const float kRowSpacing = 0.0f;
 }
 
 
-- (void)setSeparator:(UICollectionViewCell*)cell indexPath:(NSIndexPath*)indexPath
+- (void)setSeparator:(UIView*)contentView indexPath:(NSIndexPath*)indexPath
 {
     CALayer *separatorLine = [[CALayer alloc] init];
     if (indexPath.row == 0) {
         separatorLine.frame = CGRectMake(0.0,
-                                         CGRectGetMaxY(cell.contentView.bounds),
-                                         CGRectGetWidth(cell.contentView.bounds),
+                                         CGRectGetMaxY(contentView.bounds) - 1.0,
+                                         CGRectGetWidth(contentView.bounds),
                                          1.0);
     } else {
         static const float separatorLineWidth = 80.0;
-        separatorLine.frame = CGRectMake(CGRectGetMidX(cell.contentView.bounds) - (separatorLineWidth / 2.0),
-                                         CGRectGetMaxY(cell.contentView.bounds),
+        separatorLine.frame = CGRectMake(CGRectGetMidX(contentView.bounds) - (separatorLineWidth / 2.0),
+                                         CGRectGetMaxY(contentView.bounds) - 1.0,
                                          separatorLineWidth,
                                          1.0);
     }
-    
-    [cell.contentView.layer addSublayer:separatorLine];
+    [contentView.layer addSublayer:separatorLine];
     separatorLine.backgroundColor = [UIColor grayColor].CGColor;
 }
 
@@ -360,46 +406,31 @@ static const float kRowSpacing = 0.0f;
     if (indexPath.row == 0) {
         BCCellComposeView *cv = [[BCCellComposeView alloc] init:CGRectGetWidth(cell.bounds)];
         [cell.contentView addSubview:cv];
-        [self setSeparator:cell indexPath:indexPath];
+        [self setSeparator:cell.contentView indexPath:indexPath];
         [cv placeIn:cell.contentView alignedAt:CENTER_LEFT];
     } else {
         BCSecretModel *secretModel = [_messages objectAtIndex:indexPath.row - 1];
-        
-        BOOL showHeader = secretModel.agrees || secretModel.disagrees;
         float width = CGRectGetWidth(cell.bounds);
-        BCCellTopLayerTextView *textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel.text withWidth:width];
-        BCCellTopLayerFooterView *footerView = [[BCCellTopLayerFooterView alloc] init:secretModel.timeStr withWidth:width];
-    
-        BCCellBottomLayerContainerView *bcv = [[BCCellBottomLayerContainerView alloc] init:CGRectGetWidth(cell.bounds)];
         
-        BCCellTopLayerHeaderView *headerView = [[BCCellTopLayerHeaderView alloc] init:secretModel.agrees withDisagree:secretModel.disagrees withWidth:width];
+        BCCellBottomLayerContainerView *bcv = [[BCCellBottomLayerContainerView alloc] init:width];
+        BCCellTopLayerContainerView *cv = [[BCCellTopLayerContainerView alloc] init:secretModel
+                                                                           withSize:(CGSize){width,
+                                                                               CGRectGetHeight(cell.contentView.bounds)}];
         
-        //[cell.contentView addSubview:bcv];
-        [cell.contentView addSubview:textView];
-        [cell.contentView addSubview:footerView];
+        [cell.contentView addSubview:bcv];
+        [cell.contentView addSubview:cv];
         
         [bcv placeIn:cell.contentView alignedAt:CENTER];
-        [textView placeIn:cell.contentView alignedAt:CENTER];
-        [footerView placeIn:cell.contentView alignedAt:CENTER];
-        [headerView placeIn:cell.contentView alignedAt:CENTER];
         
-        static const float margin = 10.0;
-
-        [footerView setY:(CGRectGetMaxY(textView.frame) + margin)];
-        
-        if (showHeader) {
-            [cell.contentView addSubview:headerView];
-            [headerView setY:CGRectGetMinY(textView.frame) - CGRectGetHeight(footerView.bounds) - margin];
-        }
-        [self setSeparator:cell indexPath:indexPath];
+        [self setSeparator:cell.contentView indexPath:indexPath];
     }
     
 }
 
-- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+- (BCMainCollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 
 {
-    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCMainCollectionViewCell" forIndexPath:indexPath];
+    BCMainCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCMainCollectionViewCell" forIndexPath:indexPath];
     [self clearCell:cell indexPath:indexPath];
     [self prepareCell:cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath];
     return cell;

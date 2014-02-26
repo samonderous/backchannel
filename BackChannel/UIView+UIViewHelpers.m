@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Saureen Shah. All rights reserved.
 //
 
+#import "Utils.h"
 #import "UIView+UIViewHelpers.h"
 
 @implementation UIView (UIViewHelpers)
@@ -20,8 +21,23 @@
 {
     switch (alignment) {
         case CENTER:
-            self.center = CGPointMake(view.bounds.size.width / 2, view.bounds.size.height / 2);
+        {
+            //self.center = CGPointMake(view.bounds.size.width / 2.0, view.bounds.size.height / 2.0);
+            self.center = [view convertPoint:view.center fromView:view.superview];
             break;
+        }
+        case CENTER_LEFT:
+        {
+            self.center = CGPointMake(view.bounds.size.width / 2, view.bounds.size.height / 2);
+            [self setX:margin];
+            break;
+        }
+        case CENTER_RIGTH:
+        {
+            self.center = CGPointMake(view.bounds.size.width / 2, view.bounds.size.height / 2);
+            [self setX:CGRectGetMaxX(view.bounds) - CGRectGetWidth(self.bounds) - margin];
+            break;
+        }
         case TOP_LEFT:
         {
             CGRect selfFrame = self.frame;

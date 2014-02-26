@@ -9,10 +9,10 @@
 #import <CoreText/CTFrameSetter.h>
 #import <QuartzCore/QuartzCore.h>
 
-#import "FUPUtil.h"
+#import "Utils.h"
 #import "TTTAttributedLabel.h"
 
-@implementation FUPUtil
+@implementation Utils
 
 + (NSMutableAttributedString*)getAttributedString:(NSString*)inputText withFontSize:(float)fontSize withBoldFont:(BOOL)isBold
 {
@@ -31,7 +31,7 @@
 
 + (CGSize)calculateTextBoundsSize:(NSString*)inputText withFontSize:(float)fontSize withTargetWidth:(float)targetWidth withBoldFont:(BOOL)isBold
 {
-    NSMutableAttributedString *attrInputText = [FUPUtil getAttributedString:inputText withFontSize:fontSize withBoldFont:isBold];
+    NSMutableAttributedString *attrInputText = [Utils getAttributedString:inputText withFontSize:fontSize withBoldFont:isBold];
     CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attrInputText);
     CGSize targetSize = CGSizeMake(targetWidth, CGFLOAT_MAX);
     CGSize fitSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, CFRangeMake(0, [attrInputText length]), NULL, targetSize, NULL);

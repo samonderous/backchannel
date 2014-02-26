@@ -12,6 +12,8 @@ typedef enum Alignment {
     TOP_LEFT,
     TOP_RIGHT,
     CENTER,
+    CENTER_LEFT,
+    CENTER_RIGTH,
     BOTTOM_LEFT,
     BOTTOM_RIGHT
 } Alignment;

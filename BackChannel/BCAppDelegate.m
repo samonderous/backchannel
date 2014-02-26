@@ -10,6 +10,11 @@
 
 @implementation BCAppDelegate
 
++ (BCAppDelegate*)sharedAppDelegate
+{
+    return (BCAppDelegate*)[[UIApplication sharedApplication] delegate];
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.

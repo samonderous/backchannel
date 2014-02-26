@@ -6,15 +6,14 @@
 //  Copyright (c) 2013 Saureen Shah. All rights reserved.
 //
 
-#import "FUPViewController.h"
-#import "FUPAppDelegate.h"
+#import "BCViewController.h"
+#import "BCAppDelegate.h"
+#import "BCStreamViewController.h"
 
-
-@interface FUPViewController ()
-
+@interface BCViewController ()
 @end
 
-@implementation FUPViewController
+@implementation BCViewController
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -39,11 +38,11 @@
 
 - (void)performSegue
 {
-    UIViewController *vc = [FUPAppDelegate sharedAppDelegate].drawerController;
+    BCStreamViewController *vc = [[BCStreamViewController alloc] init];
+    UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
+    vc.title = @"Backchannel";
     vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-    [self presentViewController:vc animated:YES completion:^() {
-        _pickerController = [[FUPPickerViewController alloc] init];
-        [[FUPAppDelegate sharedAppDelegate].window addSubview:_pickerController.view];
+    [self presentViewController:nc animated:YES completion:^() {
     }];
 }
 

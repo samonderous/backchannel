@@ -7,10 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "FUPPickerViewController.h"
 
-@interface FUPViewController : UIViewController
-
-@property (strong, nonatomic) FUPPickerViewController *pickerController;
-
+@interface BCViewController : UIViewController
 @end

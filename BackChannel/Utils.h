@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface FUPUtil : NSObject
+@interface Utils : NSObject
 
 + (NSMutableAttributedString*)getAttributedString:(NSString*)inputText withFontSize:(float)fontSize withBoldFont:(BOOL)isBold;
 + (CGSize)calculateTextBoundsSize:(NSString*)inputText withFontSize:(float)fontSize withTargetWidth:(float)targetWidth withBoldFont:(BOOL)isBold;
