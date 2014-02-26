@@ -1,5 +1,5 @@
 express = require('express')
-#JSON = require('json')
+BCModel = require("./BCModel").BCModel
 
 app = express()
 
@@ -10,7 +10,8 @@ app.get '/hello', (req, res)=>
   res.send 'Hello World'
 
 app.get '/feed', (req, res)=>
-  res.send (JSON.stringify { status: "success", elements: [{text: "hello", time:"1323423423", agrees:4, disagrees:1},{text: "hello", time:"1323423423", agrees:4, disagrees:1},{text: "hello", time:"1323423423", agrees:4, disagrees:1}] })
+  bcModel = new BCModel("hello",12123123,5,1)
+  res.send (JSON.stringify bcModel)
 
 app.listen(3001);
 console.log('Listening on port 3001')
