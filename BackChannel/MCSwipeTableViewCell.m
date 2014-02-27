@@ -257,7 +257,7 @@ secondStateIconName:(NSString *)secondIconName
     CGFloat width = CGRectGetWidth(self.bounds);
     NSTimeInterval animationDurationDiff = kMCDurationHightLimit - kMCDurationLowLimit;
     CGFloat horizontalVelocity = velocity.x;
-    
+
     if (horizontalVelocity < -width) horizontalVelocity = -width;
     else if (horizontalVelocity > width) horizontalVelocity = width;
     

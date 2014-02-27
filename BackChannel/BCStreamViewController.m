@@ -28,9 +28,32 @@ static const float kRowSpacing = 0.0f;
 @interface BCCellComposeView : UIView
 @end
 
-@interface BCCellComposeView ()
+@interface BCCellTopLayerTextView : UIView
++ (CGRect)getViewRect:(float)width withText:(NSString*)text;
 @end
 
+@interface BCCellTopLayerHeaderView : UIView
+@end
+
+@interface BCCellTopLayerFooterView : UIView
++ (float)getFooterHeight;
+@end
+
+@interface BCCellTopLayerContainerView : UIView<UIGestureRecognizerDelegate>
+- (void)addSwipes;
+@end
+
+@interface BCCellBottomLayerContainerView : UIView
+@end
+
+@interface BCMainCollectionViewCell : UICollectionViewCell
+- (void)addComposeTap:(BCCellComposeView*)composeView;
+@end
+
+
+
+@interface BCCellComposeView ()
+@end
 
 @implementation BCCellComposeView
 
@@ -51,10 +74,6 @@ static const float kRowSpacing = 0.0f;
     [super layoutSubviews];
 }
 
-@end
-
-@interface BCCellTopLayerTextView : UIView
-+ (CGRect)getViewRect:(float)width withText:(NSString*)text;
 @end
 
 @interface BCCellTopLayerTextView ()
@@ -100,9 +119,6 @@ static const float kRowSpacing = 0.0f;
 
 @end
 
-@interface BCCellTopLayerHeaderView : UIView
-@end
-
 @interface BCCellTopLayerHeaderView ()
 @end
 
@@ -139,10 +155,6 @@ static const float kRowSpacing = 0.0f;
 @end
 
 
-@interface BCCellTopLayerFooterView : UIView
-+ (float)getFooterHeight;
-@end
-
 @interface BCCellTopLayerFooterView ()
 @end
 
@@ -175,10 +187,6 @@ static const float kRowSpacing = 0.0f;
 
 @end
 
-
-@interface BCCellBottomLayerContainerView : UIView
-@end
-
 @interface BCCellBottomLayerContainerView ()
 @end
 
@@ -190,12 +198,18 @@ static const float kRowSpacing = 0.0f;
     self = [self initWithFrame:CGRectMake(0.0, 0.0, width, 0.0)];
     UIView *agreeView = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, kSentimentLength, kSentimentLength)];
     agreeView.layer.cornerRadius = CGRectGetWidth(agreeView.bounds) / 2.0;
-    agreeView.layer.borderColor = [UIColor greenColor].CGColor;
+    agreeView.layer.borderColor = [UIColor colorWithRed:(17.0/255.0)
+                                                  green:(156.0/255.0)
+                                                   blue:(96/255.0)
+                                                  alpha:1.0].CGColor;
     agreeView.layer.borderWidth = 2.0;
     
     UIView *disagreeView = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, kSentimentLength, kSentimentLength)];
     disagreeView.layer.cornerRadius = CGRectGetWidth(disagreeView.bounds) / 2.0;
-    disagreeView.layer.borderColor = [UIColor redColor].CGColor;
+    disagreeView.layer.borderColor = [UIColor colorWithRed:(204.0/255.0)
+                                                     green:(76.0/255.0)
+                                                      blue:(69/255.0)
+                                                     alpha:1.0].CGColor;
     disagreeView.layer.borderWidth = 2.0;
 
     [self addSubview:agreeView];
@@ -204,6 +218,7 @@ static const float kRowSpacing = 0.0f;
     
     [agreeView placeIn:self alignedAt:CENTER_RIGTH];
     [disagreeView placeIn:self alignedAt:CENTER_LEFT];
+    self.opaque = YES;
 
     return self;
 }
@@ -215,9 +230,6 @@ static const float kRowSpacing = 0.0f;
 
 @end
 
-
-@interface BCCellTopLayerContainerView : UIView
-@end
 
 @interface BCCellTopLayerContainerView ()
 @end
@@ -249,24 +261,105 @@ static const float kRowSpacing = 0.0f;
         [headerView setY:CGRectGetMinY(textView.frame) - CGRectGetHeight(footerView.bounds) - margin];
     }
     self.backgroundColor = [UIColor whiteColor];
-    
+    self.opaque = YES;
     return self;
+}
+
+- (void)addSwipes
+{
+    UIPanGestureRecognizer *panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+	[panRecognizer setMinimumNumberOfTouches:1];
+	[panRecognizer setMaximumNumberOfTouches:1];
+	[panRecognizer setDelegate:self];
+	[self addGestureRecognizer:panRecognizer];
+    panRecognizer.delegate = self;
+}
+
+- (void)handleSwipe:(UIPanGestureRecognizer*)gesture
+{
+    typedef enum Direction
+    {
+        LEFT_DIRECTION = 0,
+        RIGHT_DIRECTION
+    } Direction;
+    
+    static const float cutOff = 40.0;
+    
+    UIGestureRecognizerState state = gesture.state;
+    CGFloat width = CGRectGetWidth(gesture.view.bounds);
+    CGPoint delta = [gesture translationInView:gesture.view.superview];
+    CGPoint velocity = [gesture velocityInView:gesture.view.superview];
+    Direction direction;
+    
+    [Utils debugRect:gesture.view withName:@"Content View"];
+    if (velocity.x <= 0) {
+        direction = LEFT_DIRECTION;
+    } else {
+        direction = RIGHT_DIRECTION;
+    }
+    
+    CGFloat finalX = 0.0;
+    if (velocity.x < -width) {
+        finalX = -width + cutOff;
+    } else if (velocity.x > width) {
+        finalX = width - 20.0;
+    } else {
+        finalX = velocity.x;
+    }
+    NSLog(@"The velocity x = %f with finalX = %f", velocity.x, finalX);
+    
+    if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
+        gesture.view.center = CGPointMake(gesture.view.center.x + delta.x, gesture.view.center.y);
+        [gesture setTranslation:CGPointZero inView:self.superview];
+    } else if (state == UIGestureRecognizerStateEnded || state == UIGestureRecognizerStateCancelled) {
+        [UIView beginAnimations:nil context:NULL];
+        [UIView setAnimationDuration:1.0];
+        [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+        [UIView setAnimationDelegate:self];
+        //[UIView setAnimationDidStopSelector:@selector(animationDidFinish)];
+        [gesture.view setX:finalX];
+        [UIView commitAnimations];
+    }
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    return YES;
 }
 
 @end
 
 
 
-@interface BCMainCollectionViewCell : UICollectionViewCell
-- (void)addPanGesture;
-@end
-
 @interface BCMainCollectionViewCell ()
 @end
 
 @implementation BCMainCollectionViewCell
 
-- (void)addPanGesture
+- (void)prepareForReuse
+{
+    [super prepareForReuse];
+    
+    for (UIGestureRecognizer *recognizer in self.contentView.gestureRecognizers) {
+        [self.contentView removeGestureRecognizer:recognizer];
+    }
+    
+    for (UIView *subview in self.contentView.subviews) {
+        [subview removeFromSuperview];
+    }
+    
+    for (CALayer *layer in self.contentView.layer.sublayers) {
+        [layer removeFromSuperlayer];
+    }
+}
+
+
+- (void)addComposeTap:(BCCellComposeView*)composeView
+{
+    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    [self addGestureRecognizer:tapRecognizer];
+}
+
+- (void)handleTap:(UITapGestureRecognizer*)gesture
 {
     
 }
@@ -390,24 +483,14 @@ static const float kRowSpacing = 0.0f;
     separatorLine.backgroundColor = [UIColor grayColor].CGColor;
 }
 
-- (void)clearCell:(UICollectionViewCell*)cell indexPath:(NSIndexPath*)indexPath
-{
-    for (UIView *subview in cell.contentView.subviews) {
-        [subview removeFromSuperview];
-    }
-    
-    for (CALayer *layer in cell.contentView.layer.sublayers) {
-        [layer removeFromSuperlayer];
-    }
-}
-
-- (void)prepareCell:(UICollectionViewCell*)cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath
+- (void)prepareCell:(BCMainCollectionViewCell*)cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath
 {
     if (indexPath.row == 0) {
         BCCellComposeView *cv = [[BCCellComposeView alloc] init:CGRectGetWidth(cell.bounds)];
         [cell.contentView addSubview:cv];
         [self setSeparator:cell.contentView indexPath:indexPath];
         [cv placeIn:cell.contentView alignedAt:CENTER_LEFT];
+        [cell addComposeTap:cv];
     } else {
         BCSecretModel *secretModel = [_messages objectAtIndex:indexPath.row - 1];
         float width = CGRectGetWidth(cell.bounds);
@@ -416,10 +499,9 @@ static const float kRowSpacing = 0.0f;
         BCCellTopLayerContainerView *cv = [[BCCellTopLayerContainerView alloc] init:secretModel
                                                                            withSize:(CGSize){width,
                                                                                CGRectGetHeight(cell.contentView.bounds)}];
-        
+        [cv addSwipes];
         [cell.contentView addSubview:bcv];
         [cell.contentView addSubview:cv];
-        
         [bcv placeIn:cell.contentView alignedAt:CENTER];
         
         [self setSeparator:cell.contentView indexPath:indexPath];
@@ -430,8 +512,8 @@ static const float kRowSpacing = 0.0f;
 - (BCMainCollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 
 {
+
     BCMainCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCMainCollectionViewCell" forIndexPath:indexPath];
-    [self clearCell:cell indexPath:indexPath];
     [self prepareCell:cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath];
     return cell;
 }
