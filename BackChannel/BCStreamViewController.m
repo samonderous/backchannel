@@ -25,6 +25,7 @@ static const float kSentimentLength = 40.0;
 static const float kRowSpacing = 0.0f;
 
 
+
 @interface BCCellComposeView : UIView
 @end
 
@@ -41,6 +42,7 @@ static const float kRowSpacing = 0.0f;
 
 @interface BCCellTopLayerContainerView : UIView<UIGestureRecognizerDelegate>
 - (void)addSwipes;
++ (BOOL)isSwipeLocked;
 @end
 
 @interface BCCellBottomLayerContainerView : UIView
@@ -49,7 +51,6 @@ static const float kRowSpacing = 0.0f;
 @interface BCMainCollectionViewCell : UICollectionViewCell
 - (void)addComposeTap:(BCCellComposeView*)composeView;
 @end
-
 
 
 @interface BCCellComposeView ()
@@ -232,37 +233,67 @@ static const float kRowSpacing = 0.0f;
 
 
 @interface BCCellTopLayerContainerView ()
+@property (assign) BOOL isDragging;
+@property (strong, nonatomic) BCCellTopLayerTextView *textView;
 @end
 
 @implementation BCCellTopLayerContainerView
 
+static BOOL isSwipeLocked;
+
+typedef enum Direction
+{
+    LEFT_DIRECTION = 1,
+    RIGHT_DIRECTION
+} Direction;
+
 - (id)init:(BCSecretModel*)secretModel withSize:(CGSize)size
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
+    static dispatch_once_t oncePredicate;
+    
+    dispatch_once(&oncePredicate, ^{
+        static BOOL isSwipeLocked = NO;
+        NSLog(@"COMING HERE");
+
+    });
     
     BOOL showHeader = secretModel.agrees || secretModel.disagrees;
     
-    BCCellTopLayerTextView *textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel.text withWidth:size.width];
+    _textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel.text withWidth:size.width];
     BCCellTopLayerFooterView *footerView = [[BCCellTopLayerFooterView alloc] init:secretModel.timeStr withWidth:size.width];
     BCCellTopLayerHeaderView *headerView = [[BCCellTopLayerHeaderView alloc] init:secretModel.agrees withDisagree:secretModel.disagrees withWidth:size.width];
     
-    [self addSubview:textView];
+    [self addSubview:_textView];
     [self addSubview:footerView];
     
-    [textView placeIn:self alignedAt:CENTER];
+    [_textView placeIn:self alignedAt:CENTER];
     [footerView placeIn:self alignedAt:CENTER];
     [headerView placeIn:self alignedAt:CENTER];
     
     static const float margin = 10.0;
     
-    [footerView setY:(CGRectGetMaxY(textView.frame) + margin)];
+    [footerView setY:(CGRectGetMaxY(_textView.frame) + margin)];
     if (showHeader) {
         [self addSubview:headerView];
-        [headerView setY:CGRectGetMinY(textView.frame) - CGRectGetHeight(footerView.bounds) - margin];
+        [headerView setY:CGRectGetMinY(_textView.frame) - CGRectGetHeight(footerView.bounds) - margin];
     }
     self.backgroundColor = [UIColor whiteColor];
     self.opaque = YES;
+    
+    _isDragging = NO;
+    
     return self;
+}
+
++ (void)setSwipeLocked:(BOOL)isLock
+{
+    isSwipeLocked = isLock;
+}
+
++ (BOOL)isSwipeLocked
+{
+    return isSwipeLocked;
 }
 
 - (void)addSwipes
@@ -277,12 +308,13 @@ static const float kRowSpacing = 0.0f;
 
 - (void)handleSwipe:(UIPanGestureRecognizer*)gesture
 {
-    typedef enum Direction
-    {
-        LEFT_DIRECTION = 0,
-        RIGHT_DIRECTION
-    } Direction;
-    
+    NSLog(@"COMING HERE? and isSwipeLocked at = %d", isSwipeLocked);
+    if (isSwipeLocked) {
+        return;
+    }
+
+    BOOL overshot = NO;
+    float threshhold = CGRectGetWidth(gesture.view.bounds) / 2.0;
     static const float cutOff = 40.0;
     
     UIGestureRecognizerState state = gesture.state;
@@ -291,7 +323,6 @@ static const float kRowSpacing = 0.0f;
     CGPoint velocity = [gesture velocityInView:gesture.view.superview];
     Direction direction;
     
-    [Utils debugRect:gesture.view withName:@"Content View"];
     if (velocity.x <= 0) {
         direction = LEFT_DIRECTION;
     } else {
@@ -306,24 +337,48 @@ static const float kRowSpacing = 0.0f;
     } else {
         finalX = velocity.x;
     }
-    NSLog(@"The velocity x = %f with finalX = %f", velocity.x, finalX);
     
+    float duration = 1.0;
+    if (fabs(velocity.x) > width) {
+        overshot = YES;
+        duration = width / fabs(velocity.x) * 1.0;
+    } else {
+        duration = 1.0 * fabs(velocity.x) / width;
+    }
+
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
+        _isDragging = YES;
         gesture.view.center = CGPointMake(gesture.view.center.x + delta.x, gesture.view.center.y);
         [gesture setTranslation:CGPointZero inView:self.superview];
     } else if (state == UIGestureRecognizerStateEnded || state == UIGestureRecognizerStateCancelled) {
-        [UIView beginAnimations:nil context:NULL];
-        [UIView setAnimationDuration:1.0];
-        [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-        [UIView setAnimationDelegate:self];
-        //[UIView setAnimationDidStopSelector:@selector(animationDidFinish)];
-        [gesture.view setX:finalX];
-        [UIView commitAnimations];
+        _isDragging = NO;
+        isSwipeLocked = YES;
+        if (RIGHT_DIRECTION && gesture.view.frame.origin.x > threshhold) {
+            finalX = width - 20.0;
+            overshot = YES;
+        } else if (LEFT_DIRECTION && gesture.view.frame.origin.x + width <= threshhold) {
+            finalX = -width + cutOff;
+            overshot = YES;
+        }
+        [UIView animateWithDuration:duration delay:0.0 options: UIViewAnimationOptionCurveLinear
+                         animations:^{
+                             [gesture.view setX:finalX];
+                         }
+                         completion:^(BOOL finished) {
+                             [UIView animateWithDuration: overshot ? 1.0 : duration delay:0.0 options: UIViewAnimationOptionCurveLinear
+                                              animations:^{
+                                                  [gesture.view setX:0.0];
+                                              }
+                                              completion:^(BOOL finished) {
+                                                  isSwipeLocked = NO;
+                                              }];
+                         }];
     }
 }
 
+
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-    return YES;
+    return !_isDragging;
 }
 
 @end
@@ -372,6 +427,7 @@ static const float kRowSpacing = 0.0f;
 @property (assign) int contentWidth;
 @property (strong, nonatomic) UICollectionView *messageTable;
 @property (strong, nonatomic) NSMutableArray *messages;
+@property (assign) BOOL isSwipeLock;
 @end
 
 @implementation BCStreamViewController
@@ -420,6 +476,9 @@ static const float kRowSpacing = 0.0f;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    _isSwipeLock = NO;
+    
 	// Do any additional setup after loading the view.
     _messages = [[NSMutableArray alloc] init];
     [self setupMessages];
@@ -437,11 +496,13 @@ static const float kRowSpacing = 0.0f;
                                                                            alpha:1.0];
     // NOTE: UIBarStyleDefault for black status bar content
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [BCCellTopLayerContainerView setSwipeLocked:NO];
 }
 
 - (void)didReceiveMemoryWarning
@@ -450,6 +511,34 @@ static const float kRowSpacing = 0.0f;
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark Collection View Scroll
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+    [BCCellTopLayerContainerView setSwipeLocked:YES];
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    [BCCellTopLayerContainerView setSwipeLocked:NO];
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    // This delegate gets called on init for some weird reason
+    if (_messageTable.contentOffset.y > 0.0) {
+        [BCCellTopLayerContainerView setSwipeLocked:YES];
+    }
+}
+
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
+{
+    [BCCellTopLayerContainerView setSwipeLocked:NO];
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    [BCCellTopLayerContainerView setSwipeLocked:NO];
+}
 
 #pragma mark Collection View Delegate (_messagesTable)
 
