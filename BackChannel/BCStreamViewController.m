@@ -25,36 +25,12 @@ static const float kSentimentLength = 40.0;
 static const float kRowSpacing = 0.0f;
 
 
-
 @interface BCCellComposeView : UIView
 @end
 
-@interface BCCellTopLayerTextView : UIView
-+ (CGRect)getViewRect:(float)width withText:(NSString*)text;
-@end
-
-@interface BCCellTopLayerHeaderView : UIView
-@end
-
-@interface BCCellTopLayerFooterView : UIView
-+ (float)getFooterHeight;
-@end
-
-@interface BCCellTopLayerContainerView : UIView<UIGestureRecognizerDelegate>
-- (void)addSwipes;
-+ (BOOL)isSwipeLocked;
-@end
-
-@interface BCCellBottomLayerContainerView : UIView
-@end
-
-@interface BCMainCollectionViewCell : UICollectionViewCell
-- (void)addComposeTap:(BCCellComposeView*)composeView;
-@end
-
-
 @interface BCCellComposeView ()
 @end
+
 
 @implementation BCCellComposeView
 
@@ -75,6 +51,10 @@ static const float kRowSpacing = 0.0f;
     [super layoutSubviews];
 }
 
+@end
+
+@interface BCCellTopLayerTextView : UIView
++ (CGRect)getViewRect:(float)width withText:(NSString*)text;
 @end
 
 @interface BCCellTopLayerTextView ()
@@ -120,6 +100,9 @@ static const float kRowSpacing = 0.0f;
 
 @end
 
+@interface BCCellTopLayerHeaderView : UIView
+@end
+
 @interface BCCellTopLayerHeaderView ()
 @end
 
@@ -156,6 +139,10 @@ static const float kRowSpacing = 0.0f;
 @end
 
 
+@interface BCCellTopLayerFooterView : UIView
++ (float)getFooterHeight;
+@end
+
 @interface BCCellTopLayerFooterView ()
 @end
 
@@ -188,6 +175,10 @@ static const float kRowSpacing = 0.0f;
 
 @end
 
+
+@interface BCCellBottomLayerContainerView : UIView
+@end
+
 @interface BCCellBottomLayerContainerView ()
 @end
 
@@ -199,18 +190,12 @@ static const float kRowSpacing = 0.0f;
     self = [self initWithFrame:CGRectMake(0.0, 0.0, width, 0.0)];
     UIView *agreeView = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, kSentimentLength, kSentimentLength)];
     agreeView.layer.cornerRadius = CGRectGetWidth(agreeView.bounds) / 2.0;
-    agreeView.layer.borderColor = [UIColor colorWithRed:(17.0/255.0)
-                                                  green:(156.0/255.0)
-                                                   blue:(96/255.0)
-                                                  alpha:1.0].CGColor;
+    agreeView.layer.borderColor = [UIColor greenColor].CGColor;
     agreeView.layer.borderWidth = 2.0;
     
     UIView *disagreeView = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, kSentimentLength, kSentimentLength)];
     disagreeView.layer.cornerRadius = CGRectGetWidth(disagreeView.bounds) / 2.0;
-    disagreeView.layer.borderColor = [UIColor colorWithRed:(204.0/255.0)
-                                                     green:(76.0/255.0)
-                                                      blue:(69/255.0)
-                                                     alpha:1.0].CGColor;
+    disagreeView.layer.borderColor = [UIColor redColor].CGColor;
     disagreeView.layer.borderWidth = 2.0;
 
     [self addSubview:agreeView];
@@ -219,7 +204,6 @@ static const float kRowSpacing = 0.0f;
     
     [agreeView placeIn:self alignedAt:CENTER_RIGTH];
     [disagreeView placeIn:self alignedAt:CENTER_LEFT];
-    self.opaque = YES;
 
     return self;
 }
@@ -232,189 +216,57 @@ static const float kRowSpacing = 0.0f;
 @end
 
 
+@interface BCCellTopLayerContainerView : UIView
+@end
+
 @interface BCCellTopLayerContainerView ()
-@property (assign) BOOL isDragging;
-@property (strong, nonatomic) BCCellTopLayerTextView *textView;
 @end
 
 @implementation BCCellTopLayerContainerView
 
-static BOOL isSwipeLocked;
-
-typedef enum Direction
-{
-    LEFT_DIRECTION = 1,
-    RIGHT_DIRECTION
-} Direction;
-
 - (id)init:(BCSecretModel*)secretModel withSize:(CGSize)size
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
-    static dispatch_once_t oncePredicate;
-    
-    dispatch_once(&oncePredicate, ^{
-        static BOOL isSwipeLocked = NO;
-        NSLog(@"COMING HERE");
-
-    });
     
     BOOL showHeader = secretModel.agrees || secretModel.disagrees;
     
-    _textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel.text withWidth:size.width];
+    BCCellTopLayerTextView *textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel.text withWidth:size.width];
     BCCellTopLayerFooterView *footerView = [[BCCellTopLayerFooterView alloc] init:secretModel.timeStr withWidth:size.width];
     BCCellTopLayerHeaderView *headerView = [[BCCellTopLayerHeaderView alloc] init:secretModel.agrees withDisagree:secretModel.disagrees withWidth:size.width];
     
-    [self addSubview:_textView];
+    [self addSubview:textView];
     [self addSubview:footerView];
     
-    [_textView placeIn:self alignedAt:CENTER];
+    [textView placeIn:self alignedAt:CENTER];
     [footerView placeIn:self alignedAt:CENTER];
     [headerView placeIn:self alignedAt:CENTER];
     
     static const float margin = 10.0;
     
-    [footerView setY:(CGRectGetMaxY(_textView.frame) + margin)];
+    [footerView setY:(CGRectGetMaxY(textView.frame) + margin)];
     if (showHeader) {
         [self addSubview:headerView];
-        [headerView setY:CGRectGetMinY(_textView.frame) - CGRectGetHeight(footerView.bounds) - margin];
+        [headerView setY:CGRectGetMinY(textView.frame) - CGRectGetHeight(footerView.bounds) - margin];
     }
     self.backgroundColor = [UIColor whiteColor];
-    self.opaque = YES;
-    
-    _isDragging = NO;
     
     return self;
-}
-
-+ (void)setSwipeLocked:(BOOL)isLock
-{
-    isSwipeLocked = isLock;
-}
-
-+ (BOOL)isSwipeLocked
-{
-    return isSwipeLocked;
-}
-
-- (void)addSwipes
-{
-    UIPanGestureRecognizer *panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
-	[panRecognizer setMinimumNumberOfTouches:1];
-	[panRecognizer setMaximumNumberOfTouches:1];
-	[panRecognizer setDelegate:self];
-	[self addGestureRecognizer:panRecognizer];
-    panRecognizer.delegate = self;
-}
-
-- (void)handleSwipe:(UIPanGestureRecognizer*)gesture
-{
-    NSLog(@"COMING HERE? and isSwipeLocked at = %d", isSwipeLocked);
-    if (isSwipeLocked) {
-        return;
-    }
-
-    BOOL overshot = NO;
-    float threshhold = CGRectGetWidth(gesture.view.bounds) / 2.0;
-    static const float cutOff = 40.0;
-    
-    UIGestureRecognizerState state = gesture.state;
-    CGFloat width = CGRectGetWidth(gesture.view.bounds);
-    CGPoint delta = [gesture translationInView:gesture.view.superview];
-    CGPoint velocity = [gesture velocityInView:gesture.view.superview];
-    Direction direction;
-    
-    if (velocity.x <= 0) {
-        direction = LEFT_DIRECTION;
-    } else {
-        direction = RIGHT_DIRECTION;
-    }
-    
-    CGFloat finalX = 0.0;
-    if (velocity.x < -width) {
-        finalX = -width + cutOff;
-    } else if (velocity.x > width) {
-        finalX = width - 20.0;
-    } else {
-        finalX = velocity.x;
-    }
-    
-    float duration = 1.0;
-    if (fabs(velocity.x) > width) {
-        overshot = YES;
-        duration = width / fabs(velocity.x) * 1.0;
-    } else {
-        duration = 1.0 * fabs(velocity.x) / width;
-    }
-
-    if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
-        _isDragging = YES;
-        gesture.view.center = CGPointMake(gesture.view.center.x + delta.x, gesture.view.center.y);
-        [gesture setTranslation:CGPointZero inView:self.superview];
-    } else if (state == UIGestureRecognizerStateEnded || state == UIGestureRecognizerStateCancelled) {
-        _isDragging = NO;
-        isSwipeLocked = YES;
-        if (RIGHT_DIRECTION && gesture.view.frame.origin.x > threshhold) {
-            finalX = width - 20.0;
-            overshot = YES;
-        } else if (LEFT_DIRECTION && gesture.view.frame.origin.x + width <= threshhold) {
-            finalX = -width + cutOff;
-            overshot = YES;
-        }
-        [UIView animateWithDuration:duration delay:0.0 options: UIViewAnimationOptionCurveLinear
-                         animations:^{
-                             [gesture.view setX:finalX];
-                         }
-                         completion:^(BOOL finished) {
-                             [UIView animateWithDuration: overshot ? 1.0 : duration delay:0.0 options: UIViewAnimationOptionCurveLinear
-                                              animations:^{
-                                                  [gesture.view setX:0.0];
-                                              }
-                                              completion:^(BOOL finished) {
-                                                  isSwipeLocked = NO;
-                                              }];
-                         }];
-    }
-}
-
-
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-    return !_isDragging;
 }
 
 @end
 
 
+
+@interface BCMainCollectionViewCell : UICollectionViewCell
+- (void)addPanGesture;
+@end
 
 @interface BCMainCollectionViewCell ()
 @end
 
 @implementation BCMainCollectionViewCell
 
-- (void)prepareForReuse
-{
-    [super prepareForReuse];
-    
-    for (UIGestureRecognizer *recognizer in self.contentView.gestureRecognizers) {
-        [self.contentView removeGestureRecognizer:recognizer];
-    }
-    
-    for (UIView *subview in self.contentView.subviews) {
-        [subview removeFromSuperview];
-    }
-    
-    for (CALayer *layer in self.contentView.layer.sublayers) {
-        [layer removeFromSuperlayer];
-    }
-}
-
-
-- (void)addComposeTap:(BCCellComposeView*)composeView
-{
-    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-    [self addGestureRecognizer:tapRecognizer];
-}
-
-- (void)handleTap:(UITapGestureRecognizer*)gesture
+- (void)addPanGesture
 {
     
 }
@@ -427,7 +279,6 @@ typedef enum Direction
 @property (assign) int contentWidth;
 @property (strong, nonatomic) UICollectionView *messageTable;
 @property (strong, nonatomic) NSMutableArray *messages;
-@property (assign) BOOL isSwipeLock;
 @end
 
 @implementation BCStreamViewController
@@ -476,9 +327,6 @@ typedef enum Direction
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    _isSwipeLock = NO;
-    
 	// Do any additional setup after loading the view.
     _messages = [[NSMutableArray alloc] init];
     [self setupMessages];
@@ -496,13 +344,11 @@ typedef enum Direction
                                                                            alpha:1.0];
     // NOTE: UIBarStyleDefault for black status bar content
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-    
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [BCCellTopLayerContainerView setSwipeLocked:NO];
 }
 
 - (void)didReceiveMemoryWarning
@@ -511,34 +357,6 @@ typedef enum Direction
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark Collection View Scroll
-- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
-{
-    [BCCellTopLayerContainerView setSwipeLocked:YES];
-}
-
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
-{
-    [BCCellTopLayerContainerView setSwipeLocked:NO];
-}
-
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView
-{
-    // This delegate gets called on init for some weird reason
-    if (_messageTable.contentOffset.y > 0.0) {
-        [BCCellTopLayerContainerView setSwipeLocked:YES];
-    }
-}
-
-- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
-{
-    [BCCellTopLayerContainerView setSwipeLocked:NO];
-}
-
-- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
-{
-    [BCCellTopLayerContainerView setSwipeLocked:NO];
-}
 
 #pragma mark Collection View Delegate (_messagesTable)
 
@@ -572,14 +390,24 @@ typedef enum Direction
     separatorLine.backgroundColor = [UIColor grayColor].CGColor;
 }
 
-- (void)prepareCell:(BCMainCollectionViewCell*)cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath
+- (void)clearCell:(UICollectionViewCell*)cell indexPath:(NSIndexPath*)indexPath
+{
+    for (UIView *subview in cell.contentView.subviews) {
+        [subview removeFromSuperview];
+    }
+    
+    for (CALayer *layer in cell.contentView.layer.sublayers) {
+        [layer removeFromSuperlayer];
+    }
+}
+
+- (void)prepareCell:(UICollectionViewCell*)cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath
 {
     if (indexPath.row == 0) {
         BCCellComposeView *cv = [[BCCellComposeView alloc] init:CGRectGetWidth(cell.bounds)];
         [cell.contentView addSubview:cv];
         [self setSeparator:cell.contentView indexPath:indexPath];
         [cv placeIn:cell.contentView alignedAt:CENTER_LEFT];
-        [cell addComposeTap:cv];
     } else {
         BCSecretModel *secretModel = [_messages objectAtIndex:indexPath.row - 1];
         float width = CGRectGetWidth(cell.bounds);
@@ -588,9 +416,10 @@ typedef enum Direction
         BCCellTopLayerContainerView *cv = [[BCCellTopLayerContainerView alloc] init:secretModel
                                                                            withSize:(CGSize){width,
                                                                                CGRectGetHeight(cell.contentView.bounds)}];
-        [cv addSwipes];
+        
         [cell.contentView addSubview:bcv];
         [cell.contentView addSubview:cv];
+        
         [bcv placeIn:cell.contentView alignedAt:CENTER];
         
         [self setSeparator:cell.contentView indexPath:indexPath];
@@ -601,8 +430,8 @@ typedef enum Direction
 - (BCMainCollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 
 {
-
     BCMainCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCMainCollectionViewCell" forIndexPath:indexPath];
+    [self clearCell:cell indexPath:indexPath];
     [self prepareCell:cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath];
     return cell;
 }
