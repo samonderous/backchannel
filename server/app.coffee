@@ -18,6 +18,13 @@ findBCModelInFeed = (array,uuid)->
 			return bc
 	return null
 
+confirmUserFromHash = (hash,array)->
+	for user in array
+		if (user.hashedEmailAndUDID == hash) 
+			user.confirmed
+			return true;
+	return false;
+
 app = express()
 app.use express.bodyParser()
 app.use express.logger()
@@ -45,10 +52,17 @@ app.put '/register', (req, res)=>
 
 app.put '/confirm/:hashedEmailAndUDID', (req,res)=>
 	console.log(req.param("hashedEmailAndUDID"))
-	res.send req.param("hashedEmailAndUDID")
-
+	if (confirmUserFromHash(req.param("hashedEmailAndUDID"),usersTable))
+		res.send (JSON.stringify {
+			confirmed: true
+		})
+	else
+		res.send (JSON.stringify {
+			confirmed: false
+		})
 
 app.post '/login', (req, res)=>
+
 
 app.put '/compose', (req, res)=>
 	console.log(req.body)
