@@ -23,8 +23,13 @@ static const float kHeaderFooterHeight = 30.0;
 static const float kContainerPadding = 30.0;
 static const float kSentimentLength = 40.0;
 static const float kRowSpacing = 0.0f;
+static const float kKeyboardHeight = 216.0;
+static const float kPublishBarHeight = 60.0;
 
 
+
+@interface BCComposeBarView : UIView
+@end
 
 @interface BCCellComposeView : UIView
 @end
@@ -49,7 +54,38 @@ static const float kRowSpacing = 0.0f;
 @end
 
 @interface BCMainCollectionViewCell : UICollectionViewCell
-- (void)addComposeTap:(BCCellComposeView*)composeView;
+@end
+
+
+
+@interface BCComposeBarView ()
+@end
+
+@implementation BCComposeBarView
+
+- (id)init:(float)width
+{
+    self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kPublishBarHeight)];
+    UIButton *nevermind = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, width, kPublishBarHeight / 2.0)];
+    UIButton *publish = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(nevermind.frame), 0.0, width, kPublishBarHeight / 2.0)];
+    
+    [self addSubview:nevermind];
+    [self addSubview:publish];
+    
+    [nevermind setTitle:@"Nevermind" forState:UIControlStateNormal];
+    [publish setTitle:@"Publish" forState:UIControlStateNormal];
+    nevermind.backgroundColor = [UIColor colorWithRed:(189.0/255.0) green:(187.0/255.0) blue:(159.0/255.0) alpha:0.05];
+    publish.backgroundColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:0.05];
+    
+    
+    return self;
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+}
+
 @end
 
 
@@ -254,8 +290,6 @@ typedef enum Direction
     
     dispatch_once(&oncePredicate, ^{
         static BOOL isSwipeLocked = NO;
-        NSLog(@"COMING HERE");
-
     });
     
     BOOL showHeader = secretModel.agrees || secretModel.disagrees;
@@ -308,7 +342,6 @@ typedef enum Direction
 
 - (void)handleSwipe:(UIPanGestureRecognizer*)gesture
 {
-    NSLog(@"COMING HERE? and isSwipeLocked at = %d", isSwipeLocked);
     if (isSwipeLocked) {
         return;
     }
@@ -384,8 +417,8 @@ typedef enum Direction
 @end
 
 
-
 @interface BCMainCollectionViewCell ()
+@property (strong, nonatomic) UICollectionView *collectionView;
 @end
 
 @implementation BCMainCollectionViewCell
@@ -407,18 +440,6 @@ typedef enum Direction
     }
 }
 
-
-- (void)addComposeTap:(BCCellComposeView*)composeView
-{
-    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-    [self addGestureRecognizer:tapRecognizer];
-}
-
-- (void)handleTap:(UITapGestureRecognizer*)gesture
-{
-    
-}
-
 @end
 
 
@@ -428,6 +449,7 @@ typedef enum Direction
 @property (strong, nonatomic) UICollectionView *messageTable;
 @property (strong, nonatomic) NSMutableArray *messages;
 @property (assign) BOOL isSwipeLock;
+@property (assign) BOOL isComposeMode;
 @end
 
 @implementation BCStreamViewController
@@ -489,7 +511,7 @@ typedef enum Direction
     [_messageTable setShowsHorizontalScrollIndicator:NO];
     [_messageTable setShowsVerticalScrollIndicator:NO];
     _messageTable.backgroundColor = [UIColor whiteColor];
-    
+
     self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:(41.0/255.0)
                                                                            green:(99.0/255.0)
                                                                             blue:(120/255.0)
@@ -572,6 +594,18 @@ typedef enum Direction
     separatorLine.backgroundColor = [UIColor grayColor].CGColor;
 }
 
+
+- (void)addComposeTap:(BCMainCollectionViewCell*)cell
+{
+    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    [cell addGestureRecognizer:tapRecognizer];
+}
+
+- (void)handleTap:(UITapGestureRecognizer*)gesture
+{
+    
+}
+
 - (void)prepareCell:(BCMainCollectionViewCell*)cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath
 {
     if (indexPath.row == 0) {
@@ -579,7 +613,7 @@ typedef enum Direction
         [cell.contentView addSubview:cv];
         [self setSeparator:cell.contentView indexPath:indexPath];
         [cv placeIn:cell.contentView alignedAt:CENTER_LEFT];
-        [cell addComposeTap:cv];
+        //[self addComposeTap:cell];
     } else {
         BCSecretModel *secretModel = [_messages objectAtIndex:indexPath.row - 1];
         float width = CGRectGetWidth(cell.bounds);
@@ -609,12 +643,27 @@ typedef enum Direction
 
 #pragma mark Collection View Flow Layout Delegates
 
+- (float)getComposeWindowHeight
+{
+    return CGRectGetHeight([UIScreen mainScreen].bounds) - kKeyboardHeight - kPublishBarHeight -
+            CGRectGetHeight(self.navigationController.navigationBar.bounds) -
+            [UIApplication sharedApplication].statusBarFrame.size.height;
+}
+
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout*)collectionViewLayout;
     float width = CGRectGetWidth([UIScreen mainScreen].bounds) - flowLayout.sectionInset.left - flowLayout.sectionInset.right;
     if (indexPath.row == 0) {
-        return (CGSize){width, kCellComposeHeight};
+        CGSize headerCellSize = (CGSize){0.0, 0.0};
+        if (_isComposeMode) {
+            float composeCellHeight = [self getComposeWindowHeight];
+            
+            headerCellSize = (CGSize){width, composeCellHeight};
+        } else {
+            headerCellSize = (CGSize){width, kCellComposeHeight};
+        }
+        return headerCellSize;
     }
     
    return (CGSize){width, kCellHeight};
@@ -629,5 +678,44 @@ typedef enum Direction
  {
      return 0.0f;
  }
+
+- (void)setupComposeBar
+{
+    self.navigationController.navigationBar.barStyle = UIBarStyleDefault;
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName :
+                                                                          [UIColor colorWithRed:(41.0/255.0)
+                                                                                          green:(99.0/255.0)
+                                                                                           blue:(120/255.0)
+                                                                                          alpha:1.0]}];
+}
+
+- (void)setupCompose:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath
+{
+    [self setupComposeBar];
+    BCMainCollectionViewCell *cell = (BCMainCollectionViewCell*)[collectionView cellForItemAtIndexPath:indexPath];
+    UITextView *tv = [[UITextView alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth(cell.contentView.bounds),
+                                                                  [self getComposeWindowHeight])];
+    [cell prepareForReuse];
+    [cell.contentView addSubview:tv];
+    [tv becomeFirstResponder];
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.row != 0) {
+        return;
+    }
+  
+    [collectionView performBatchUpdates:^{
+        // append your data model to return a larger size for
+        // cell at this index path
+        _isComposeMode = YES;
+        [collectionView.collectionViewLayout invalidateLayout];
+        [self setupCompose:collectionView indexPath:indexPath];
+    } completion:^(BOOL finished) {
+        
+    }];
+}
 
 @end
