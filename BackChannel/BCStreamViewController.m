@@ -27,7 +27,6 @@ static const float kKeyboardHeight = 216.0;
 static const float kPublishBarHeight = 60.0;
 
 
-<<<<<<< HEAD
 
 @interface BCComposeBarView : UIView
 @end
@@ -90,11 +89,6 @@ static const float kPublishBarHeight = 60.0;
 @end
 
 
-=======
-@interface BCCellComposeView : UIView
-@end
-
->>>>>>> c62ee2459a0b832e62f88a63df64bc977e826c10
 @interface BCCellComposeView ()
 @end
 
@@ -120,9 +114,6 @@ static const float kPublishBarHeight = 60.0;
 
 @end
 
-@interface BCCellTopLayerTextView : UIView
-+ (CGRect)getViewRect:(float)width withText:(NSString*)text;
-@end
 
 @interface BCCellTopLayerTextView ()
 @end
@@ -167,8 +158,6 @@ static const float kPublishBarHeight = 60.0;
 
 @end
 
-@interface BCCellTopLayerHeaderView : UIView
-@end
 
 @interface BCCellTopLayerHeaderView ()
 @end
@@ -206,10 +195,6 @@ static const float kPublishBarHeight = 60.0;
 @end
 
 
-@interface BCCellTopLayerFooterView : UIView
-+ (float)getFooterHeight;
-@end
-
 @interface BCCellTopLayerFooterView ()
 @end
 
@@ -243,9 +228,6 @@ static const float kPublishBarHeight = 60.0;
 @end
 
 
-@interface BCCellBottomLayerContainerView : UIView
-@end
-
 @interface BCCellBottomLayerContainerView ()
 @end
 
@@ -257,12 +239,12 @@ static const float kPublishBarHeight = 60.0;
     self = [self initWithFrame:CGRectMake(0.0, 0.0, width, 0.0)];
     UIView *agreeView = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, kSentimentLength, kSentimentLength)];
     agreeView.layer.cornerRadius = CGRectGetWidth(agreeView.bounds) / 2.0;
-    agreeView.layer.borderColor = [UIColor greenColor].CGColor;
+    agreeView.layer.borderColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96/255.0) alpha:1.0].CGColor;
     agreeView.layer.borderWidth = 2.0;
     
     UIView *disagreeView = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, kSentimentLength, kSentimentLength)];
     disagreeView.layer.cornerRadius = CGRectGetWidth(disagreeView.bounds) / 2.0;
-    disagreeView.layer.borderColor = [UIColor redColor].CGColor;
+    disagreeView.layer.borderColor = [UIColor colorWithRed:(204.0/255.0) green:(76.0/255.0) blue:(69/255.0) alpha:1.0].CGColor;
     disagreeView.layer.borderWidth = 2.0;
 
     [self addSubview:agreeView];
@@ -283,26 +265,29 @@ static const float kPublishBarHeight = 60.0;
 @end
 
 
-@interface BCCellTopLayerContainerView : UIView
-@end
-
 @interface BCCellTopLayerContainerView ()
+@property (assign) BOOL isDragging;
 @end
 
 @implementation BCCellTopLayerContainerView
 
+typedef enum Direction {
+    LEFT_DIRECTION = 1,
+    RIGHT_DIRECTION
+} Direction;
+
+static BOOL isSwipeLocked = NO;
+
 - (id)init:(BCSecretModel*)secretModel withSize:(CGSize)size
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
-<<<<<<< HEAD
     static dispatch_once_t oncePredicate;
     
     dispatch_once(&oncePredicate, ^{
         static BOOL isSwipeLocked = NO;
     });
-=======
->>>>>>> c62ee2459a0b832e62f88a63df64bc977e826c10
-    
+
+    _isDragging = NO;
     BOOL showHeader = secretModel.agrees || secretModel.disagrees;
     
     BCCellTopLayerTextView *textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel.text withWidth:size.width];
@@ -324,11 +309,12 @@ static const float kPublishBarHeight = 60.0;
         [headerView setY:CGRectGetMinY(textView.frame) - CGRectGetHeight(footerView.bounds) - margin];
     }
     self.backgroundColor = [UIColor whiteColor];
+    self.opaque = YES;
     
     return self;
 }
 
-<<<<<<< HEAD
+
 + (void)setSwipeLocked:(BOOL)isLock
 {
     isSwipeLocked = isLock;
@@ -417,27 +403,20 @@ static const float kPublishBarHeight = 60.0;
                          }];
     }
 }
-=======
-@end
->>>>>>> c62ee2459a0b832e62f88a63df64bc977e826c10
 
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    return !_isDragging;
+}
 
-
-@interface BCMainCollectionViewCell : UICollectionViewCell
-- (void)addPanGesture;
 @end
 
-<<<<<<< HEAD
 
-=======
->>>>>>> c62ee2459a0b832e62f88a63df64bc977e826c10
 @interface BCMainCollectionViewCell ()
 @property (strong, nonatomic) UICollectionView *collectionView;
 @end
 
 @implementation BCMainCollectionViewCell
 
-<<<<<<< HEAD
 - (void)prepareForReuse
 {
     [super prepareForReuse];
@@ -453,11 +432,6 @@ static const float kPublishBarHeight = 60.0;
     for (CALayer *layer in self.contentView.layer.sublayers) {
         [layer removeFromSuperlayer];
     }
-=======
-- (void)addPanGesture
-{
-    
->>>>>>> c62ee2459a0b832e62f88a63df64bc977e826c10
 }
 
 @end
@@ -468,11 +442,9 @@ static const float kPublishBarHeight = 60.0;
 @property (assign) int contentWidth;
 @property (strong, nonatomic) UICollectionView *messageTable;
 @property (strong, nonatomic) NSMutableArray *messages;
-<<<<<<< HEAD
 @property (assign) BOOL isSwipeLock;
 @property (assign) BOOL isComposeMode;
-=======
->>>>>>> c62ee2459a0b832e62f88a63df64bc977e826c10
+
 @end
 
 @implementation BCStreamViewController
@@ -521,10 +493,12 @@ static const float kPublishBarHeight = 60.0;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    _isSwipeLock = NO;
+
 	// Do any additional setup after loading the view.
     _messages = [[NSMutableArray alloc] init];
     [self setupMessages];
-
+    
     _messageTable.dataSource = self;
     _messageTable.delegate = self;
     [_messageTable registerClass:[BCMainCollectionViewCell class] forCellWithReuseIdentifier:@"BCMainCollectionViewCell"];
@@ -543,6 +517,7 @@ static const float kPublishBarHeight = 60.0;
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [BCCellTopLayerContainerView setSwipeLocked:NO];
 }
 
 - (void)didReceiveMemoryWarning
@@ -584,44 +559,15 @@ static const float kPublishBarHeight = 60.0;
     separatorLine.backgroundColor = [UIColor grayColor].CGColor;
 }
 
-<<<<<<< HEAD
 
-- (void)addComposeTap:(BCMainCollectionViewCell*)cell
-{
-    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-    [cell addGestureRecognizer:tapRecognizer];
-}
-
-- (void)handleTap:(UITapGestureRecognizer*)gesture
-{
-    
-}
-
-- (void)prepareCell:(BCMainCollectionViewCell*)cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath
-=======
-- (void)clearCell:(UICollectionViewCell*)cell indexPath:(NSIndexPath*)indexPath
-{
-    for (UIView *subview in cell.contentView.subviews) {
-        [subview removeFromSuperview];
-    }
-    
-    for (CALayer *layer in cell.contentView.layer.sublayers) {
-        [layer removeFromSuperlayer];
-    }
-}
 
 - (void)prepareCell:(UICollectionViewCell*)cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath
->>>>>>> c62ee2459a0b832e62f88a63df64bc977e826c10
 {
     if (indexPath.row == 0) {
         BCCellComposeView *cv = [[BCCellComposeView alloc] init:CGRectGetWidth(cell.bounds)];
         [cell.contentView addSubview:cv];
         [self setSeparator:cell.contentView indexPath:indexPath];
         [cv placeIn:cell.contentView alignedAt:CENTER_LEFT];
-<<<<<<< HEAD
-        //[self addComposeTap:cell];
-=======
->>>>>>> c62ee2459a0b832e62f88a63df64bc977e826c10
     } else {
         BCSecretModel *secretModel = [_messages objectAtIndex:indexPath.row - 1];
         float width = CGRectGetWidth(cell.bounds);
@@ -630,7 +576,7 @@ static const float kPublishBarHeight = 60.0;
         BCCellTopLayerContainerView *cv = [[BCCellTopLayerContainerView alloc] init:secretModel
                                                                            withSize:(CGSize){width,
                                                                                CGRectGetHeight(cell.contentView.bounds)}];
-        
+        [cv addSwipes];
         [cell.contentView addSubview:bcv];
         [cell.contentView addSubview:cv];
         
@@ -645,9 +591,37 @@ static const float kPublishBarHeight = 60.0;
 
 {
     BCMainCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCMainCollectionViewCell" forIndexPath:indexPath];
-    [self clearCell:cell indexPath:indexPath];
     [self prepareCell:cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath];
     return cell;
+}
+
+#pragma mark Collection View Scroll
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+    [BCCellTopLayerContainerView setSwipeLocked:YES];
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    [BCCellTopLayerContainerView setSwipeLocked:NO];
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    // This delegate gets called on init for some weird reason
+    if (_messageTable.contentOffset.y > 0.0) {
+        [BCCellTopLayerContainerView setSwipeLocked:YES];
+    }
+}
+
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
+{
+    [BCCellTopLayerContainerView setSwipeLocked:NO];
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    [BCCellTopLayerContainerView setSwipeLocked:NO];
 }
 
 #pragma mark Collection View Flow Layout Delegates
