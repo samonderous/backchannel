@@ -65,19 +65,25 @@ static const float kPublishBarHeight = 60.0;
 
 - (id)init:(float)width
 {
+    UIColor *creamColor = [UIColor colorWithRed:(189.0/255.0) green:(187.0/255.0) blue:(159.0/255.0) alpha:1.0];
+    UIColor *creamBackgroundColor = [UIColor colorWithRed:(189.0/255.0) green:(187.0/255.0) blue:(159.0/255.0) alpha:0.05];
+    UIColor *greenColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:1.0];
+    UIColor *greenBackgroundColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:0.05];
+    
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kPublishBarHeight)];
-    UIButton *nevermind = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, width, kPublishBarHeight / 2.0)];
-    UIButton *publish = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(nevermind.frame), 0.0, width, kPublishBarHeight / 2.0)];
+    UIButton *nevermind = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, width / 2.0, kPublishBarHeight)];
+    UIButton *publish = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(nevermind.frame), 0.0, width / 2.0, kPublishBarHeight)];
     
     [self addSubview:nevermind];
     [self addSubview:publish];
     
     [nevermind setTitle:@"Nevermind" forState:UIControlStateNormal];
+    [nevermind setTitleColor:creamColor forState:UIControlStateNormal];
+    nevermind.backgroundColor = creamBackgroundColor;
+    
     [publish setTitle:@"Publish" forState:UIControlStateNormal];
-    nevermind.backgroundColor = [UIColor colorWithRed:(189.0/255.0) green:(187.0/255.0) blue:(159.0/255.0) alpha:0.05];
-    publish.backgroundColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:0.05];
-    
-    
+    [publish setTitleColor:greenColor forState:UIControlStateNormal];
+    publish.backgroundColor = greenBackgroundColor;
     return self;
 }
 
@@ -640,7 +646,7 @@ static BOOL isSwipeLocked = NO;
     if (indexPath.row == 0) {
         CGSize headerCellSize = (CGSize){0.0, 0.0};
         if (_isComposeMode) {
-            float composeCellHeight = [self getComposeWindowHeight];
+            float composeCellHeight = [self getComposeWindowHeight] + kPublishBarHeight;
             
             headerCellSize = (CGSize){width, composeCellHeight};
         } else {
@@ -682,6 +688,12 @@ static BOOL isSwipeLocked = NO;
     [cell prepareForReuse];
     [cell.contentView addSubview:tv];
     [tv becomeFirstResponder];
+    
+    BCComposeBarView *cbv = [[BCComposeBarView alloc] init:CGRectGetWidth([UIScreen mainScreen].bounds)];
+    [cbv setY:CGRectGetMaxY(tv.frame)];
+    UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout*)collectionView.collectionViewLayout;
+    [cbv setX:-flowLayout.sectionInset.left];
+    [cell addSubview:cbv];
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
