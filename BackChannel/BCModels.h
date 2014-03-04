@@ -1,6 +1,6 @@
 //
 //  FUPModels.h
-//  FollowUp
+//  BackChannel
 //
 //  Created by Saureen Shah on 1/15/14.
 //  Copyright (c) 2014 Saureen Shah. All rights reserved.

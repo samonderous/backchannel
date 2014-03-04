@@ -87,6 +87,7 @@
 		C1316E2F18B5760A005A85B8 /* UIScrollView+SVPullToRefresh.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+SVPullToRefresh.m"; sourceTree = "<group>"; };
 		C1F0C31018C51C5500009BDD /* BCGlobalsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BCGlobalsManager.h; sourceTree = "<group>"; };
 		C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BCGlobalsManager.m; sourceTree = "<group>"; };
+		C1F0C31418C68A2600009BDD /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -153,6 +154,7 @@
 		C1316DDA18B3F741005A85B8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C1F0C31418C68A2600009BDD /* CoreText.framework */,
 				C1316DDB18B3F741005A85B8 /* Foundation.framework */,
 				C1316DDD18B3F741005A85B8 /* CoreGraphics.framework */,
 				C1316DDF18B3F741005A85B8 /* UIKit.framework */,

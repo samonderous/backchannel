@@ -1,6 +1,6 @@
 //
 //  BCStreamViewController.m
-//  FollowUp
+//  BackChannel
 //
 //  Created by Saureen Shah on 10/3/13.
 //  Copyright (c) 2013 Saureen Shah. All rights reserved.
@@ -16,6 +16,7 @@
 #import "BCStreamViewController.h"
 #import "BCModels.h"
 #import "BCGlobalsManager.h"
+#import "BCStreamCollectionViewCell.h"
 
 static const float kCellHeight = 251.0f;
 static const float kSecretFontSize = 16.0;
@@ -60,8 +61,6 @@ static const int kMaxCharCount = 140;
 @interface BCCellBottomLayerContainerView : UIView
 @end
 
-@interface BCMainCollectionViewCell : UICollectionViewCell
-@end
 
 
 
@@ -72,8 +71,9 @@ static const int kMaxCharCount = 140;
 
 @implementation BCComposeContainerView
 
-- (id)init:(BCMainCollectionViewCell*)cell withHeight:(float)height
+- (id)init:(BCStreamCollectionViewCell*)cell withHeight:(float)height
 {
+    //NSLog(@"%@",[NSThread callStackSymbols]);
     UIColor *fontColor = [[BCGlobalsManager globalsManager] fontColor];
     
     float width = CGRectGetWidth([UIScreen mainScreen].bounds);
@@ -105,8 +105,9 @@ static const int kMaxCharCount = 140;
     CGRect rect = [attributedText boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX}
                                                options:NSStringDrawingUsesLineFragmentOrigin
                                                context:nil];
+    rect.size.width += 20.0;
     [_charCountLabel setSize:rect.size];
-    [_charCountLabel placeIn:_publish alignedAt:CENTER_RIGTH withMargin:20.0];
+    [_charCountLabel placeIn:_publish alignedAt:CENTER_RIGTH withMargin:0];
     
     
     _textView = [[UITextView alloc] initWithFrame:CGRectMake(CGRectGetMinX(cell.frame),
@@ -114,7 +115,7 @@ static const int kMaxCharCount = 140;
                                                              CGRectGetWidth(cell.contentView.bounds),
                                                              height - kPublishBarHeight)];
     _textView.scrollEnabled = NO;
-    
+    _textView.font = [[BCGlobalsManager globalsManager] composeFont];
     
     _publishMeter = [[UIView alloc] initWithFrame:CGRectMake(-width, 0.0, width, 1.0)];
     _publishMeter.backgroundColor = [[BCGlobalsManager globalsManager] greenColor];
@@ -137,8 +138,42 @@ static const int kMaxCharCount = 140;
     [super layoutSubviews];
 }
 
-- (void)setCharCount:(int)count
+- (void)update:(int)count
 {
+    UIColor *fontColor = [[BCGlobalsManager globalsManager] fontColor];
+    UIFont *font = [UIFont systemFontOfSize:12.0];
+    
+    NSMutableAttributedString *mutableAttributedString = [[NSMutableAttributedString alloc]
+                                initWithString:_textView.text
+                                attributes:@{ NSFontAttributeName:[[BCGlobalsManager globalsManager] composeFont]}];
+    if (count > kMaxCharCount) {
+        fontColor = [[BCGlobalsManager globalsManager] redColor];
+        _publish.backgroundColor = [[BCGlobalsManager globalsManager] blackPublishBackgroundColor];
+        [_publish setTitleColor:[[BCGlobalsManager globalsManager] blackPublishFontColor] forState:UIControlStateNormal];
+        _publish.userInteractionEnabled = NO;
+        [mutableAttributedString addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] redColor] range: NSMakeRange(kMaxCharCount, count - kMaxCharCount)];
+        _textView.attributedText = mutableAttributedString;
+    } else {
+        _publish.userInteractionEnabled = YES;
+        [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenColor] forState:UIControlStateNormal];
+        _publish.backgroundColor = [[BCGlobalsManager globalsManager] greenBackgroundColor];
+    }
+    NSAttributedString *attributedText = [[NSMutableAttributedString alloc]
+                                          initWithString:[NSString stringWithFormat:@"%d", abs(kMaxCharCount - count)]
+                                          attributes:@{ NSFontAttributeName:font, NSForegroundColorAttributeName: fontColor}];
+    
+    _charCountLabel.attributedText = attributedText;
+}
+
+
+- (void)setPublishPush
+{
+    [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenPublishColor] forState:UIControlStateNormal];
+}
+
+- (void)unsetPublishPush
+{
+    [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenColor] forState:UIControlStateNormal];
 }
 
 @end
@@ -466,30 +501,6 @@ static BOOL isSwipeLocked = NO;
 @end
 
 
-@interface BCMainCollectionViewCell ()
-@property (strong, nonatomic) UICollectionView *collectionView;
-@end
-
-@implementation BCMainCollectionViewCell
-
-- (void)prepareForReuse
-{
-    [super prepareForReuse];
-    
-    for (UIGestureRecognizer *recognizer in self.contentView.gestureRecognizers) {
-        [self.contentView removeGestureRecognizer:recognizer];
-    }
-    
-    for (UIView *subview in self.contentView.subviews) {
-        [subview removeFromSuperview];
-    }
-    
-    for (CALayer *layer in self.contentView.layer.sublayers) {
-        [layer removeFromSuperlayer];
-    }
-}
-
-@end
 
 
 @interface BCStreamViewController ()
@@ -499,7 +510,6 @@ static BOOL isSwipeLocked = NO;
 @property (strong, nonatomic) NSMutableArray *messages;
 @property (assign) BOOL isSwipeLock;
 @property (assign) BOOL isComposeMode;
-
 @end
 
 @implementation BCStreamViewController
@@ -579,7 +589,7 @@ static BOOL isSwipeLocked = NO;
     
     _messageTable.dataSource = self;
     _messageTable.delegate = self;
-    [_messageTable registerClass:[BCMainCollectionViewCell class] forCellWithReuseIdentifier:@"BCMainCollectionViewCell"];
+    [_messageTable registerClass:[BCStreamCollectionViewCell class] forCellWithReuseIdentifier:@"BCStreamCollectionViewCell"];
     [_messageTable setShowsHorizontalScrollIndicator:NO];
     [_messageTable setShowsVerticalScrollIndicator:NO];
     _messageTable.backgroundColor = [UIColor whiteColor];
@@ -660,10 +670,10 @@ static BOOL isSwipeLocked = NO;
     
 }
 
-- (BCMainCollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+- (BCStreamCollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 
 {
-    BCMainCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCMainCollectionViewCell" forIndexPath:indexPath];
+    BCStreamCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCStreamCollectionViewCell" forIndexPath:indexPath];
     [self prepareCell:cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath];
     return cell;
 }
@@ -738,7 +748,7 @@ static BOOL isSwipeLocked = NO;
 - (void)addNewSecretToStream
 {
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
-    BCMainCollectionViewCell *cell = (BCMainCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
+    BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
     [self addSecret:ccv.textView.text];
     [_messageTable performBatchUpdates:^{
@@ -761,8 +771,9 @@ static BOOL isSwipeLocked = NO;
 - (void)publishHoldDown
 {
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
-    BCMainCollectionViewCell *cell = (BCMainCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
+    BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+    [ccv setPublishPush];
     [UIView animateWithDuration:1.0 delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
         [ccv.publishMeter setX:0.0];
     } completion:^(BOOL finished) {
@@ -777,9 +788,10 @@ static BOOL isSwipeLocked = NO;
 - (void)publishHoldRelease
 {
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
-    BCMainCollectionViewCell *cell = (BCMainCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
+    BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
     [ccv.publishMeter.layer removeAllAnimations];
+    [ccv unsetPublishPush];
 }
 
 - (void)removeCompose
@@ -787,7 +799,7 @@ static BOOL isSwipeLocked = NO;
     [self setupStreamBar];
     
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
-    BCMainCollectionViewCell *cell = (BCMainCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
+    BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
     _isComposeMode = NO;
     _messageTable.scrollEnabled = YES;
@@ -803,7 +815,7 @@ static BOOL isSwipeLocked = NO;
     [self setupComposeBar];
     collectionView.scrollEnabled = NO;
     
-    BCMainCollectionViewCell *cell = (BCMainCollectionViewCell*)[collectionView cellForItemAtIndexPath:indexPath];
+    BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[collectionView cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = [[BCComposeContainerView alloc] init:cell withHeight:[self getComposeWindowHeight]];
     [cell addSubview:ccv];
     UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout*)collectionView.collectionViewLayout;
@@ -814,11 +826,12 @@ static BOOL isSwipeLocked = NO;
     [ccv.publish addTarget:self action:@selector(publishHoldRelease) forControlEvents:UIControlEventTouchUpInside];
     
     [ccv.textView becomeFirstResponder];
+    ccv.textView.delegate = self;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row != 0) {
+    if (indexPath.row != 0 || _isComposeMode) {
         return;
     }
   
@@ -827,6 +840,16 @@ static BOOL isSwipeLocked = NO;
     } completion:^(BOOL finished) {
         
     }];
+}
+
+# pragma Text View Delegate
+- (void)textViewDidChange:(UITextView *)textView
+{
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
+    BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+   [ccv update:(int)textView.text.length];
+
 }
 
 @end

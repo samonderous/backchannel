@@ -19,13 +19,22 @@
     return self;
 }
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
+
+- (void)prepareForReuse
 {
-    // Drawing code
+    [super prepareForReuse];
+    
+    for (UIGestureRecognizer *recognizer in self.contentView.gestureRecognizers) {
+        [self.contentView removeGestureRecognizer:recognizer];
+    }
+    
+    for (UIView *subview in self.contentView.subviews) {
+        [subview removeFromSuperview];
+    }
+    
+    for (CALayer *layer in self.contentView.layer.sublayers) {
+        [layer removeFromSuperlayer];
+    }
 }
-*/
 
 @end
