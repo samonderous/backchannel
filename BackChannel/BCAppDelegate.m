@@ -7,6 +7,7 @@
 //
 
 #import "BCAppDelegate.h"
+#import "BCGlobalsManager.h"
 
 @implementation BCAppDelegate
 
@@ -17,6 +18,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    [[BCGlobalsManager globalsManager] loadConfig];
     // Override point for customization after application launch.
     return YES;
 }

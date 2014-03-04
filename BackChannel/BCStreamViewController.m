@@ -6,14 +6,16 @@
 //  Copyright (c) 2013 Saureen Shah. All rights reserved.
 //
 
-#import "BCAppDelegate.h"
-#import "BCStreamViewController.h"
 #import "UIScrollView+SVPullToRefresh.h"
 #import "UIScrollView+SVInfiniteScrolling.h"
 #import "MCSwipeTableViewCell.h"
 #import "TTTAttributedLabel.h"
-#import "BCModels.h"
 #import "Utils.h"
+
+#import "BCAppDelegate.h"
+#import "BCStreamViewController.h"
+#import "BCModels.h"
+#import "BCGlobalsManager.h"
 
 static const float kCellHeight = 251.0f;
 static const float kSecretFontSize = 16.0;
@@ -25,10 +27,15 @@ static const float kSentimentLength = 40.0;
 static const float kRowSpacing = 0.0f;
 static const float kKeyboardHeight = 216.0;
 static const float kPublishBarHeight = 60.0;
+static const int kMaxCharCount = 140;
 
 
+@interface BCComposeContainerView : UIView
+@property (strong, nonatomic) UITextView *textView;
+@property (strong, nonatomic) UIButton *nevermind;
+@property (strong, nonatomic) UIButton *publish;
 
-@interface BCComposeBarView : UIView
+- (void)setCharCount:(int)count;
 @end
 
 @interface BCCellComposeView : UIView
@@ -58,38 +65,80 @@ static const float kPublishBarHeight = 60.0;
 
 
 
-@interface BCComposeBarView ()
+@interface BCComposeContainerView ()
+@property (strong, nonatomic) TTTAttributedLabel *charCountLabel;
+@property (strong, nonatomic) UIView *publishMeter;
 @end
 
-@implementation BCComposeBarView
+@implementation BCComposeContainerView
 
-- (id)init:(float)width
+- (id)init:(BCMainCollectionViewCell*)cell withHeight:(float)height
 {
-    UIColor *creamColor = [UIColor colorWithRed:(189.0/255.0) green:(187.0/255.0) blue:(159.0/255.0) alpha:1.0];
-    UIColor *creamBackgroundColor = [UIColor colorWithRed:(189.0/255.0) green:(187.0/255.0) blue:(159.0/255.0) alpha:0.05];
-    UIColor *greenColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:1.0];
-    UIColor *greenBackgroundColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:0.05];
+    UIColor *fontColor = [[BCGlobalsManager globalsManager] fontColor];
     
-    self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kPublishBarHeight)];
-    UIButton *nevermind = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, width / 2.0, kPublishBarHeight)];
-    UIButton *publish = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(nevermind.frame), 0.0, width / 2.0, kPublishBarHeight)];
+    float width = CGRectGetWidth([UIScreen mainScreen].bounds);
     
-    [self addSubview:nevermind];
-    [self addSubview:publish];
+    self = [super initWithFrame:CGRectMake(0.0, 0.0, width, height)];
     
-    [nevermind setTitle:@"Nevermind" forState:UIControlStateNormal];
-    [nevermind setTitleColor:creamColor forState:UIControlStateNormal];
-    nevermind.backgroundColor = creamBackgroundColor;
+    UIView *bar = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, width, kPublishBarHeight)];
+    _nevermind = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, width / 2.0, kPublishBarHeight)];
+    _publish = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(_nevermind.frame), 0.0, width / 2.0, kPublishBarHeight)];
     
-    [publish setTitle:@"Publish" forState:UIControlStateNormal];
-    [publish setTitleColor:greenColor forState:UIControlStateNormal];
-    publish.backgroundColor = greenBackgroundColor;
+    [_nevermind setTitle:@"Nevermind" forState:UIControlStateNormal];
+    [_nevermind setTitleColor:[[BCGlobalsManager globalsManager] creamColor] forState:UIControlStateNormal];
+    _nevermind.backgroundColor = [[BCGlobalsManager globalsManager] creamBackgroundColor];
+    
+    
+    [_publish setTitle:@"Publish" forState:UIControlStateNormal];
+    [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenColor] forState:UIControlStateNormal];
+    _publish.backgroundColor = [[BCGlobalsManager globalsManager] greenBackgroundColor];
+    
+    _charCountLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 30.0, 30.0)];
+    [_publish addSubview:_charCountLabel];
+
+    UIFont *font = [UIFont systemFontOfSize:12.0];
+    NSAttributedString *attributedText = [[NSMutableAttributedString alloc]
+                                          initWithString:[NSString stringWithFormat:@"%d", kMaxCharCount]
+                                          attributes:@{ NSFontAttributeName:font, NSForegroundColorAttributeName: fontColor}];
+    _charCountLabel.attributedText = attributedText;
+    _charCountLabel.textColor = fontColor;
+    CGRect rect = [attributedText boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX}
+                                               options:NSStringDrawingUsesLineFragmentOrigin
+                                               context:nil];
+    [_charCountLabel setSize:rect.size];
+    [_charCountLabel placeIn:_publish alignedAt:CENTER_RIGTH withMargin:20.0];
+    
+    
+    _textView = [[UITextView alloc] initWithFrame:CGRectMake(CGRectGetMinX(cell.frame),
+                                                             0.0,
+                                                             CGRectGetWidth(cell.contentView.bounds),
+                                                             height - kPublishBarHeight)];
+    _textView.scrollEnabled = NO;
+    
+    
+    _publishMeter = [[UIView alloc] initWithFrame:CGRectMake(-width, 0.0, width, 1.0)];
+    _publishMeter.backgroundColor = [[BCGlobalsManager globalsManager] greenColor];
+    
+    [self addSubview:_textView];
+    [bar addSubview:_nevermind];
+    [bar addSubview:_publish];
+    [self addSubview:_publishMeter];
+    [self addSubview:bar];
+    [bar setY:CGRectGetMaxY(_textView.frame)];
+    
+    self.opaque = YES;
+    self.backgroundColor = [UIColor whiteColor];
+    
     return self;
 }
 
 - (void)layoutSubviews
 {
     [super layoutSubviews];
+}
+
+- (void)setCharCount:(int)count
+{
 }
 
 @end
@@ -496,6 +545,34 @@ static BOOL isSwipeLocked = NO;
     [_messages addObject:s5];
 }
 
+- (void)addSecret:(NSString*)text
+{
+    BCSecretModel *s = [[BCSecretModel alloc] init:text withTime:0.0 withAgrees:0 withDisagree:0];
+    [_messages insertObject:s atIndex:0];
+}
+
+- (void)setupStreamBar
+{
+    self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:(41.0/255.0)
+                                                                           green:(99.0/255.0)
+                                                                            blue:(120/255.0)
+                                                                           alpha:1.0];
+    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName :
+                                                                          [UIColor whiteColor]}];
+}
+
+- (void)setupComposeBar
+{
+    self.navigationController.navigationBar.barStyle = UIBarStyleDefault;
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName :
+                                                                          [UIColor colorWithRed:(41.0/255.0)
+                                                                                          green:(99.0/255.0)
+                                                                                           blue:(120/255.0)
+                                                                                          alpha:1.0]}];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -512,12 +589,7 @@ static BOOL isSwipeLocked = NO;
     [_messageTable setShowsVerticalScrollIndicator:NO];
     _messageTable.backgroundColor = [UIColor whiteColor];
 
-    self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:(41.0/255.0)
-                                                                           green:(99.0/255.0)
-                                                                            blue:(120/255.0)
-                                                                           alpha:1.0];
-    // NOTE: UIBarStyleDefault for black status bar content
-    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+    [self setupStreamBar];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -634,7 +706,7 @@ static BOOL isSwipeLocked = NO;
 
 - (float)getComposeWindowHeight
 {
-    return CGRectGetHeight([UIScreen mainScreen].bounds) - kKeyboardHeight - kPublishBarHeight -
+    return CGRectGetHeight([UIScreen mainScreen].bounds) - kKeyboardHeight -
             CGRectGetHeight(self.navigationController.navigationBar.bounds) -
             [UIApplication sharedApplication].statusBarFrame.size.height;
 }
@@ -646,7 +718,7 @@ static BOOL isSwipeLocked = NO;
     if (indexPath.row == 0) {
         CGSize headerCellSize = (CGSize){0.0, 0.0};
         if (_isComposeMode) {
-            float composeCellHeight = [self getComposeWindowHeight] + kPublishBarHeight;
+            float composeCellHeight = [self getComposeWindowHeight];
             
             headerCellSize = (CGSize){width, composeCellHeight};
         } else {
@@ -668,32 +740,85 @@ static BOOL isSwipeLocked = NO;
      return 0.0f;
  }
 
-- (void)setupComposeBar
+- (void)addNewSecretToStream
 {
-    self.navigationController.navigationBar.barStyle = UIBarStyleDefault;
-    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
-    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName :
-                                                                          [UIColor colorWithRed:(41.0/255.0)
-                                                                                          green:(99.0/255.0)
-                                                                                           blue:(120/255.0)
-                                                                                          alpha:1.0]}];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    BCMainCollectionViewCell *cell = (BCMainCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
+    BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+    [self addSecret:ccv.textView.text];
+    [_messageTable performBatchUpdates:^{
+        [_messageTable.collectionViewLayout invalidateLayout];
+        [self removeCompose];
+        [_messageTable insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:1 inSection:0]]];
+    } completion:^(BOOL finished) {
+    
+    }];
+}
+
+- (void)nevermindTap
+{
+    [_messageTable performBatchUpdates:^{
+        [self removeCompose];
+    } completion:^(BOOL finished) {
+    }];
+}
+
+- (void)publishHoldDown
+{
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    BCMainCollectionViewCell *cell = (BCMainCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
+    BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+    [UIView animateWithDuration:1.0 delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
+        [ccv.publishMeter setX:0.0];
+    } completion:^(BOOL finished) {
+        if (finished) {
+            [self addNewSecretToStream];
+        } else {
+            [ccv.publishMeter setX:-CGRectGetWidth([UIScreen mainScreen].bounds)];
+        }
+    }];
+}
+
+- (void)publishHoldRelease
+{
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    BCMainCollectionViewCell *cell = (BCMainCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
+    BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+    [ccv.publishMeter.layer removeAllAnimations];
+}
+
+- (void)removeCompose
+{
+    [self setupStreamBar];
+    
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    BCMainCollectionViewCell *cell = (BCMainCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
+    BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+    _isComposeMode = NO;
+    _messageTable.scrollEnabled = YES;
+    [_messageTable.collectionViewLayout invalidateLayout];
+    [ccv removeFromSuperview];
+    [ccv.textView resignFirstResponder];
 }
 
 - (void)setupCompose:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath
 {
+    _isComposeMode = YES;
+    [collectionView.collectionViewLayout invalidateLayout];
     [self setupComposeBar];
-    BCMainCollectionViewCell *cell = (BCMainCollectionViewCell*)[collectionView cellForItemAtIndexPath:indexPath];
-    UITextView *tv = [[UITextView alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth(cell.contentView.bounds),
-                                                                  [self getComposeWindowHeight])];
-    [cell prepareForReuse];
-    [cell.contentView addSubview:tv];
-    [tv becomeFirstResponder];
+    collectionView.scrollEnabled = NO;
     
-    BCComposeBarView *cbv = [[BCComposeBarView alloc] init:CGRectGetWidth([UIScreen mainScreen].bounds)];
-    [cbv setY:CGRectGetMaxY(tv.frame)];
+    BCMainCollectionViewCell *cell = (BCMainCollectionViewCell*)[collectionView cellForItemAtIndexPath:indexPath];
+    BCComposeContainerView *ccv = [[BCComposeContainerView alloc] init:cell withHeight:[self getComposeWindowHeight]];
+    [cell addSubview:ccv];
     UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout*)collectionView.collectionViewLayout;
-    [cbv setX:-flowLayout.sectionInset.left];
-    [cell addSubview:cbv];
+    [ccv setX:-flowLayout.sectionInset.left];
+    
+    [ccv.nevermind addTarget:self action:@selector(nevermindTap) forControlEvents:UIControlEventTouchUpInside];
+    [ccv.publish addTarget:self action:@selector(publishHoldDown) forControlEvents:UIControlEventTouchDown];
+    [ccv.publish addTarget:self action:@selector(publishHoldRelease) forControlEvents:UIControlEventTouchUpInside];
+    
+    [ccv.textView becomeFirstResponder];
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
@@ -703,10 +828,6 @@ static BOOL isSwipeLocked = NO;
     }
   
     [collectionView performBatchUpdates:^{
-        // append your data model to return a larger size for
-        // cell at this index path
-        _isComposeMode = YES;
-        [collectionView.collectionViewLayout invalidateLayout];
         [self setupCompose:collectionView indexPath:indexPath];
     } completion:^(BOOL finished) {
         
