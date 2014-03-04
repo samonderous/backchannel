@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @interface BCGlobalsManager : NSObject
+@property (strong, nonatomic) UIColor *blueColor;
 @property (strong, nonatomic) UIColor *greenColor;
 @property (strong, nonatomic) UIColor *creamColor;
 @property (strong, nonatomic) UIColor *creamBackgroundColor;

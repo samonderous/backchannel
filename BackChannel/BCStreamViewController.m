@@ -553,10 +553,8 @@ static BOOL isSwipeLocked = NO;
 
 - (void)setupStreamBar
 {
-    self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:(41.0/255.0)
-                                                                           green:(99.0/255.0)
-                                                                            blue:(120/255.0)
-                                                                           alpha:1.0];
+    self.navigationController.navigationBar.barTintColor = [[BCGlobalsManager globalsManager] blueColor];
+    self.navigationController.navigationBar.translucent = NO;
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
     [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName :
                                                                           [UIColor whiteColor]}];
@@ -567,10 +565,7 @@ static BOOL isSwipeLocked = NO;
     self.navigationController.navigationBar.barStyle = UIBarStyleDefault;
     self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
     [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName :
-                                                                          [UIColor colorWithRed:(41.0/255.0)
-                                                                                          green:(99.0/255.0)
-                                                                                           blue:(120/255.0)
-                                                                                          alpha:1.0]}];
+                                                                          [[BCGlobalsManager globalsManager] blueColor]}];
 }
 
 - (void)viewDidLoad
