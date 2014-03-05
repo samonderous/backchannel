@@ -29,6 +29,7 @@ static const float kRowSpacing = 0.0f;
 static const float kKeyboardHeight = 216.0;
 static const float kPublishBarHeight = 60.0;
 static const int kMaxCharCount = 140;
+static const int kCellEdgeInset = 30.0;
 
 
 @interface BCComposeContainerView : UIView
@@ -87,16 +88,17 @@ static const int kMaxCharCount = 140;
     [_nevermind setTitle:@"Nevermind" forState:UIControlStateNormal];
     [_nevermind setTitleColor:[[BCGlobalsManager globalsManager] creamColor] forState:UIControlStateNormal];
     _nevermind.backgroundColor = [[BCGlobalsManager globalsManager] creamBackgroundColor];
-    
+    _nevermind.titleLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
     
     [_publish setTitle:@"Publish" forState:UIControlStateNormal];
     [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenColor] forState:UIControlStateNormal];
     _publish.backgroundColor = [[BCGlobalsManager globalsManager] greenBackgroundColor];
+    _publish.titleLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
     
     _charCountLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 30.0, 30.0)];
     [_publish addSubview:_charCountLabel];
 
-    UIFont *font = [UIFont systemFontOfSize:12.0];
+    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:15.0];
     NSAttributedString *attributedText = [[NSMutableAttributedString alloc]
                                           initWithString:[NSString stringWithFormat:@"%d", kMaxCharCount]
                                           attributes:@{ NSFontAttributeName:font, NSForegroundColorAttributeName: fontColor}];
@@ -114,6 +116,7 @@ static const int kMaxCharCount = 140;
                                                              0.0,
                                                              CGRectGetWidth(cell.contentView.bounds),
                                                              height - kPublishBarHeight)];
+    [[UITextView appearance] setTintColor:[[BCGlobalsManager globalsManager] blueColor]];
     _textView.scrollEnabled = NO;
     _textView.font = [[BCGlobalsManager globalsManager] composeFont];
     
@@ -190,9 +193,8 @@ static const int kMaxCharCount = 140;
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kCellComposeHeight)];
     UILabel *textLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 250.0, kCellComposeHeight)];
     textLabel.text = @"Tap to say something...";
-    textLabel.textColor = [UIColor grayColor];
-    [textLabel setFont:[UIFont fontWithName:@"Arial" size:19]];
-    //[textLabel placeIn:self alignedAt:CENTER_LEFT];
+    textLabel.textColor = [[BCGlobalsManager globalsManager] emptyPostCellColor];
+    textLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
     [self addSubview:textLabel];
     return self;
 }
@@ -213,7 +215,7 @@ static const int kMaxCharCount = 140;
 - (id)initWithText:(NSString*)text withWidth:(float)width
 {
     self = [super init];
-    UIFont *font = [UIFont systemFontOfSize:kSecretFontSize];
+    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
     NSAttributedString *attributedText = [[NSAttributedString alloc]
                                           initWithString:text
                                           attributes:@{ NSFontAttributeName:font}];
@@ -257,7 +259,7 @@ static const int kMaxCharCount = 140;
 - (id)init:(int)agree withDisagree:(int)disagree withWidth:(float)width
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
-    UIFont *font = [UIFont fontWithName:@"Arial" size:kHeaderFooterTextFontSize];
+    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:12.0];
     UILabel *voteLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
     voteLabel.text = [NSString stringWithFormat:@"%d agrees \u00B7 %d disagrees", agree, disagree];
     voteLabel.font = font;
@@ -279,7 +281,6 @@ static const int kMaxCharCount = 140;
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    
 }
 
 @end
@@ -293,7 +294,7 @@ static const int kMaxCharCount = 140;
 - (id)init:(NSString*)time withWidth:(float)width
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
-    UIFont *font = [UIFont fontWithName:@"Arial" size:kHeaderFooterTextFontSize];
+    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:12.0];
     UILabel *timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
     timeLabel.text = time;
     timeLabel.font = font;
@@ -535,7 +536,7 @@ static BOOL isSwipeLocked = NO;
 {
     self.view = [[UIView alloc] initWithFrame:[UIScreen mainScreen].applicationFrame];
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-    layout.sectionInset = UIEdgeInsetsMake(0.0, 20.0, 0.0, 20.0);
+    layout.sectionInset = UIEdgeInsetsMake(0.0, kCellEdgeInset, 0.0, kCellEdgeInset);
     _messageTable = [[UICollectionView alloc] initWithFrame:[UIScreen mainScreen].bounds collectionViewLayout:layout];
     [self.view addSubview:_messageTable];
 }
@@ -566,16 +567,16 @@ static BOOL isSwipeLocked = NO;
     self.navigationController.navigationBar.barTintColor = [[BCGlobalsManager globalsManager] blueColor];
     self.navigationController.navigationBar.translucent = NO;
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName :
-                                                                          [UIColor whiteColor]}];
+    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor],
+                                                                      NSFontAttributeName: [UIFont fontWithName:@"Tisa Pro" size:18.0]}];
 }
 
 - (void)setupComposeBar
 {
     self.navigationController.navigationBar.barStyle = UIBarStyleDefault;
     self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
-    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName :
-                                                                          [[BCGlobalsManager globalsManager] blueColor]}];
+    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [[BCGlobalsManager globalsManager] blueColor],
+                                                                      NSFontAttributeName: [UIFont fontWithName:@"Tisa Pro" size:18.0]}];
 }
 
 - (void)viewDidLoad
@@ -639,7 +640,7 @@ static BOOL isSwipeLocked = NO;
                                          1.0);
     }
     [contentView.layer addSublayer:separatorLine];
-    separatorLine.backgroundColor = [UIColor grayColor].CGColor;
+    separatorLine.backgroundColor = [[BCGlobalsManager globalsManager] blackDividerColor].CGColor;
 }
 
 

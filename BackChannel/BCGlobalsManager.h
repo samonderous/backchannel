@@ -20,6 +20,8 @@
 @property (strong, nonatomic) UIColor *greenPublishColor;
 @property (strong, nonatomic) UIColor *redColor;
 @property (strong, nonatomic) UIFont *composeFont;
+@property (strong, nonatomic) UIColor *emptyPostCellColor;
+@property (strong, nonatomic) UIColor *blackDividerColor;
 
 + (id)globalsManager;
 - (void)loadConfig;

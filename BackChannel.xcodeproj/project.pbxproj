@@ -32,6 +32,7 @@
 		C1316E3018B5760A005A85B8 /* UIScrollView+SVInfiniteScrolling.m in Sources */ = {isa = PBXBuildFile; fileRef = C1316E2D18B5760A005A85B8 /* UIScrollView+SVInfiniteScrolling.m */; };
 		C1316E3118B5760A005A85B8 /* UIScrollView+SVPullToRefresh.m in Sources */ = {isa = PBXBuildFile; fileRef = C1316E2F18B5760A005A85B8 /* UIScrollView+SVPullToRefresh.m */; };
 		C1F0C31218C51C5500009BDD /* BCGlobalsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */; };
+		C1F6D21418C6B94200498506 /* TisaPro.otf in Resources */ = {isa = PBXBuildFile; fileRef = C100166F18BD4D4C00347A31 /* TisaPro.otf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -336,6 +337,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1F6D21418C6B94200498506 /* TisaPro.otf in Resources */,
 				C1316DF218B3F741005A85B8 /* Main_iPad.storyboard in Resources */,
 				C1316DF718B3F741005A85B8 /* Images.xcassets in Resources */,
 				C1316DEF18B3F741005A85B8 /* Main_iPhone.storyboard in Resources */,
