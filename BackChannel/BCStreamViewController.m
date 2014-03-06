@@ -54,14 +54,19 @@ static const int kCellEdgeInset = 30.0;
 + (float)getFooterHeight;
 @end
 
+/*
 @interface BCCellTopLayerContainerView : UIView<UIGestureRecognizerDelegate>
+- (void)addSwipes;
++ (BOOL)isSwipeLocked;
+@end
+*/
+@interface BCCellTopLayerContainerView : UIScrollView<UIGestureRecognizerDelegate, UIScrollViewDelegate>
 - (void)addSwipes;
 + (BOOL)isSwipeLocked;
 @end
 
 @interface BCCellBottomLayerContainerView : UIView
 @end
-
 
 
 
@@ -377,7 +382,7 @@ static BOOL isSwipeLocked = NO;
     dispatch_once(&oncePredicate, ^{
         static BOOL isSwipeLocked = NO;
     });
-
+    
     _isDragging = NO;
     BOOL showHeader = secretModel.agrees || secretModel.disagrees;
     
@@ -401,7 +406,7 @@ static BOOL isSwipeLocked = NO;
     }
     self.backgroundColor = [UIColor whiteColor];
     self.opaque = YES;
-    
+
     return self;
 }
 
@@ -424,7 +429,9 @@ static BOOL isSwipeLocked = NO;
 	[panRecognizer setDelegate:self];
 	[self addGestureRecognizer:panRecognizer];
     panRecognizer.delegate = self;
+    
 }
+
 
 - (void)handleSwipe:(UIPanGestureRecognizer*)gesture
 {
@@ -441,7 +448,7 @@ static BOOL isSwipeLocked = NO;
     CGPoint delta = [gesture translationInView:gesture.view.superview];
     CGPoint velocity = [gesture velocityInView:gesture.view.superview];
     Direction direction;
-    
+  
     if (velocity.x <= 0) {
         direction = LEFT_DIRECTION;
     } else {
@@ -466,8 +473,11 @@ static BOOL isSwipeLocked = NO;
     }
 
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
+
         _isDragging = YES;
-        gesture.view.center = CGPointMake(gesture.view.center.x + delta.x, gesture.view.center.y);
+        NSLog(@"the delta = %f, and center.x = %f", delta.x, gesture.view.center.x);
+        float resultX = delta.x < 10.0 ? gesture.view.center.x : gesture.view.center.x + delta.x;
+        gesture.view.center = CGPointMake(resultX, gesture.view.center.y);
         [gesture setTranslation:CGPointZero inView:self.superview];
     } else if (state == UIGestureRecognizerStateEnded || state == UIGestureRecognizerStateCancelled) {
         _isDragging = NO;
@@ -565,7 +575,7 @@ static BOOL isSwipeLocked = NO;
 - (void)setupStreamBar
 {
     self.navigationController.navigationBar.barTintColor = [[BCGlobalsManager globalsManager] blueColor];
-    self.navigationController.navigationBar.translucent = NO;
+    self.navigationController.navigationBar.translucent = YES;
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
     [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor],
                                                                       NSFontAttributeName: [UIFont fontWithName:@"Tisa Pro" size:18.0]}];
