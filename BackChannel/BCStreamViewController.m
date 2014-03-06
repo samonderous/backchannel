@@ -475,9 +475,7 @@ static BOOL isSwipeLocked = NO;
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
 
         _isDragging = YES;
-        NSLog(@"the delta = %f, and center.x = %f", delta.x, gesture.view.center.x);
-        float resultX = delta.x < 10.0 ? gesture.view.center.x : gesture.view.center.x + delta.x;
-        gesture.view.center = CGPointMake(resultX, gesture.view.center.y);
+        gesture.view.center = CGPointMake(gesture.view.center.x + delta.x, gesture.view.center.y);
         [gesture setTranslation:CGPointZero inView:self.superview];
     } else if (state == UIGestureRecognizerStateEnded || state == UIGestureRecognizerStateCancelled) {
         _isDragging = NO;
@@ -488,6 +486,11 @@ static BOOL isSwipeLocked = NO;
         } else if (LEFT_DIRECTION && gesture.view.frame.origin.x + width <= threshhold) {
             finalX = -width + cutOff;
             overshot = YES;
+        } else {
+            //NSLog(@"the width = %f, and %f, and %f", width, gesture.view.frame.origin.x + width, gesture.view.frame.origin.x);
+            if (gesture.view.frame.origin.x < 10.0 || gesture.view.frame.origin.x + width >= 250.0) {
+                finalX = 0.0;
+            }
         }
         [UIView animateWithDuration:duration delay:0.0 options: UIViewAnimationOptionCurveLinear
                          animations:^{
