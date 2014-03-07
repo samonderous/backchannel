@@ -54,13 +54,7 @@ static const int kCellEdgeInset = 30.0;
 + (float)getFooterHeight;
 @end
 
-/*
 @interface BCCellTopLayerContainerView : UIView<UIGestureRecognizerDelegate>
-- (void)addSwipes;
-+ (BOOL)isSwipeLocked;
-@end
-*/
-@interface BCCellTopLayerContainerView : UIScrollView<UIGestureRecognizerDelegate, UIScrollViewDelegate>
 - (void)addSwipes;
 + (BOOL)isSwipeLocked;
 @end
@@ -217,17 +211,25 @@ static const int kCellEdgeInset = 30.0;
 
 @implementation BCCellTopLayerTextView
 
-- (id)initWithText:(NSString*)text withWidth:(float)width
+- (id)initWithText:(BCSecretModel*)model withWidth:(float)width
 {
     self = [super init];
     UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
+    UIColor *fontColor;
+    if (model.agrees > model.disagrees) {
+        fontColor = [[BCGlobalsManager globalsManager] greenColor];
+    } else if (model.agrees < model.disagrees) {
+        fontColor = [[BCGlobalsManager globalsManager] redColor];
+    } else {
+        fontColor = [UIColor blackColor];
+    }
+    
     NSAttributedString *attributedText = [[NSAttributedString alloc]
-                                          initWithString:text
-                                          attributes:@{ NSFontAttributeName:font}];
-    CGRect rect = [BCCellTopLayerTextView getViewRect:width withText:text];
+                                          initWithString:model.text
+                                          attributes:@{ NSFontAttributeName:font, NSForegroundColorAttributeName: fontColor}];
+    CGRect rect = [BCCellTopLayerTextView getViewRect:width withText:model.text];
     TTTAttributedLabel *textLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectZero];
     textLabel.attributedText = attributedText;
-    textLabel.textColor = [UIColor darkGrayColor];
     textLabel.lineBreakMode = NSLineBreakByWordWrapping;
     [textLabel setSize:rect.size];
     textLabel.numberOfLines = 0;
@@ -265,18 +267,28 @@ static const int kCellEdgeInset = 30.0;
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
     UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:12.0];
-    UILabel *voteLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
-    voteLabel.text = [NSString stringWithFormat:@"%d agrees \u00B7 %d disagrees", agree, disagree];
-    voteLabel.font = font;
-    voteLabel.textColor = [UIColor darkGrayColor];
-    voteLabel.numberOfLines = 1;
+    NSString *voteText = [NSString stringWithFormat:@"%d agrees \u00B7 %d disagrees", agree, disagree];
+    NSRange range = [voteText rangeOfString:@"\u00B7"];
+    NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc]
+                                                 initWithString:voteText
+                                                 attributes:@{ NSFontAttributeName:font,
+                                                               NSForegroundColorAttributeName: [[BCGlobalsManager globalsManager] creamColor]}];
     
+    if (agree > disagree) {
+        [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] greenColor]
+                               range: NSMakeRange(0, range.location - 1)];
+    } else if (agree < disagree) {
+        [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] redColor]
+                               range: NSMakeRange(range.location + 1, voteText.length - 1 - range.location)];
+    }
+    
+    TTTAttributedLabel *voteLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
+    voteLabel.attributedText = attributedText;
+    voteLabel.numberOfLines = 1;
+
     [self addSubview:voteLabel];
     
-    CGRect rect = [voteLabel.text boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX}
-                                 options:NSStringDrawingUsesLineFragmentOrigin
-                              attributes:@{NSFontAttributeName: font}
-                                 context:nil];
+    CGRect rect = [attributedText boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX} options:NSStringDrawingUsesLineFragmentOrigin context:nil];
     [voteLabel setSize:rect.size];
     [voteLabel placeIn:self alignedAt:CENTER];
 
@@ -303,9 +315,14 @@ static const int kCellEdgeInset = 30.0;
     UILabel *timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
     timeLabel.text = time;
     timeLabel.font = font;
-    timeLabel.textColor = [UIColor darkGrayColor];
+    timeLabel.textColor = [[BCGlobalsManager globalsManager] blackTimestampColor];
     [self addSubview:timeLabel];
-    [timeLabel placeIn:self alignedAt:CENTER_LEFT];
+    CGRect rect = [timeLabel.text boundingRectWithSize:(CGSize){CGFLOAT_MAX, kHeaderFooterHeight}
+                                               options:NSStringDrawingUsesLineFragmentOrigin
+                                            attributes:@{NSFontAttributeName: font}
+                                               context:nil];
+    [timeLabel setWidth:rect.size.width];
+    [timeLabel placeIn:self alignedAt:CENTER];
     
     return self;
 }
@@ -386,7 +403,7 @@ static BOOL isSwipeLocked = NO;
     _isDragging = NO;
     BOOL showHeader = secretModel.agrees || secretModel.disagrees;
     
-    BCCellTopLayerTextView *textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel.text withWidth:size.width];
+    BCCellTopLayerTextView *textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel withWidth:size.width];
     BCCellTopLayerFooterView *footerView = [[BCCellTopLayerFooterView alloc] init:secretModel.timeStr withWidth:size.width];
     BCCellTopLayerHeaderView *headerView = [[BCCellTopLayerHeaderView alloc] init:secretModel.agrees withDisagree:secretModel.disagrees withWidth:size.width];
     
@@ -464,7 +481,7 @@ static BOOL isSwipeLocked = NO;
         finalX = velocity.x;
     }
     
-    float duration = 1.0;
+    float duration = 0.8;
     if (fabs(velocity.x) > width) {
         overshot = YES;
         duration = width / fabs(velocity.x) * 1.0;
@@ -488,7 +505,7 @@ static BOOL isSwipeLocked = NO;
             overshot = YES;
         } else {
             //NSLog(@"the width = %f, and %f, and %f", width, gesture.view.frame.origin.x + width, gesture.view.frame.origin.x);
-            if (gesture.view.frame.origin.x < 10.0 || gesture.view.frame.origin.x + width >= 250.0) {
+            if (gesture.view.frame.origin.x < 5.0 || gesture.view.frame.origin.x + width >= 255.0) {
                 finalX = 0.0;
             }
         }
@@ -497,7 +514,7 @@ static BOOL isSwipeLocked = NO;
                              [gesture.view setX:finalX];
                          }
                          completion:^(BOOL finished) {
-                             [UIView animateWithDuration: overshot ? 1.0 : duration delay:0.0 options: UIViewAnimationOptionCurveLinear
+                             [UIView animateWithDuration: overshot ? 0.7 : duration delay:0.0 options: UIViewAnimationOptionCurveLinear
                                               animations:^{
                                                   [gesture.view setX:0.0];
                                               }
@@ -765,6 +782,7 @@ static BOOL isSwipeLocked = NO;
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
     [self addSecret:ccv.textView.text];
+    NSLog(@"The text being added = %@", ccv.textView.text);
     [_messageTable performBatchUpdates:^{
         [_messageTable.collectionViewLayout invalidateLayout];
         [self removeCompose];

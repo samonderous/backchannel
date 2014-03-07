@@ -36,6 +36,8 @@
     
     _composeFont = [UIFont fontWithName:@"Tisa Pro" size:19];
     _blackDividerColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.1];
+    _blackTimestampColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.4];
+
 }
 
 @end

@@ -22,6 +22,7 @@
 @property (strong, nonatomic) UIFont *composeFont;
 @property (strong, nonatomic) UIColor *emptyPostCellColor;
 @property (strong, nonatomic) UIColor *blackDividerColor;
+@property (strong, nonatomic) UIColor *blackTimestampColor;
 
 + (id)globalsManager;
 - (void)loadConfig;
