@@ -8,6 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
+typedef enum Vote {
+    VOTE_NONE = 0,
+    VOTE_AGREE,
+    VOTE_DISAGREE
+} Vote;
 @interface BCSecretModel : NSObject
 
 @property (strong, nonatomic) NSString *text;
@@ -15,6 +20,7 @@
 @property (assign) int agrees;
 @property (assign) int disagrees;
 @property (strong, nonatomic) NSString *timeStr;
+@property (assign) Vote vote;
 
 - (id)init:(NSString*)text withTime:(float)time withAgrees:(int)agrees withDisagree:(int)disagrees;
 @end

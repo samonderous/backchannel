@@ -30,14 +30,22 @@ static const float kKeyboardHeight = 216.0;
 static const float kPublishBarHeight = 60.0;
 static const int kMaxCharCount = 140;
 static const int kCellEdgeInset = 30.0;
+static const float kPublishPushDuration = 1.0;
 
+
+
+typedef enum Direction {
+    LEFT_DIRECTION = 1,
+    RIGHT_DIRECTION
+} Direction;
+
+@class BCCellTopLayerContainerView;
 
 @interface BCComposeContainerView : UIView
 @property (strong, nonatomic) UITextView *textView;
 @property (strong, nonatomic) UIButton *nevermind;
 @property (strong, nonatomic) UIButton *publish;
 
-- (void)setCharCount:(int)count;
 @end
 
 @interface BCCellComposeView : UIView
@@ -54,7 +62,17 @@ static const int kCellEdgeInset = 30.0;
 + (float)getFooterHeight;
 @end
 
+@protocol BCCellTopLayerContainerViewDelegate <NSObject>
+@optional
+
+- (void)swipeReleaseAnimationBackComplete:(BCCellTopLayerContainerView*)containerView inDirection:(Direction)direction;
+
+@end
+
 @interface BCCellTopLayerContainerView : UIView<UIGestureRecognizerDelegate>
+
+@property (nonatomic, assign) id <BCCellTopLayerContainerViewDelegate>delegate;
+
 - (void)addSwipes;
 + (BOOL)isSwipeLocked;
 @end
@@ -215,14 +233,16 @@ static const int kCellEdgeInset = 30.0;
 {
     self = [super init];
     UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
-    UIColor *fontColor;
-    if (model.agrees > model.disagrees) {
+    UIColor *fontColor = [UIColor blackColor];
+    
+    // NOTE: This code updates the text color. Commented out for now.
+    /*
+    if (model.vote == VOTE_AGREE) {
         fontColor = [[BCGlobalsManager globalsManager] greenColor];
-    } else if (model.agrees < model.disagrees) {
+    } else if (model.vote == VOTE_DISAGREE) {
         fontColor = [[BCGlobalsManager globalsManager] redColor];
-    } else {
-        fontColor = [UIColor blackColor];
     }
+    */
     
     NSAttributedString *attributedText = [[NSAttributedString alloc]
                                           initWithString:model.text
@@ -263,21 +283,21 @@ static const int kCellEdgeInset = 30.0;
 
 @implementation BCCellTopLayerHeaderView
 
-- (id)init:(int)agree withDisagree:(int)disagree withWidth:(float)width
+- (id)init:(BCSecretModel*)model withWidth:(float)width
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
     UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:12.0];
-    NSString *voteText = [NSString stringWithFormat:@"%d agrees \u00B7 %d disagrees", agree, disagree];
+    NSString *voteText = [NSString stringWithFormat:@"%d agrees \u00B7 %d disagrees", model.agrees, model.disagrees];
     NSRange range = [voteText rangeOfString:@"\u00B7"];
     NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc]
                                                  initWithString:voteText
                                                  attributes:@{ NSFontAttributeName:font,
                                                                NSForegroundColorAttributeName: [[BCGlobalsManager globalsManager] creamColor]}];
     
-    if (agree > disagree) {
+    if (model.vote == VOTE_AGREE) {
         [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] greenColor]
                                range: NSMakeRange(0, range.location - 1)];
-    } else if (agree < disagree) {
+    } else if (model.vote == VOTE_DISAGREE) {
         [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] redColor]
                                range: NSMakeRange(range.location + 1, voteText.length - 1 - range.location)];
     }
@@ -379,15 +399,15 @@ static const int kCellEdgeInset = 30.0;
 
 
 @interface BCCellTopLayerContainerView ()
+@property (strong, nonatomic) BCCellTopLayerTextView *textView;
+@property (strong, nonatomic) BCCellTopLayerFooterView *footerView;
+@property (strong, nonatomic) BCCellTopLayerHeaderView *headerView;
+@property (strong, nonatomic) BCSecretModel *secretModel;
+@property (assign) CGSize size;
 @property (assign) BOOL isDragging;
 @end
 
 @implementation BCCellTopLayerContainerView
-
-typedef enum Direction {
-    LEFT_DIRECTION = 1,
-    RIGHT_DIRECTION
-} Direction;
 
 static BOOL isSwipeLocked = NO;
 
@@ -400,26 +420,24 @@ static BOOL isSwipeLocked = NO;
         static BOOL isSwipeLocked = NO;
     });
     
+    _size = size;
+    _secretModel = secretModel;
     _isDragging = NO;
-    BOOL showHeader = secretModel.agrees || secretModel.disagrees;
+
+    _textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel withWidth:size.width];
+    _footerView = [[BCCellTopLayerFooterView alloc] init:secretModel.timeStr withWidth:size.width];
+
+    [self addSubview:_textView];
+    [self addSubview:_footerView];
     
-    BCCellTopLayerTextView *textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel withWidth:size.width];
-    BCCellTopLayerFooterView *footerView = [[BCCellTopLayerFooterView alloc] init:secretModel.timeStr withWidth:size.width];
-    BCCellTopLayerHeaderView *headerView = [[BCCellTopLayerHeaderView alloc] init:secretModel.agrees withDisagree:secretModel.disagrees withWidth:size.width];
-    
-    [self addSubview:textView];
-    [self addSubview:footerView];
-    
-    [textView placeIn:self alignedAt:CENTER];
-    [footerView placeIn:self alignedAt:CENTER];
-    [headerView placeIn:self alignedAt:CENTER];
-    
+    [_textView placeIn:self alignedAt:CENTER];
+    [_footerView placeIn:self alignedAt:CENTER];
+
     static const float margin = 10.0;
+    [_footerView setY:(CGRectGetMaxY(_textView.frame) + margin)];
     
-    [footerView setY:(CGRectGetMaxY(textView.frame) + margin)];
-    if (showHeader) {
-        [self addSubview:headerView];
-        [headerView setY:CGRectGetMinY(textView.frame) - CGRectGetHeight(footerView.bounds) - margin];
+    if (_secretModel.vote) {
+        [self updateVoteView];
     }
     self.backgroundColor = [UIColor whiteColor];
     self.opaque = YES;
@@ -427,6 +445,15 @@ static BOOL isSwipeLocked = NO;
     return self;
 }
 
+- (void)updateVoteView
+{
+    static const float margin = 10.0;
+    [_headerView removeFromSuperview];
+    _headerView = [[BCCellTopLayerHeaderView alloc] init:_secretModel withWidth:_size.width];
+    [_headerView placeIn:self alignedAt:CENTER];
+    [self addSubview:_headerView];
+    [_headerView setY:CGRectGetMinY(_textView.frame) - CGRectGetHeight(_footerView.bounds) - margin];
+}
 
 + (void)setSwipeLocked:(BOOL)isLock
 {
@@ -449,6 +476,10 @@ static BOOL isSwipeLocked = NO;
     
 }
 
+- (Direction)getSwipeDirection:(CGPoint)velocity
+{
+    return velocity.x <= 0 ? LEFT_DIRECTION : RIGHT_DIRECTION;
+}
 
 - (void)handleSwipe:(UIPanGestureRecognizer*)gesture
 {
@@ -459,6 +490,7 @@ static BOOL isSwipeLocked = NO;
     BOOL overshot = NO;
     float threshhold = CGRectGetWidth(gesture.view.bounds) / 2.0;
     static const float cutOff = 40.0;
+    static const float resistPan = 5.0;
     
     UIGestureRecognizerState state = gesture.state;
     CGFloat width = CGRectGetWidth(gesture.view.bounds);
@@ -466,11 +498,7 @@ static BOOL isSwipeLocked = NO;
     CGPoint velocity = [gesture velocityInView:gesture.view.superview];
     Direction direction;
   
-    if (velocity.x <= 0) {
-        direction = LEFT_DIRECTION;
-    } else {
-        direction = RIGHT_DIRECTION;
-    }
+    direction = [self getSwipeDirection:velocity];
     
     CGFloat finalX = 0.0;
     if (velocity.x < -width) {
@@ -505,7 +533,7 @@ static BOOL isSwipeLocked = NO;
             overshot = YES;
         } else {
             //NSLog(@"the width = %f, and %f, and %f", width, gesture.view.frame.origin.x + width, gesture.view.frame.origin.x);
-            if (gesture.view.frame.origin.x < 5.0 || gesture.view.frame.origin.x + width >= 255.0) {
+            if (gesture.view.frame.origin.x < resistPan || gesture.view.frame.origin.x + width >= (width - resistPan)) {
                 finalX = 0.0;
             }
         }
@@ -514,6 +542,9 @@ static BOOL isSwipeLocked = NO;
                              [gesture.view setX:finalX];
                          }
                          completion:^(BOOL finished) {
+                             if (finalX) {
+                                 [self.delegate swipeReleaseAnimationBackComplete:self inDirection:direction];
+                             }
                              [UIView animateWithDuration: overshot ? 0.7 : duration delay:0.0 options: UIViewAnimationOptionCurveLinear
                                               animations:^{
                                                   [gesture.view setX:0.0];
@@ -534,7 +565,7 @@ static BOOL isSwipeLocked = NO;
 
 
 
-@interface BCStreamViewController ()
+@interface BCStreamViewController ()<BCCellTopLayerContainerViewDelegate>
 
 @property (assign) int contentWidth;
 @property (strong, nonatomic) UICollectionView *messageTable;
@@ -690,6 +721,7 @@ static BOOL isSwipeLocked = NO;
         BCCellTopLayerContainerView *cv = [[BCCellTopLayerContainerView alloc] init:secretModel
                                                                            withSize:(CGSize){width,
                                                                                CGRectGetHeight(cell.contentView.bounds)}];
+        cv.delegate = self;
         [cv addSwipes];
         [cell.contentView addSubview:bcv];
         [cell.contentView addSubview:cv];
@@ -698,7 +730,6 @@ static BOOL isSwipeLocked = NO;
         
         [self setSeparator:cell.contentView indexPath:indexPath];
     }
-    
 }
 
 - (BCStreamCollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -806,7 +837,7 @@ static BOOL isSwipeLocked = NO;
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
     [ccv setPublishPush];
-    [UIView animateWithDuration:1.0 delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
+    [UIView animateWithDuration:kPublishPushDuration delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
         [ccv.publishMeter setX:0.0];
     } completion:^(BOOL finished) {
         if (finished) {
@@ -881,7 +912,27 @@ static BOOL isSwipeLocked = NO;
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
    [ccv update:(int)textView.text.length];
+}
 
+# pragma Cell Top Container View Delegate
+- (void)swipeReleaseAnimationBackComplete:(BCCellTopLayerContainerView*)containerView inDirection:(Direction)direction
+{
+    BCSecretModel *secretModel = containerView.secretModel;
+    if (secretModel.vote != VOTE_NONE) {
+        return;
+    }
+    
+    if (direction == LEFT_DIRECTION) {
+        secretModel.disagrees++;
+        secretModel.vote = VOTE_DISAGREE;
+    } else if (direction == RIGHT_DIRECTION) {
+        secretModel.agrees++;
+        secretModel.vote = VOTE_AGREE;
+    }
+    // NOTE: Write to server
+    //
+    
+    [containerView updateVoteView];
 }
 
 @end

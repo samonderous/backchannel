@@ -21,6 +21,7 @@
     _agrees = agrees;
     _disagrees = disagrees;
     _timeStr = [self convertTimeToString];
+    _vote = VOTE_NONE;
     return self;
 }
 
