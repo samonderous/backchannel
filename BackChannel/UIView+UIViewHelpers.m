@@ -41,19 +41,21 @@
         {
             CGRect selfFrame = self.frame;
             selfFrame.origin = CGPointMake(margin, margin);
-            self.frame = CGRectIntegral(selfFrame);
+            self.frame = selfFrame;
             break;
         }
         case TOP_RIGHT:
         {
             CGRect selfFrame = self.frame;
             selfFrame.origin = CGPointMake(CGRectGetMaxX(view.bounds) - CGRectGetWidth(self.bounds) - margin, margin);
+            self.frame = selfFrame;
             break;
         }
         case BOTTOM_LEFT:
         {
             CGRect selfFrame = self.frame;
             selfFrame.origin = CGPointMake(margin, CGRectGetMaxY(view.bounds) - CGRectGetHeight(self.bounds) - margin);
+            self.frame = selfFrame;
             break;
         }
         case BOTTOM_RIGHT:
@@ -61,6 +63,14 @@
             CGRect selfFrame = self.frame;
             selfFrame.origin = CGPointMake(CGRectGetMaxY(view.bounds) - CGRectGetHeight(self.bounds) - margin,
                                            CGRectGetMaxY(view.bounds) - CGRectGetHeight(self.bounds) - margin);
+            self.frame = selfFrame;
+            break;
+        }
+        case BOTTOM:
+        {
+            CGRect selfFrame = self.frame;
+            selfFrame.origin = CGPointMake(CGRectGetMinX(view.bounds), CGRectGetHeight(view.bounds) - CGRectGetHeight(self.bounds));
+            self.frame = selfFrame;
             break;
         }
         default:

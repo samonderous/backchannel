@@ -31,6 +31,7 @@
 		C1316E2918B57318005A85B8 /* TTTAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C1316E2818B57318005A85B8 /* TTTAttributedLabel.m */; };
 		C1316E3018B5760A005A85B8 /* UIScrollView+SVInfiniteScrolling.m in Sources */ = {isa = PBXBuildFile; fileRef = C1316E2D18B5760A005A85B8 /* UIScrollView+SVInfiniteScrolling.m */; };
 		C1316E3118B5760A005A85B8 /* UIScrollView+SVPullToRefresh.m in Sources */ = {isa = PBXBuildFile; fileRef = C1316E2F18B5760A005A85B8 /* UIScrollView+SVPullToRefresh.m */; };
+		C14C9D6118CF8EF300A79BFD /* verify_asset.png in Resources */ = {isa = PBXBuildFile; fileRef = C14C9D6018CF8EF300A79BFD /* verify_asset.png */; };
 		C1F0C31218C51C5500009BDD /* BCGlobalsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */; };
 		C1F5B74118CBC6E600D3FD32 /* BCAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5B74018CBC6E600D3FD32 /* BCAuthViewController.m */; };
 		C1F5B74418CBC6FE00D3FD32 /* BCVerificationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5B74318CBC6FE00D3FD32 /* BCVerificationViewController.m */; };
@@ -88,6 +89,7 @@
 		C1316E2D18B5760A005A85B8 /* UIScrollView+SVInfiniteScrolling.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+SVInfiniteScrolling.m"; sourceTree = "<group>"; };
 		C1316E2E18B5760A005A85B8 /* UIScrollView+SVPullToRefresh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIScrollView+SVPullToRefresh.h"; sourceTree = "<group>"; };
 		C1316E2F18B5760A005A85B8 /* UIScrollView+SVPullToRefresh.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+SVPullToRefresh.m"; sourceTree = "<group>"; };
+		C14C9D6018CF8EF300A79BFD /* verify_asset.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = verify_asset.png; sourceTree = "<group>"; };
 		C1F0C31018C51C5500009BDD /* BCGlobalsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BCGlobalsManager.h; sourceTree = "<group>"; };
 		C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BCGlobalsManager.m; sourceTree = "<group>"; };
 		C1F0C31418C68A2600009BDD /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
@@ -124,6 +126,7 @@
 		C100166E18BD4D4000347A31 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C14C9D6018CF8EF300A79BFD /* verify_asset.png */,
 				C100166F18BD4D4C00347A31 /* TisaPro.otf */,
 			);
 			name = Resources;
@@ -348,6 +351,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C1F6D21418C6B94200498506 /* TisaPro.otf in Resources */,
+				C14C9D6118CF8EF300A79BFD /* verify_asset.png in Resources */,
 				C1316DF218B3F741005A85B8 /* Main_iPad.storyboard in Resources */,
 				C1316DF718B3F741005A85B8 /* Images.xcassets in Resources */,
 				C1316DEF18B3F741005A85B8 /* Main_iPhone.storyboard in Resources */,

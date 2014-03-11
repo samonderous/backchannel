@@ -10,9 +10,8 @@
 
 #import "BCAuthViewController.h"
 #import "BCGlobalsManager.h"
+#import "BCVerificationViewController.h"
 
-
-static const float kTitleTopMargin = 20.0;
 static const float kJoinBarHeight = 60.0;
 static const float kEmailMargin = 30.0;
 
@@ -36,7 +35,7 @@ static const float kEmailMargin = 30.0;
                                            CGRectGetMinY([UIScreen mainScreen].applicationFrame),
                                            CGRectGetWidth([UIScreen mainScreen].bounds),
                                            CGRectGetHeight([UIScreen mainScreen].applicationFrame) - kKeyboardHeight)];
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
+    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:20.0];
     UIColor *fontColor = [[BCGlobalsManager globalsManager] blueColor];
     NSAttributedString *titleAttributedString = [[NSMutableAttributedString alloc]
                                                  initWithString:[NSString stringWithFormat:@"Backchannel"]
@@ -70,14 +69,6 @@ static const float kEmailMargin = 30.0;
     _email.attributedText = emailAttributedString;
     _email.font = emailFont;
     [_email placeIn:self alignedAt:CENTER];
-    
-    CGPoint point = (CGPoint){CGRectGetWidth(self.bounds) / 2.0, CGRectGetHeight(self.bounds) / 2.0};
-    NSLog(@"x = %f, y = %f", _email.center.x, _email.center.y);
-    NSLog(@"x = %f, y = %f", point.x, point.y);
-    NSLog(@"%@", NSStringFromCGRect(self.frame));
-    NSLog(@"%@", NSStringFromCGRect(self.bounds));
-
-    
     
     _divider = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, width, 1.0)];
     [self addSubview:_divider];
@@ -187,6 +178,11 @@ static const float kEmailMargin = 30.0;
 {
     int persons = 18;
     [_av updateEmail:persons withError:YES];
+    
+    BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
+    vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+    [self presentViewController:vc animated:YES completion:^() {
+    }];
 }
 
 - (void)viewDidLoad

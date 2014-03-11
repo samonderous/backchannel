@@ -10,6 +10,7 @@
 #import "BCAppDelegate.h"
 #import "BCStreamViewController.h"
 #import "BCAuthViewController.h"
+#import "BCVerificationViewController.h"
 
 @interface BCViewController ()
 @end
@@ -47,10 +48,18 @@
     [self presentViewController:nc animated:YES completion:^() {
     }];
      */
+
     BCAuthViewController *vc = [[BCAuthViewController alloc] init];
     vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
     [self presentViewController:vc animated:YES completion:^() {
     }];
+
+    /*
+    BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
+    vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+    [self presentViewController:vc animated:YES completion:^() {
+    }];
+     */
 }
 
 @end

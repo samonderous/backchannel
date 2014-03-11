@@ -15,7 +15,8 @@ typedef enum Alignment {
     CENTER_LEFT,
     CENTER_RIGTH,
     BOTTOM_LEFT,
-    BOTTOM_RIGHT
+    BOTTOM_RIGHT,
+    BOTTOM
 } Alignment;
 
 @interface UIView (UIViewHelpers)

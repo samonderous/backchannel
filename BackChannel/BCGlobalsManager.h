@@ -10,10 +10,12 @@
 
 
 extern const float kKeyboardHeight;
+extern const float kTitleTopMargin;
 
 
 @interface BCGlobalsManager : NSObject
 @property (strong, nonatomic) UIColor *blueColor;
+@property (strong, nonatomic) UIColor *blueBackgroundColor;
 @property (strong, nonatomic) UIColor *blackPublishFontColor;
 @property (strong, nonatomic) UIColor *blackPublishBackgroundColor;
 @property (strong, nonatomic) UIColor *greenColor;
