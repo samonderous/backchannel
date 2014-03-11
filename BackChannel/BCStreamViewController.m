@@ -26,7 +26,6 @@ static const float kHeaderFooterHeight = 30.0;
 static const float kContainerPadding = 30.0;
 static const float kSentimentLength = 40.0;
 static const float kRowSpacing = 0.0f;
-static const float kKeyboardHeight = 216.0;
 static const float kPublishBarHeight = 60.0;
 static const int kMaxCharCount = 140;
 static const int kCellEdgeInset = 30.0;

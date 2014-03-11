@@ -8,6 +8,8 @@
 
 #import "BCGlobalsManager.h"
 
+const float kKeyboardHeight = 216.0;
+
 @implementation BCGlobalsManager
 
 + (id)globalsManager

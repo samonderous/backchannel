@@ -8,6 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+
+extern const float kKeyboardHeight;
+
+
 @interface BCGlobalsManager : NSObject
 @property (strong, nonatomic) UIColor *blueColor;
 @property (strong, nonatomic) UIColor *blackPublishFontColor;

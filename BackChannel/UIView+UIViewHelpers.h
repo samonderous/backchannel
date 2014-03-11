@@ -31,5 +31,6 @@ typedef enum Alignment {
 - (void)setSize:(CGSize)size;
 - (void)setSizeWidth:(float)width andHeight:(float)height;
 - (void)debug;
+- (void)debugCenter;
 
 @end

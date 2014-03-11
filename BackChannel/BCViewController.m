@@ -9,6 +9,7 @@
 #import "BCViewController.h"
 #import "BCAppDelegate.h"
 #import "BCStreamViewController.h"
+#import "BCAuthViewController.h"
 
 @interface BCViewController ()
 @end
@@ -38,11 +39,17 @@
 
 - (void)performSegue
 {
+    /*
     BCStreamViewController *vc = [[BCStreamViewController alloc] init];
     UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
     vc.title = @"Backchannel";
     vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
     [self presentViewController:nc animated:YES completion:^() {
+    }];
+     */
+    BCAuthViewController *vc = [[BCAuthViewController alloc] init];
+    vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+    [self presentViewController:vc animated:YES completion:^() {
     }];
 }
 

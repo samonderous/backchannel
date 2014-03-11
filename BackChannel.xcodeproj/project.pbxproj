@@ -32,6 +32,8 @@
 		C1316E3018B5760A005A85B8 /* UIScrollView+SVInfiniteScrolling.m in Sources */ = {isa = PBXBuildFile; fileRef = C1316E2D18B5760A005A85B8 /* UIScrollView+SVInfiniteScrolling.m */; };
 		C1316E3118B5760A005A85B8 /* UIScrollView+SVPullToRefresh.m in Sources */ = {isa = PBXBuildFile; fileRef = C1316E2F18B5760A005A85B8 /* UIScrollView+SVPullToRefresh.m */; };
 		C1F0C31218C51C5500009BDD /* BCGlobalsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */; };
+		C1F5B74118CBC6E600D3FD32 /* BCAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5B74018CBC6E600D3FD32 /* BCAuthViewController.m */; };
+		C1F5B74418CBC6FE00D3FD32 /* BCVerificationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5B74318CBC6FE00D3FD32 /* BCVerificationViewController.m */; };
 		C1F6D21418C6B94200498506 /* TisaPro.otf in Resources */ = {isa = PBXBuildFile; fileRef = C100166F18BD4D4C00347A31 /* TisaPro.otf */; };
 /* End PBXBuildFile section */
 
@@ -89,6 +91,10 @@
 		C1F0C31018C51C5500009BDD /* BCGlobalsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BCGlobalsManager.h; sourceTree = "<group>"; };
 		C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BCGlobalsManager.m; sourceTree = "<group>"; };
 		C1F0C31418C68A2600009BDD /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		C1F5B73F18CBC6E600D3FD32 /* BCAuthViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BCAuthViewController.h; sourceTree = "<group>"; };
+		C1F5B74018CBC6E600D3FD32 /* BCAuthViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BCAuthViewController.m; sourceTree = "<group>"; };
+		C1F5B74218CBC6FE00D3FD32 /* BCVerificationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BCVerificationViewController.h; sourceTree = "<group>"; };
+		C1F5B74318CBC6FE00D3FD32 /* BCVerificationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BCVerificationViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,18 +176,22 @@
 				C100167618BD747F00347A31 /* Libraries */,
 				C100166E18BD4D4000347A31 /* Resources */,
 				C1316E1918B56D04005A85B8 /* Helpers */,
-				C1F0C31018C51C5500009BDD /* BCGlobalsManager.h */,
-				C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */,
-				C1316E2018B570FA005A85B8 /* BCModels.h */,
-				C1316E2118B570FA005A85B8 /* BCModels.m */,
-				C100167318BD743800347A31 /* BCStreamCollectionViewCell.h */,
-				C100167418BD743800347A31 /* BCStreamCollectionViewCell.m */,
-				C100167718BD75A900347A31 /* BCStreamViewController.h */,
-				C100167818BD75A900347A31 /* BCStreamViewController.m */,
-				C1316E1D18B56D3F005A85B8 /* BCViewController.h */,
-				C1316E1E18B56D3F005A85B8 /* BCViewController.m */,
 				C1316DEA18B3F741005A85B8 /* BCAppDelegate.h */,
 				C1316DEB18B3F741005A85B8 /* BCAppDelegate.m */,
+				C1F0C31018C51C5500009BDD /* BCGlobalsManager.h */,
+				C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */,
+				C1316E1D18B56D3F005A85B8 /* BCViewController.h */,
+				C1316E1E18B56D3F005A85B8 /* BCViewController.m */,
+				C1F5B73F18CBC6E600D3FD32 /* BCAuthViewController.h */,
+				C1F5B74018CBC6E600D3FD32 /* BCAuthViewController.m */,
+				C1F5B74218CBC6FE00D3FD32 /* BCVerificationViewController.h */,
+				C1F5B74318CBC6FE00D3FD32 /* BCVerificationViewController.m */,
+				C100167718BD75A900347A31 /* BCStreamViewController.h */,
+				C100167818BD75A900347A31 /* BCStreamViewController.m */,
+				C100167318BD743800347A31 /* BCStreamCollectionViewCell.h */,
+				C100167418BD743800347A31 /* BCStreamCollectionViewCell.m */,
+				C1316E2018B570FA005A85B8 /* BCModels.h */,
+				C1316E2118B570FA005A85B8 /* BCModels.m */,
 				C1316DED18B3F741005A85B8 /* Main_iPhone.storyboard */,
 				C1316DF018B3F741005A85B8 /* Main_iPad.storyboard */,
 				C1316DF618B3F741005A85B8 /* Images.xcassets */,
@@ -363,7 +373,9 @@
 				C1316E1718B56D01005A85B8 /* Utils.m in Sources */,
 				C1316E3118B5760A005A85B8 /* UIScrollView+SVPullToRefresh.m in Sources */,
 				C1316E2218B570FA005A85B8 /* BCModels.m in Sources */,
+				C1F5B74118CBC6E600D3FD32 /* BCAuthViewController.m in Sources */,
 				C100167918BD75A900347A31 /* BCStreamViewController.m in Sources */,
+				C1F5B74418CBC6FE00D3FD32 /* BCVerificationViewController.m in Sources */,
 				C100167518BD743800347A31 /* BCStreamCollectionViewCell.m in Sources */,
 				C1F0C31218C51C5500009BDD /* BCGlobalsManager.m in Sources */,
 				C1316DE818B3F741005A85B8 /* main.m in Sources */,

@@ -22,8 +22,7 @@
     switch (alignment) {
         case CENTER:
         {
-            //self.center = CGPointMake(view.bounds.size.width / 2.0, view.bounds.size.height / 2.0);
-            self.center = [view convertPoint:view.center fromView:view.superview];
+            self.center = CGPointMake(view.bounds.size.width / 2.0, view.bounds.size.height / 2.0);
             break;
         }
         case CENTER_LEFT:
@@ -127,6 +126,19 @@
 {
     self.layer.borderWidth = 1.0;
     self.layer.borderColor = [UIColor redColor].CGColor;
+}
+
+- (void)debugCenter
+{
+    CALayer *circle = [[CALayer alloc] init];
+    circle.frame = CGRectMake(0.0, 0.0, 5.0, 5.0);
+    CGRect frame = circle.frame;
+    frame.origin = (CGPoint){(CGRectGetWidth(self.bounds) - CGRectGetWidth(circle.bounds)) / 2.0, (CGRectGetHeight(self.bounds) - CGRectGetHeight(circle.bounds)) / 2.0};
+    circle.frame = frame;
+    circle.cornerRadius = CGRectGetWidth(circle.frame) / 2.0;
+    circle.backgroundColor = [UIColor blueColor].CGColor;
+    [self.layer addSublayer:circle];
+    
 }
 
 @end
