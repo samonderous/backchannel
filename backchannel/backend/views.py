@@ -1,7 +1,6 @@
 import re
 import logging
 import time, datetime
-import settings
 import simplejson
 import pytz
 import random
@@ -23,6 +22,9 @@ except:
         pass
 
 # Create your views here.
+
+def init(request):
+    return HttpResponse("init")
 
 def auth(request):
     return HttpResponse("auth")
