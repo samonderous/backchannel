@@ -6,6 +6,8 @@
 //  Copyright (c) 2013 Saureen Shah. All rights reserved.
 //
 
+#import <QuartzCore/QuartzCore.h>
+
 #import "UIScrollView+SVPullToRefresh.h"
 #import "UIScrollView+SVInfiniteScrolling.h"
 #import "MCSwipeTableViewCell.h"
@@ -853,19 +855,30 @@ static BOOL isSwipeLocked = NO;
         if (finished) {
             [self addNewSecretToStream];
         } else {
-            [ccv.publishMeter setX:-CGRectGetWidth([UIScreen mainScreen].bounds)];
+            NSLog(@"NOW HERE");
+            //[ccv.publishMeter setX:-CGRectGetWidth([UIScreen mainScreen].bounds)];
         }
     }];
 }
 
 - (void)publishHoldRelease
 {
+
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+    //NSLog(@"the publish meter x = %f", ccv.publishMeter.bounds.origin.x);
+    CALayer *layer = ccv.publishMeter.layer.presentationLayer;
+    NSLog(@"the publish meter layer x = %f", CGRectGetMaxX(layer.frame));
+    float maxX = CGRectGetMaxX(layer.frame);
+    CGRect layerFrame = layer.frame;
+    layerFrame.origin.x = layer.frame.origin.x;
+    layer.frame = layerFrame;
+
     [ccv.publishMeter.layer removeAllAnimations];
-    float duration = kPublishPushDuration * (CGRectGetMaxX(ccv.publishMeter.bounds) /
-                                             CGRectGetWidth([UIScreen mainScreen].bounds));
+    
+    float duration = kPublishPushDuration * (maxX / CGRectGetWidth([UIScreen mainScreen].bounds));
+    NSLog(@"Got a duration = %f, %f, %f", duration, maxX, CGRectGetWidth([UIScreen mainScreen].bounds));
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
         [ccv.publishMeter setX:-CGRectGetWidth([UIScreen mainScreen].bounds)];
     } completion:^(BOOL finished) {
@@ -882,7 +895,6 @@ static BOOL isSwipeLocked = NO;
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
     _isComposeMode = NO;
     _messageTable.scrollEnabled = YES;
-    [_messageTable.collectionViewLayout invalidateLayout];
     [ccv removeFromSuperview];
     [ccv.textView resignFirstResponder];
 }

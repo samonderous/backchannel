@@ -51,6 +51,7 @@
 		C14C9D9918CFC95A00A79BFD /* UIWebView+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = C14C9D9118CFC95A00A79BFD /* UIWebView+AFNetworking.m */; };
 		C14C9D9E18D0F24300A79BFD /* BCAPIClient.m in Sources */ = {isa = PBXBuildFile; fileRef = C14C9D9D18D0F24300A79BFD /* BCAPIClient.m */; };
 		C14C9DA418D13C9800A79BFD /* AFNetworkActivityLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = C14C9DA318D13C9800A79BFD /* AFNetworkActivityLogger.m */; };
+		C14C9DA718D194CD00A79BFD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C14C9DA618D194CD00A79BFD /* QuartzCore.framework */; };
 		C1F0C31218C51C5500009BDD /* BCGlobalsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */; };
 		C1F5B74118CBC6E600D3FD32 /* BCAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5B74018CBC6E600D3FD32 /* BCAuthViewController.m */; };
 		C1F5B74418CBC6FE00D3FD32 /* BCVerificationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5B74318CBC6FE00D3FD32 /* BCVerificationViewController.m */; };
@@ -149,6 +150,7 @@
 		C14C9D9D18D0F24300A79BFD /* BCAPIClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BCAPIClient.m; sourceTree = "<group>"; };
 		C14C9DA218D13C9800A79BFD /* AFNetworkActivityLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFNetworkActivityLogger.h; sourceTree = "<group>"; };
 		C14C9DA318D13C9800A79BFD /* AFNetworkActivityLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFNetworkActivityLogger.m; sourceTree = "<group>"; };
+		C14C9DA618D194CD00A79BFD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		C1F0C31018C51C5500009BDD /* BCGlobalsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BCGlobalsManager.h; sourceTree = "<group>"; };
 		C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BCGlobalsManager.m; sourceTree = "<group>"; };
 		C1F0C31418C68A2600009BDD /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
@@ -163,6 +165,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C14C9DA718D194CD00A79BFD /* QuartzCore.framework in Frameworks */,
 				C1316DDE18B3F741005A85B8 /* CoreGraphics.framework in Frameworks */,
 				C1316DE018B3F741005A85B8 /* UIKit.framework in Frameworks */,
 				C1316DDC18B3F741005A85B8 /* Foundation.framework in Frameworks */,
@@ -225,6 +228,7 @@
 		C1316DDA18B3F741005A85B8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C14C9DA618D194CD00A79BFD /* QuartzCore.framework */,
 				C1F0C31418C68A2600009BDD /* CoreText.framework */,
 				C1316DDB18B3F741005A85B8 /* Foundation.framework */,
 				C1316DDD18B3F741005A85B8 /* CoreGraphics.framework */,
