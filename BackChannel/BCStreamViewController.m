@@ -20,10 +20,8 @@
 
 static const float kCellHeight = 251.0f;
 static const float kSecretFontSize = 16.0;
-static const float kHeaderFooterTextFontSize = 12.0;
 static const float kCellComposeHeight = 50.0f;
 static const float kHeaderFooterHeight = 30.0;
-static const float kContainerPadding = 30.0;
 static const float kSentimentLength = 40.0;
 static const float kRowSpacing = 0.0f;
 static const float kPublishBarHeight = 60.0;
@@ -646,8 +644,6 @@ static BOOL isSwipeLocked = NO;
 
 	// Do any additional setup after loading the view.
     _messages = [[NSMutableArray alloc] init];
-    [self setupMessages];
-    
     _messageTable.dataSource = self;
     _messageTable.delegate = self;
     [_messageTable registerClass:[BCStreamCollectionViewCell class] forCellWithReuseIdentifier:@"BCStreamCollectionViewCell"];
@@ -655,13 +651,19 @@ static BOOL isSwipeLocked = NO;
     [_messageTable setShowsVerticalScrollIndicator:NO];
     _messageTable.backgroundColor = [UIColor whiteColor];
 
+    [BCCellTopLayerContainerView setSwipeLocked:NO];
+
     [self setupStreamBar];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [BCCellTopLayerContainerView setSwipeLocked:NO];
+    
+    // NOTE: Write to server
+    //
+    
+    [self setupMessages];
 }
 
 - (void)didReceiveMemoryWarning
@@ -670,6 +672,10 @@ static BOOL isSwipeLocked = NO;
     // Dispose of any resources that can be recreated.
 }
 
+-(NSUInteger)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskPortrait;
+}
 
 #pragma mark Collection View Delegate (_messagesTable)
 
@@ -812,7 +818,11 @@ static BOOL isSwipeLocked = NO;
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
     [self addSecret:ccv.textView.text];
-    NSLog(@"The text being added = %@", ccv.textView.text);
+    
+    // NOTE: Write to server
+    //
+    
+    
     [_messageTable performBatchUpdates:^{
         [_messageTable.collectionViewLayout invalidateLayout];
         [self removeCompose];
@@ -835,6 +845,7 @@ static BOOL isSwipeLocked = NO;
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+    [ccv.publishMeter.layer removeAllAnimations];
     [ccv setPublishPush];
     [UIView animateWithDuration:kPublishPushDuration delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
         [ccv.publishMeter setX:0.0];
@@ -853,6 +864,12 @@ static BOOL isSwipeLocked = NO;
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
     [ccv.publishMeter.layer removeAllAnimations];
+    float duration = kPublishPushDuration * (CGRectGetMaxX(ccv.publishMeter.bounds) /
+                                             CGRectGetWidth([UIScreen mainScreen].bounds));
+    [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
+        [ccv.publishMeter setX:-CGRectGetWidth([UIScreen mainScreen].bounds)];
+    } completion:^(BOOL finished) {
+    }];
     [ccv unsetPublishPush];
 }
 
