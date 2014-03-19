@@ -12,6 +12,8 @@ from django.shortcuts import render_to_response, redirect
 from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import csrf_exempt
 
+from backend import send_email
+
 try:
         logging.basicConfig(
         level = logging.DEBUG,
@@ -23,11 +25,31 @@ except:
 
 # Create your views here.
 
-def init(request):
-    return HttpResponse("init")
+ORG_DOMAIN_LIST = [
+    'google.com',
+    'hightail.com',
+    'gmail.com',
+]
 
+
+@csrf_exempt
 def auth(request):
-    return HttpResponse("auth")
+    response = {'status': 1, 'domain': ''}
+    email = request.POST.get('email')
+    domain = ''
+    try:
+        domain = email.split('@')[1]
+        if not domain or domain not in ORG_DOMAIN_LIST:
+            raise
+        print "HELLO NOW HERE"
+        send_email.send_verify_email()
+    except Exception, e:
+        print "%s" % e
+        return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
+    response = {'status': 0, 'domain': domain}
+    return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
 
 def vote(request):
     return HttpResponse("vote")
@@ -37,3 +59,5 @@ def stream(request):
 
 def resendemail(request):
     return HttpResponse("resendemail")
+
+

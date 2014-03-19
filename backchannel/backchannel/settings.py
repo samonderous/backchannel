@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'backend',
+    'djcelery',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -63,6 +64,23 @@ DATABASES = {
     }
 }
 
+TEMPLATE_LOADERS = (
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+)
+
+TEMPLATE_DIRS = (
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    '/home/ubuntu/Backchannel/backchannel/backchannel/templates',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.messages.context_processors.messages',
+    'django.contrib.auth.context_processors.auth',
+)
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
@@ -81,3 +99,30 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
+
+#Email Settings
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.sendgrid.com'
+EMAIL_HOST_USER = 'samonderous'
+EMAIL_HOST_PASSWORD = '##work##story!'
+EMAIL_PORT = 587
+
+
+#broker
+BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+
+import djcelery
+from celery.schedules import crontab
+from datetime import timedelta
+
+djcelery.setup_loader()
+
+CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
+CELERYBEAT_PIDFILE = '/tmp/celerybeat.pid'
+CELERYBEAT_SCHEDULE = {
+    'add-every-10-seconds': {
+        'task': 'tasks.update_skills_index_long',
+        'schedule': timedelta(seconds=10),
+        'args': ()
+    },
+}

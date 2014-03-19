@@ -1,2 +1,5 @@
-/server/node_modules
 .DS_Store
+
+*.swp
+*.pyc
+*.ipa
