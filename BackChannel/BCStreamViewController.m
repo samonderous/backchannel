@@ -365,26 +365,46 @@ typedef enum Direction {
 
 @implementation BCCellBottomLayerContainerView
 
-- (id)init:(float)width
+- (id)init:(CGSize)size
 {
-    static const float padding = 4.0;
-    self = [self initWithFrame:CGRectMake(0.0, 0.0, width, 0.0)];
-    UIView *agreeView = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, kSentimentLength, kSentimentLength)];
-    agreeView.layer.cornerRadius = CGRectGetWidth(agreeView.bounds) / 2.0;
-    agreeView.layer.borderColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96/255.0) alpha:1.0].CGColor;
-    agreeView.layer.borderWidth = 2.0;
-    
-    UIView *disagreeView = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, kSentimentLength, kSentimentLength)];
-    disagreeView.layer.cornerRadius = CGRectGetWidth(disagreeView.bounds) / 2.0;
-    disagreeView.layer.borderColor = [UIColor colorWithRed:(204.0/255.0) green:(76.0/255.0) blue:(69/255.0) alpha:1.0].CGColor;
-    disagreeView.layer.borderWidth = 2.0;
+    self = [self initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
 
-    [self addSubview:agreeView];
-    [self addSubview:disagreeView];
-    [self setHeight:(kSentimentLength + padding)];
+    UILabel *agreeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
+    [self addSubview:agreeLabel];
+    agreeLabel.font = [UIFont fontWithName:@"Tisa Pro" size:36.0];
+    agreeLabel.text = @"1";
+    agreeLabel.textColor = [[BCGlobalsManager globalsManager] greenColor];
+    [agreeLabel sizeToFit];
     
-    [agreeView placeIn:self alignedAt:CENTER_RIGTH];
-    [disagreeView placeIn:self alignedAt:CENTER_LEFT];
+    UILabel *plusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
+    [agreeLabel addSubview:plusLabel];
+    plusLabel.font = [UIFont fontWithName:@"Tisa Pro" size:24.0];
+    plusLabel.text = @"+";
+    plusLabel.textColor = [[BCGlobalsManager globalsManager] greenColor];
+    [plusLabel sizeToFit];
+    
+    UILabel *disagreeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
+    [self addSubview:disagreeLabel];
+    disagreeLabel.font = [UIFont fontWithName:@"Tisa Pro" size:36.0];
+    disagreeLabel.text = @"1";
+    disagreeLabel.textColor = [[BCGlobalsManager globalsManager] redColor];
+    [disagreeLabel sizeToFit];
+    
+    UILabel *minusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
+    [disagreeLabel addSubview:minusLabel];
+    minusLabel.font = [UIFont fontWithName:@"Tisa Pro" size:24.0];
+    minusLabel.text = @"-";
+    minusLabel.textColor = [[BCGlobalsManager globalsManager] redColor];
+    [minusLabel sizeToFit];
+    
+    [agreeLabel placeIn:self alignedAt:CENTER_RIGTH];
+    [disagreeLabel placeIn:self alignedAt:CENTER_LEFT];
+    [plusLabel placeIn:agreeLabel alignedAt:CENTER];
+    [minusLabel placeIn:disagreeLabel alignedAt:CENTER];
+    
+    [plusLabel setX:-CGRectGetWidth(agreeLabel.bounds)];
+    [disagreeLabel setX:CGRectGetWidth(minusLabel.bounds)];
+    [minusLabel setX:-CGRectGetWidth(minusLabel.bounds)];
 
     return self;
 }
@@ -439,8 +459,7 @@ static BOOL isSwipeLocked = NO;
         [self updateVoteView];
     }
     self.backgroundColor = [UIColor whiteColor];
-    self.opaque = YES;
-
+    
     return self;
 }
 
@@ -500,40 +519,42 @@ static BOOL isSwipeLocked = NO;
     direction = [self getSwipeDirection:velocity];
     
     CGFloat finalX = 0.0;
-    if (velocity.x < -width) {
-        finalX = -width + cutOff;
-    } else if (velocity.x > width) {
-        finalX = width - 20.0;
+    if (fabsf(velocity.x) > width) {
+        finalX = (width - cutOff) * (velocity.x < 0.0 ? -1.0 : 1.0);
     } else {
         finalX = velocity.x;
     }
     
-    float duration = 0.8;
+    const float fullDuration = 0.6;
+    float duration = 0.0;
     if (fabs(velocity.x) > width) {
         overshot = YES;
-        duration = width / fabs(velocity.x) * 1.0;
+        duration = width / (fabs(velocity.x) * fullDuration);
     } else {
-        duration = 1.0 * fabs(velocity.x) / width;
+        duration = ((fabs(velocity.x) * fullDuration) / width) * fullDuration;
     }
 
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
 
         _isDragging = YES;
-        gesture.view.center = CGPointMake(gesture.view.center.x + delta.x, gesture.view.center.y);
-        [gesture setTranslation:CGPointZero inView:self.superview];
+        if (fabsf(gesture.view.frame.origin.x) >= (width - cutOff)) {
+            gesture.view.center = CGPointMake(gesture.view.center.x, gesture.view.center.y);
+            [gesture setTranslation:CGPointZero inView:self.superview];
+        } else {
+            gesture.view.center = CGPointMake(gesture.view.center.x + delta.x, gesture.view.center.y);
+            [gesture setTranslation:CGPointZero inView:self.superview];
+        }
     } else if (state == UIGestureRecognizerStateEnded || state == UIGestureRecognizerStateCancelled) {
         _isDragging = NO;
         isSwipeLocked = YES;
-        if (RIGHT_DIRECTION && gesture.view.frame.origin.x > threshhold) {
-            finalX = width - 20.0;
-            overshot = YES;
-        } else if (LEFT_DIRECTION && gesture.view.frame.origin.x + width <= threshhold) {
-            finalX = -width + cutOff;
+        if (fabsf(gesture.view.frame.origin.x) > threshhold) {
+            finalX = (width - cutOff) * (gesture.view.frame.origin.x < 0.0 ? -1.0 : 1.0);
             overshot = YES;
         } else {
-            //NSLog(@"the width = %f, and %f, and %f", width, gesture.view.frame.origin.x + width, gesture.view.frame.origin.x);
-            if (gesture.view.frame.origin.x < resistPan || gesture.view.frame.origin.x + width >= (width - resistPan)) {
+            // NOTE: Prevents inadvertent swipes
+            if (fabsf(gesture.view.frame.origin.x) < resistPan) {
                 finalX = 0.0;
+                isSwipeLocked = NO;
             }
         }
         [UIView animateWithDuration:duration delay:0.0 options: UIViewAnimationOptionCurveLinear
@@ -542,15 +563,19 @@ static BOOL isSwipeLocked = NO;
                          }
                          completion:^(BOOL finished) {
                              if (finalX) {
-                                 [self.delegate swipeReleaseAnimationBackComplete:self inDirection:direction];
-                             }
-                             [UIView animateWithDuration: overshot ? 0.7 : duration delay:0.0 options: UIViewAnimationOptionCurveLinear
-                                              animations:^{
-                                                  [gesture.view setX:0.0];
-                                              }
-                                              completion:^(BOOL finished) {
-                                                  isSwipeLocked = NO;
-                                              }];
+                                 [UIView animateWithDuration: overshot ? fullDuration : duration
+                                                       delay:0.0
+                                                     options: UIViewAnimationOptionCurveLinear
+                                                  animations:^{
+                                                      [gesture.view setX:0.0];
+                                                  }
+                                                  completion:^(BOOL finished) {
+                                                      isSwipeLocked = NO;
+                                                      if (overshot) {
+                                                          [self.delegate swipeReleaseAnimationBackComplete:self inDirection:direction];
+                                                      }
+                                }];
+                            }
                          }];
     }
 }
@@ -723,11 +748,10 @@ static BOOL isSwipeLocked = NO;
     } else {
         BCSecretModel *secretModel = [_messages objectAtIndex:indexPath.row - 1];
         float width = CGRectGetWidth(cell.bounds);
+        CGSize size = (CGSize){width, CGRectGetHeight(cell.contentView.bounds)};
+        BCCellBottomLayerContainerView *bcv = [[BCCellBottomLayerContainerView alloc] init:size];
+        BCCellTopLayerContainerView *cv = [[BCCellTopLayerContainerView alloc] init:secretModel withSize:size];
         
-        BCCellBottomLayerContainerView *bcv = [[BCCellBottomLayerContainerView alloc] init:width];
-        BCCellTopLayerContainerView *cv = [[BCCellTopLayerContainerView alloc] init:secretModel
-                                                                           withSize:(CGSize){width,
-                                                                               CGRectGetHeight(cell.contentView.bounds)}];
         cv.delegate = self;
         [cv addSwipes];
         [cell.contentView addSubview:bcv];
@@ -855,7 +879,6 @@ static BOOL isSwipeLocked = NO;
         if (finished) {
             [self addNewSecretToStream];
         } else {
-            NSLog(@"NOW HERE");
             //[ccv.publishMeter setX:-CGRectGetWidth([UIScreen mainScreen].bounds)];
         }
     }];
@@ -867,18 +890,15 @@ static BOOL isSwipeLocked = NO;
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
-    //NSLog(@"the publish meter x = %f", ccv.publishMeter.bounds.origin.x);
-    CALayer *layer = ccv.publishMeter.layer.presentationLayer;
-    NSLog(@"the publish meter layer x = %f", CGRectGetMaxX(layer.frame));
+    CALayer *layer = ccv.publishMeter.layer.presentationLayer; // not entirely sure why I need to pick x out of this layer
     float maxX = CGRectGetMaxX(layer.frame);
-    CGRect layerFrame = layer.frame;
-    layerFrame.origin.x = layer.frame.origin.x;
-    layer.frame = layerFrame;
+    CGRect layerFrame = ccv.publishMeter.layer.frame;
+    layerFrame.origin.x = CGRectGetMinX(layer.frame);
+    ccv.publishMeter.layer.frame = layerFrame;
 
     [ccv.publishMeter.layer removeAllAnimations];
     
     float duration = kPublishPushDuration * (maxX / CGRectGetWidth([UIScreen mainScreen].bounds));
-    NSLog(@"Got a duration = %f, %f, %f", duration, maxX, CGRectGetWidth([UIScreen mainScreen].bounds));
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
         [ccv.publishMeter setX:-CGRectGetWidth([UIScreen mainScreen].bounds)];
     } completion:^(BOOL finished) {
@@ -925,7 +945,7 @@ static BOOL isSwipeLocked = NO;
     if (indexPath.row != 0 || _isComposeMode) {
         return;
     }
-  
+
     [collectionView performBatchUpdates:^{
         [self setupCompose:collectionView indexPath:indexPath];
     } completion:^(BOOL finished) {
@@ -951,11 +971,11 @@ static BOOL isSwipeLocked = NO;
     }
     
     if (direction == LEFT_DIRECTION) {
-        secretModel.disagrees++;
-        secretModel.vote = VOTE_DISAGREE;
-    } else if (direction == RIGHT_DIRECTION) {
         secretModel.agrees++;
         secretModel.vote = VOTE_AGREE;
+    } else if (direction == RIGHT_DIRECTION) {
+        secretModel.disagrees++;
+        secretModel.vote = VOTE_DISAGREE;
     }
     // NOTE: Write to server
     //

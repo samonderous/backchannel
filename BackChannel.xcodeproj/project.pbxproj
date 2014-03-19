@@ -52,6 +52,8 @@
 		C14C9D9E18D0F24300A79BFD /* BCAPIClient.m in Sources */ = {isa = PBXBuildFile; fileRef = C14C9D9D18D0F24300A79BFD /* BCAPIClient.m */; };
 		C14C9DA418D13C9800A79BFD /* AFNetworkActivityLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = C14C9DA318D13C9800A79BFD /* AFNetworkActivityLogger.m */; };
 		C14C9DA718D194CD00A79BFD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C14C9DA618D194CD00A79BFD /* QuartzCore.framework */; };
+		C14C9DAD18D3CD5500A79BFD /* envelope.png in Resources */ = {isa = PBXBuildFile; fileRef = C14C9DAB18D3CD5500A79BFD /* envelope.png */; };
+		C14C9DAE18D3CD5500A79BFD /* envelope@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C14C9DAC18D3CD5500A79BFD /* envelope@2x.png */; };
 		C1F0C31218C51C5500009BDD /* BCGlobalsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */; };
 		C1F5B74118CBC6E600D3FD32 /* BCAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5B74018CBC6E600D3FD32 /* BCAuthViewController.m */; };
 		C1F5B74418CBC6FE00D3FD32 /* BCVerificationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5B74318CBC6FE00D3FD32 /* BCVerificationViewController.m */; };
@@ -151,6 +153,8 @@
 		C14C9DA218D13C9800A79BFD /* AFNetworkActivityLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFNetworkActivityLogger.h; sourceTree = "<group>"; };
 		C14C9DA318D13C9800A79BFD /* AFNetworkActivityLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFNetworkActivityLogger.m; sourceTree = "<group>"; };
 		C14C9DA618D194CD00A79BFD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		C14C9DAB18D3CD5500A79BFD /* envelope.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = envelope.png; sourceTree = "<group>"; };
+		C14C9DAC18D3CD5500A79BFD /* envelope@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "envelope@2x.png"; sourceTree = "<group>"; };
 		C1F0C31018C51C5500009BDD /* BCGlobalsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BCGlobalsManager.h; sourceTree = "<group>"; };
 		C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BCGlobalsManager.m; sourceTree = "<group>"; };
 		C1F0C31418C68A2600009BDD /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
@@ -188,6 +192,8 @@
 		C100166E18BD4D4000347A31 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C14C9DAB18D3CD5500A79BFD /* envelope.png */,
+				C14C9DAC18D3CD5500A79BFD /* envelope@2x.png */,
 				C14C9D6018CF8EF300A79BFD /* verify_asset.png */,
 				C100166F18BD4D4C00347A31 /* TisaPro.otf */,
 			);
@@ -440,6 +446,9 @@
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = "Saureen Shah";
 				TargetAttributes = {
+					C1316DD718B3F741005A85B8 = {
+						DevelopmentTeam = E4K95C67LT;
+					};
 					C1316DFB18B3F741005A85B8 = {
 						TestTargetID = C1316DD718B3F741005A85B8;
 					};
@@ -471,9 +480,11 @@
 			files = (
 				C1F6D21418C6B94200498506 /* TisaPro.otf in Resources */,
 				C14C9D6118CF8EF300A79BFD /* verify_asset.png in Resources */,
+				C14C9DAE18D3CD5500A79BFD /* envelope@2x.png in Resources */,
 				C1316DF218B3F741005A85B8 /* Main_iPad.storyboard in Resources */,
 				C1316DF718B3F741005A85B8 /* Images.xcassets in Resources */,
 				C1316DEF18B3F741005A85B8 /* Main_iPhone.storyboard in Resources */,
+				C14C9DAD18D3CD5500A79BFD /* envelope.png in Resources */,
 				C1316DE618B3F741005A85B8 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -663,10 +674,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BackChannel/BackChannel-Prefix.pch";
 				INFOPLIST_FILE = "BackChannel/BackChannel-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -676,10 +690,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BackChannel/BackChannel-Prefix.pch";
 				INFOPLIST_FILE = "BackChannel/BackChannel-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

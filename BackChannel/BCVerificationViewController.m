@@ -9,10 +9,13 @@
 #import "BCVerificationViewController.h"
 #import "BCGlobalsManager.h"
 #import "BCStreamViewController.h"
+#import "BCAPIClient.h"
 
 #import "TTTAttributedLabel.h"
 
 static const float kButtonHeight = 60.0;
+static const float kAssetTopMargin = 80.0 + 44.0;
+static const float kGreatLabelMargin = 40.0;
 
 @interface BCVerificationView : UIView
 @end
@@ -30,11 +33,12 @@ static const float kButtonHeight = 60.0;
 {
     self = [super initWithFrame:[UIScreen mainScreen].applicationFrame];
     
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:20.0];
+    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:kTitleFontSize];
     UIColor *fontColor = [[BCGlobalsManager globalsManager] blueColor];
     NSAttributedString *titleAttributedString = [[NSMutableAttributedString alloc]
                                                  initWithString:[NSString stringWithFormat:@"Backchannel"]
-                                                 attributes:@{NSFontAttributeName:font, NSForegroundColorAttributeName: fontColor}];
+                                                 attributes:@{NSFontAttributeName:font,
+                                                              NSForegroundColorAttributeName: fontColor}];
     
     CGRect titleRect = [titleAttributedString boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX}
                                                            options:NSStringDrawingUsesLineFragmentOrigin
@@ -59,7 +63,7 @@ static const float kButtonHeight = 60.0;
     _openMailButton.backgroundColor = [[BCGlobalsManager globalsManager] blueBackgroundColor];
     _resendEmailButton.backgroundColor = [[BCGlobalsManager globalsManager] creamBackgroundColor];
     
-    UIFont *openFont = [UIFont fontWithName:@"Tisa Pro" size:16.0];
+    UIFont *openFont = [UIFont fontWithName:@"Tisa Pro" size:18.0];
     UIColor *openFontColor = [[BCGlobalsManager globalsManager] blueColor];
     NSMutableAttributedString *openAttributedString = [[NSMutableAttributedString alloc]
                                                        initWithString:@"Open Mail"
@@ -76,7 +80,7 @@ static const float kButtonHeight = 60.0;
     
     [_openMailButton addSubview:openLabel];
     
-    UIFont *resendFont = [UIFont fontWithName:@"Tisa Pro" size:16.0];
+    UIFont *resendFont = [UIFont fontWithName:@"Tisa Pro" size:18.0];
     UIColor *resendFontColor = [[BCGlobalsManager globalsManager] creamColor];
     NSMutableAttributedString *resendAttributedString = [[NSMutableAttributedString alloc]
                                                          initWithString:@"Resend email"
@@ -99,19 +103,23 @@ static const float kButtonHeight = 60.0;
     [_resendEmailButton placeIn:self alignedAt:BOTTOM];
     [_openMailButton setY:CGRectGetMinY(_resendEmailButton.frame) - kButtonHeight];
     
-    // NOTE: Remove code, just placeholder for now
-    UIImage *image = [UIImage imageNamed:@"verify_asset.png"];
-    CGSize newSize = (CGSize){200.0, 200.0};
-    UIGraphicsBeginImageContext(newSize);
-    [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
-    UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    _verifyView = [[UIImageView alloc] initWithImage:newImage];
+    UIImage *image = [UIImage imageNamed:@"envelope.png"];
+    _verifyView = [[UIImageView alloc] initWithImage:image];
     [self addSubview:_verifyView];
     [_verifyView placeIn:self alignedAt:CENTER];
-    [_verifyView setY:CGRectGetMinY(_verifyView.frame) - 50.0];
-    // Placeholder End //
+    [_verifyView setY:kAssetTopMargin];
+
+    NSString *greatLabelString = @"Great! Check your email for an access link.";
+    TTTAttributedLabel *greatLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, CGFLOAT_MAX)];
+    [self addSubview:greatLabel];
+
+    greatLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
+    greatLabel.numberOfLines = 0;
+    greatLabel.textAlignment = NSTextAlignmentCenter;
+    greatLabel.text = greatLabelString;
+    [greatLabel sizeToFit];
+    [greatLabel placeIn:self alignedAt:CENTER];
+    [greatLabel setY:CGRectGetMaxY(_verifyView.frame) + kGreatLabelMargin];
     
     self.backgroundColor = [UIColor whiteColor];
     
@@ -147,19 +155,21 @@ static const float kButtonHeight = 60.0;
 - (void)openMailTap:(UITapGestureRecognizer*)gesture
 {
     NSLog(@"Deep link to Mail.app");
+    [[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"message:DUMMY"]];
 }
 
 - (void)resendEmailTap:(UITapGestureRecognizer*)gesture
 {
-    // NOTE: Write to server
-    //
+    SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"Resending email verification success");
+    };
     
-    BCStreamViewController *vc = [[BCStreamViewController alloc] init];
-    UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
-    vc.title = @"Backchannel";
-    vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-    [self presentViewController:nc animated:YES completion:^() {
-    }];
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error: %@", error);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
+    };
+    
+    [[BCAPIClient sharedClient] sendVerificationEmail:success failure:failure];
 }
 
 - (void)viewDidLoad

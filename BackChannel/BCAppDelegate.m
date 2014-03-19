@@ -8,6 +8,8 @@
 
 #import "BCAppDelegate.h"
 #import "BCGlobalsManager.h"
+#import "BCViewController.h"
+#import "BCStreamViewController.h"
 
 #import "AFNetworkActivityLogger.h"
 
@@ -18,9 +20,31 @@
     return (BCAppDelegate*)[[UIApplication sharedApplication] delegate];
 }
 
+- (NSDictionary *)parseQueryString:(NSString *)query {
+    NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:6];
+    NSArray *pairs = [query componentsSeparatedByString:@"&"];
+    
+    for (NSString *pair in pairs) {
+        NSArray *elements = [pair componentsSeparatedByString:@"="];
+        NSString *key = [[elements objectAtIndex:0] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        NSString *val = [[elements objectAtIndex:1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        
+        [dict setObject:val forKey:key];
+    }
+    return dict;
+}
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    UIViewController *vc = [BCViewController setVerifiedAndTransition];
+    self.window.rootViewController = vc;
+
+    return YES;
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    [[AFNetworkActivityLogger sharedLogger] startLogging];
+    //[[AFNetworkActivityLogger sharedLogger] startLogging];
     [[BCGlobalsManager globalsManager] loadConfig];
     // Override point for customization after application launch.
     return YES;

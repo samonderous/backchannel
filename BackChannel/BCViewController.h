@@ -9,4 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface BCViewController : UIViewController
+
++ (UIViewController*)setVerifiedAndTransition;
 @end

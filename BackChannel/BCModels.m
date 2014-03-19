@@ -1,5 +1,5 @@
 //
-//  FUPModels.m
+//  BCModels.m
 //  BackChannel
 //
 //  Created by Saureen Shah on 1/15/14.

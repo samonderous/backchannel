@@ -11,7 +11,10 @@
 
 extern const float kKeyboardHeight;
 extern const float kTitleTopMargin;
-
+extern const float kTitleFontSize;
+extern NSString *kUdidKey;
+extern NSString *kVerifiedKey;
+extern NSString *kEmailKey;
 
 @interface BCGlobalsManager : NSObject
 @property (strong, nonatomic) UIColor *blueColor;
@@ -29,6 +32,7 @@ extern const float kTitleTopMargin;
 @property (strong, nonatomic) UIColor *emptyPostCellColor;
 @property (strong, nonatomic) UIColor *blackDividerColor;
 @property (strong, nonatomic) UIColor *blackTimestampColor;
+
 
 + (id)globalsManager;
 - (void)loadConfig;
