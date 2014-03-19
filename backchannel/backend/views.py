@@ -41,15 +41,16 @@ def auth(request):
         domain = email.split('@')[1]
         if not domain or domain not in ORG_DOMAIN_LIST:
             raise
-        print "HELLO NOW HERE"
-        send_email.send_verify_email()
+        send_email.send_verify_email(email)
     except Exception, e:
         print "%s" % e
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
-    response = {'status': 0, 'domain': domain}
+    response = {'status': 0, 'email': email}
     return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
+def verify(request):
+    return render_to_response('verify.html', {})
 
 def vote(request):
     return HttpResponse("vote")
@@ -58,6 +59,15 @@ def stream(request):
     return HttpResponse("stream")
 
 def resendemail(request):
-    return HttpResponse("resendemail")
+    email = request.GET.get('email')
+    print "Need to resend email to %s" % email
+    try:
+        send_email.send_verify_email(email)
+    except Exception, e:
+        response = {'status': 1}
+        return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
+    response = {'status': 0}
+    return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
 
