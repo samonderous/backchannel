@@ -10,6 +10,10 @@
 
 const float kKeyboardHeight = 216.0;
 const float kTitleTopMargin = 30.0;
+const float kTitleFontSize = 23.0;
+NSString *kUdidKey = @"udid";
+NSString *kVerifiedKey = @"verified";
+NSString *kEmailKey = @"email";
 
 @implementation BCGlobalsManager
 
@@ -41,7 +45,6 @@ const float kTitleTopMargin = 30.0;
     _composeFont = [UIFont fontWithName:@"Tisa Pro" size:19];
     _blackDividerColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.1];
     _blackTimestampColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.4];
-
 }
 
 @end

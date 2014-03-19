@@ -1,5 +1,5 @@
 //
-//  FUPModels.h
+//  BCModels.h
 //  BackChannel
 //
 //  Created by Saureen Shah on 1/15/14.
@@ -13,8 +13,10 @@ typedef enum Vote {
     VOTE_AGREE,
     VOTE_DISAGREE
 } Vote;
+
 @interface BCSecretModel : NSObject
 
+@property (assign) NSUInteger sid;
 @property (strong, nonatomic) NSString *text;
 @property (assign) NSInteger time;
 @property (assign) int agrees;

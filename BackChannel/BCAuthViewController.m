@@ -16,6 +16,7 @@
 static const float kJoinBarHeight = 60.0;
 static const float kEmailMargin = 30.0;
 
+
 @interface BCAuthView : UIView
 @end
 
@@ -26,6 +27,7 @@ static const float kEmailMargin = 30.0;
 @property (strong, nonatomic) TTTAttributedLabel *errorText;
 @property (strong, nonatomic, getter = getJoinBar) UIView *joinBar;
 @property (strong, nonatomic) TTTAttributedLabel *joinLabel;
+@property (assign, getter = hasErrors) BOOL hasErrors;
 @end
 
 @implementation BCAuthView
@@ -36,7 +38,7 @@ static const float kEmailMargin = 30.0;
                                            CGRectGetMinY([UIScreen mainScreen].applicationFrame),
                                            CGRectGetWidth([UIScreen mainScreen].bounds),
                                            CGRectGetHeight([UIScreen mainScreen].applicationFrame) - kKeyboardHeight)];
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:20.0];
+    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:kTitleFontSize];
     UIColor *fontColor = [[BCGlobalsManager globalsManager] blueColor];
     NSAttributedString *titleAttributedString = [[NSMutableAttributedString alloc]
                                                  initWithString:[NSString stringWithFormat:@"Backchannel"]
@@ -124,6 +126,20 @@ static const float kEmailMargin = 30.0;
     [super layoutSubviews];
 }
 
+- (void)removeError
+{
+    _errorText.alpha = 0.0;
+    _divider.backgroundColor = [[BCGlobalsManager globalsManager] blackDividerColor];
+    _hasErrors = NO;
+}
+
+- (void)showError
+{
+    _errorText.alpha = 1.0;
+    _divider.backgroundColor = [[BCGlobalsManager globalsManager] redColor];
+    _hasErrors = YES;
+}
+
 - (void)updateEmail:(int)persons withError:(BOOL)isError
 {
     UIFont *joinFont = [UIFont fontWithName:@"Tisa Pro" size:16.0];
@@ -145,7 +161,7 @@ static const float kEmailMargin = 30.0;
     [_joinLabel placeIn:_joinBar alignedAt:CENTER];
     
     if (isError) {
-        _errorText.alpha = 1.0;
+        [self showError];
     }
 }
 
@@ -181,28 +197,33 @@ static const float kEmailMargin = 30.0;
     
     // NOTE: Write to server
     //
-    
-    SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject){
-        NSLog(@"GOT A SUCCESS");
-        BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
-        vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-        [self presentViewController:vc animated:YES completion:^() {
-        }];
+    int persons = 18;
+    SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
+        int status = (int)[responseObject[@"status"] integerValue];
+        if (status == 1) {
+            [_av updateEmail:persons withError:YES];
+        } else {
+            NSString *udid = [[UIDevice currentDevice].identifierForVendor UUIDString];
+            NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+            
+            NSString *email = (NSString*)responseObject[@"email"];
+            [defaults setObject:email forKey:kEmailKey];
+            [defaults setObject:udid forKey:kUdidKey];
+            [defaults setObject:@"NO" forKey:kVerifiedKey];
+            [defaults synchronize];
+            BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
+            vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+            [_av updateEmail:persons withError:NO];
+            [self presentViewController:vc animated:YES completion:^() {}];
+        }
     };
     
     FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"Error: %@", error);
-        NSLog(@"error code %ld", operation.response.statusCode);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
     };
     
-    //[[BCAPIClient sharedClient] sendAuth:_av.email.text success:success failure:failure];
-    
-    int persons = 18;
-    [_av updateEmail:persons withError:YES];
-    BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
-    vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-    [self presentViewController:vc animated:YES completion:^() {
-    }];
+    [[BCAPIClient sharedClient] sendAuth:_av.email.text success:success failure:failure];
 }
 
 - (void)viewDidLoad
@@ -210,6 +231,7 @@ static const float kEmailMargin = 30.0;
     [super viewDidLoad];
     [_av.getEmail setKeyboardType:UIKeyboardTypeEmailAddress];
     [_av.getEmail becomeFirstResponder];
+    _av.getEmail.delegate = self;
     
 	// Do any additional setup after loading the view.
     UIView *joinBar = _av.getJoinBar;
@@ -221,6 +243,16 @@ static const float kEmailMargin = 30.0;
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma UITextField Delegate
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    if (_av.hasErrors) {
+        [_av removeError];
+    }
+    
+    return YES;
 }
 
 @end
