@@ -9,6 +9,8 @@
 #import "BCAppDelegate.h"
 #import "BCGlobalsManager.h"
 
+#import "AFNetworkActivityLogger.h"
+
 @implementation BCAppDelegate
 
 + (BCAppDelegate*)sharedAppDelegate
@@ -18,6 +20,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    [[AFNetworkActivityLogger sharedLogger] startLogging];
     [[BCGlobalsManager globalsManager] loadConfig];
     // Override point for customization after application launch.
     return YES;

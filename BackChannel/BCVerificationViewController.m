@@ -151,6 +151,9 @@ static const float kButtonHeight = 60.0;
 
 - (void)resendEmailTap:(UITapGestureRecognizer*)gesture
 {
+    // NOTE: Write to server
+    //
+    
     BCStreamViewController *vc = [[BCStreamViewController alloc] init];
     UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
     vc.title = @"Backchannel";

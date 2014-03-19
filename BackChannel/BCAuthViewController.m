@@ -11,6 +11,7 @@
 #import "BCAuthViewController.h"
 #import "BCGlobalsManager.h"
 #import "BCVerificationViewController.h"
+#import "BCAPIClient.h"
 
 static const float kJoinBarHeight = 60.0;
 static const float kEmailMargin = 30.0;
@@ -67,6 +68,7 @@ static const float kEmailMargin = 30.0;
                                                            emailRect.size.height + 10.0)];
     [self addSubview:_email];
     _email.attributedText = emailAttributedString;
+    _email.placeholder = @"Enter corporate email";
     _email.font = emailFont;
     [_email placeIn:self alignedAt:CENTER];
     
@@ -176,9 +178,27 @@ static const float kEmailMargin = 30.0;
 
 - (void)joinTapped:(UITapGestureRecognizer*)gesture
 {
+    
+    // NOTE: Write to server
+    //
+    
+    SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject){
+        NSLog(@"GOT A SUCCESS");
+        BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
+        vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+        [self presentViewController:vc animated:YES completion:^() {
+        }];
+    };
+    
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error: %@", error);
+        NSLog(@"error code %ld", operation.response.statusCode);
+    };
+    
+    //[[BCAPIClient sharedClient] sendAuth:_av.email.text success:success failure:failure];
+    
     int persons = 18;
     [_av updateEmail:persons withError:YES];
-    
     BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
     vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
     [self presentViewController:vc animated:YES completion:^() {
