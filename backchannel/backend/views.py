@@ -5,6 +5,7 @@ import simplejson
 import pytz
 import random
 import ordereddict
+import string
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse, HttpResponseNotFound, QueryDict, HttpResponseRedirect
@@ -13,6 +14,7 @@ from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import csrf_exempt
 
 from backend import send_email
+from backend.models import *
 
 try:
         logging.basicConfig(
@@ -25,13 +27,6 @@ except:
 
 # Create your views here.
 
-ORG_DOMAIN_LIST = [
-    'google.com',
-    'hightail.com',
-    'gmail.com',
-]
-
-
 @csrf_exempt
 def auth(request):
     response = {'status': 1, 'domain': ''}
@@ -39,7 +34,8 @@ def auth(request):
     domain = ''
     try:
         domain = email.split('@')[1]
-        if not domain or domain not in ORG_DOMAIN_LIST:
+        domains = Org.objects.values_list('domain', flat=True).all()
+        if not domain or domain not in domains:
             raise
         send_email.send_verify_email(email)
     except Exception, e:
@@ -49,14 +45,137 @@ def auth(request):
     response = {'status': 0, 'email': email}
     return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
+@csrf_exempt
 def verify(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        udid = request.POST.get('udid')
+
+        try:
+            user = User.objects.get(udid=udid)
+            response = {'status': 0}
+            return HttpResponse(simplejson.dumps(response), content_type="application/json")
+        except Exception, e:
+            pass
+
+        user = User()
+        user.udid = udid
+        user.email = string.lower(email)
+        domain = email.split('@')[1]
+        org = Org.objects.get(domain=domain)
+        user.org = org
+        user.save()
+        response = {'status': 0}
+        return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
     return render_to_response('verify.html', {})
 
+@csrf_exempt
 def vote(request):
-    return HttpResponse("vote")
+
+    response = {'status': 1}
+    if request.method != "POST":
+        return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
+    udid = request.POST.get('udid')
+    vote = request.POST.get('vote')
+    sid = request.POST.get('sid')
+
+    user = User.objects.get(udid=udid)
+    secret = Secret.objects.get(id=sid)
+    us = UserSecret()
+    us.user = user
+    us.secret = secret
+    if vote == 'agree':
+        us.vote = UserSecret.VOTE_AGREE
+        secret.agrees += 1
+    else:
+        us.vote = UserSecret.VOTE_DISAGREE
+        secret.disagrees += 1
+    us.save() 
+    secret.save()
+
+    response = {'status': 0}
+    return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
+@csrf_exempt
+def createsecret(request):
+    response = {'status': 1}
+    if request.method != "POST":
+        return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
+    udid = request.POST.get('udid')
+    text = request.POST.get('text')
+
+    try:
+        user = User.objects.get(udid=udid)
+    except Exception, e:
+        return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
+    secret = Secret()
+    secret.secrettext = text
+    secret.time_created = int(time.time())
+    secret.user = user
+    secret.org = user.org
+    secret.agrees = 0
+    secret.disagrees = 0
+
+    secret.save()
+ 
+    response = {'status': 0, 'sid': secret.id}
+    return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
 def stream(request):
-    return HttpResponse("stream")
+
+    def _time_str(time_delta):
+        time_str = ""
+        if time_delta <= 10:
+            time_str = "few seconds ago"
+        elif time_delta > 10 and time_delta < 60:
+            time_str = "%ss" % time_delta
+        elif time_delta >= 60 and time_delta < 3600:
+            time_str = "%sm" % (time_delta / 60)
+        elif time_delta >= 3600 and time_delta < 86400:
+            time_str = "%sh" % (time_delta / 60 / 60)
+        else:
+            time_str = "a few days ago"
+
+        return time_str
+
+    response = {'status': 1}
+    udid = request.GET.get('udid')
+    
+    try:
+        user = User.objects.get(udid=udid)
+    except Exception, e:
+        return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
+    secrets = Secret.objects.filter(org=user.org).reverse()
+
+    secrets_list = []
+
+    for s in secrets:
+        try:
+            us = UserSecret.objects.get(secret=s, user=user)
+            vote = us.vote
+        except Exception, e:
+            vote = UserSecret.VOTE_NONE
+
+        time_ago = int(time.time()) - s.time_created
+        secret_dict = {
+            'sid': s.id,
+            'secrettext': s.secrettext,
+            'time_created': s.time_created,
+            'time_ago': _time_str(time_ago),
+            'agrees': s.agrees,
+            'disagrees': s.disagrees,
+            'vote': vote
+        }
+        secrets_list.append(secret_dict)
+
+    response = {'status': 0, 'secrets': secrets_list}
+    return HttpResponse(simplejson.dumps(response), content_type="application/json")
+    
 
 def resendemail(request):
     email = request.GET.get('email')
