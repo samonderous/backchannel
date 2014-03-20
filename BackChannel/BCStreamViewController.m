@@ -493,39 +493,25 @@ static BOOL isSwipeLocked = NO;
         return;
     }
 
-    BOOL overshot = NO;
+    CGFloat width = CGRectGetWidth(gesture.view.bounds);
     float threshhold = CGRectGetWidth(gesture.view.bounds) / 2.0;
-    static const float cutOff = 40.0;
-    static const float resistPan = 5.0;
+    static const float cutOffPercentage = 0.7;
+    static const float resistPan = 10.0;
+    const float fullDuration = 0.7;
+    float totalSwipeDistance = width * cutOffPercentage;
     
     UIGestureRecognizerState state = gesture.state;
-    CGFloat width = CGRectGetWidth(gesture.view.bounds);
     CGPoint delta = [gesture translationInView:gesture.view.superview];
     CGPoint velocity = [gesture velocityInView:gesture.view.superview];
     Direction direction;
   
     direction = [self getSwipeDirection:velocity];
     
-    CGFloat finalX = 0.0;
-    if (fabsf(velocity.x) > width) {
-        finalX = (width - cutOff) * (velocity.x < 0.0 ? -1.0 : 1.0);
-    } else {
-        finalX = velocity.x;
-    }
     
-    const float fullDuration = 0.6;
-    float duration = 0.0;
-    if (fabs(velocity.x) > width) {
-        overshot = YES;
-        duration = width / (fabs(velocity.x) * fullDuration);
-    } else {
-        duration = ((fabs(velocity.x) * fullDuration) / width) * fullDuration;
-    }
-
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
-
         _isDragging = YES;
-        if (fabsf(gesture.view.frame.origin.x) >= (width - cutOff)) {
+        
+        if (fabsf(gesture.view.frame.origin.x) >= totalSwipeDistance) {
             gesture.view.center = CGPointMake(gesture.view.center.x, gesture.view.center.y);
             [gesture setTranslation:CGPointZero inView:self.superview];
         } else {
@@ -534,37 +520,34 @@ static BOOL isSwipeLocked = NO;
         }
     } else if (state == UIGestureRecognizerStateEnded || state == UIGestureRecognizerStateCancelled) {
         _isDragging = NO;
-        isSwipeLocked = YES;
-        if (fabsf(gesture.view.frame.origin.x) > threshhold) {
-            finalX = (width - cutOff) * (gesture.view.frame.origin.x < 0.0 ? -1.0 : 1.0);
-            overshot = YES;
+        
+        float finalX = 0.0;
+        float duration = 0.0;
+        if (fabsf(gesture.view.frame.origin.x) < resistPan) {
+            finalX = 0.0;
+        } else if (fabsf(gesture.view.frame.origin.x) > threshhold || fabsf(velocity.x) > 1000.0) {
+            finalX = (width * cutOffPercentage) * (gesture.view.frame.origin.x < 0.0 ? -1.0 : 1.0);
+            duration = fullDuration * ((fabsf(finalX - gesture.view.frame.origin.x) / totalSwipeDistance));
         } else {
-            // NOTE: Prevents inadvertent swipes
-            if (fabsf(gesture.view.frame.origin.x) < resistPan) {
-                finalX = 0.0;
-                isSwipeLocked = NO;
-            }
+            duration = fullDuration * ((fabsf(finalX - gesture.view.frame.origin.x) / totalSwipeDistance));
         }
+
         [UIView animateWithDuration:duration delay:0.0 options: UIViewAnimationOptionCurveLinear
                          animations:^{
                              [gesture.view setX:finalX];
                          }
                          completion:^(BOOL finished) {
-                             if (finalX) {
-                                 [UIView animateWithDuration: overshot ? fullDuration : duration
-                                                       delay:0.0
-                                                     options: UIViewAnimationOptionCurveLinear
-                                                  animations:^{
-                                                      [gesture.view setX:0.0];
-                                                  }
-                                                  completion:^(BOOL finished) {
-                                                      isSwipeLocked = NO;
-                                                      if (overshot) {
-                                                          [self.delegate swipeReleaseAnimationBackComplete:self inDirection:direction];
-                                                      }
-                                }];
-                            }
-                         }];
+                            // Slide back to origin
+                             [UIView animateWithDuration:(fullDuration * (fabsf(gesture.view.frame.origin.x) / totalSwipeDistance))
+                                                  delay:0.0
+                                                options: UIViewAnimationOptionCurveLinear
+                                             animations:^{
+                                                 [gesture.view setX:0.0];
+                                             }
+                                             completion:^(BOOL finished) {
+                                                 [self.delegate swipeReleaseAnimationBackComplete:self inDirection: direction];
+                                             }];
+        }];
     }
 }
 
@@ -584,6 +567,7 @@ static BOOL isSwipeLocked = NO;
 @property (strong, nonatomic) NSMutableArray *messages;
 @property (assign) BOOL isSwipeLock;
 @property (assign) BOOL isComposeMode;
+@property (strong, nonatomic) UIRefreshControl *refreshControl;
 @end
 
 @implementation BCStreamViewController
@@ -656,6 +640,24 @@ static BOOL isSwipeLocked = NO;
                                                                       NSFontAttributeName: [UIFont fontWithName:@"Tisa Pro" size:18.0]}];
 }
 
+- (void)refreshSecrets
+{
+    void (^success)(NSMutableArray*) = ^(NSMutableArray *secrets) {
+        NSLog(@"Get stream success");
+        _messages = secrets;
+        [_messageTable reloadData];
+        [_refreshControl endRefreshing];
+    };
+    
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error in get stream: %@", error);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
+        [_refreshControl endRefreshing];
+    };
+    
+    [[BCAPIClient sharedClient] getStream:success failure:failure];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -672,25 +674,19 @@ static BOOL isSwipeLocked = NO;
 
     [BCCellTopLayerContainerView setSwipeLocked:NO];
 
+    _refreshControl = [[UIRefreshControl alloc] init];
+    [_refreshControl addTarget:self action:@selector(refreshSecrets)
+             forControlEvents:UIControlEventValueChanged];
+    [_messageTable addSubview:_refreshControl];
+    _messageTable.alwaysBounceVertical = YES;
+    
     [self setupStreamBar];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-
-    void (^success)(NSMutableArray*) = ^(NSMutableArray *secrets) {
-        NSLog(@"Get stream success");
-        _messages = secrets;
-        [_messageTable reloadData];
-    };
-    
-    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"Error in get stream: %@", error);
-        NSLog(@"error code %d", (int)operation.response.statusCode);
-    };
-    
-    [[BCAPIClient sharedClient] getStream:success failure:failure];
+    [self refreshSecrets];
 }
 
 - (void)didReceiveMemoryWarning
@@ -786,7 +782,7 @@ static BOOL isSwipeLocked = NO;
 {
     // This delegate gets called on init for some weird reason
     if (_messageTable.contentOffset.y > 0.0) {
-        [BCCellTopLayerContainerView setSwipeLocked:YES];
+        [BCCellTopLayerContainerView setSwipeLocked:NO];
     }
 }
 

@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BackChannel/BCStreamViewController.m"
-            timestampString = "416976161.08115"
+            timestampString = "417046110.54643"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "986"
-            endingLineNumber = "986"
+            startingLineNumber = "982"
+            endingLineNumber = "982"
             landmarkName = "-swipeReleaseAnimationBackComplete:inDirection:"
             landmarkType = "5">
          </BreakpointContent>
