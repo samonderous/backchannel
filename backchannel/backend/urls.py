@@ -10,9 +10,11 @@ urlpatterns = patterns('',
     # url(r'^$', 'backchannel.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
     url(r'^auth/', views.auth, name='auth'),
+    url(r'^verify/', views.verify, name='verify'),
     url(r'^vote/', views.vote, name='vote'),
     url(r'^stream/', views.stream, name='stream'),
     url(r'^resendemail/', views.resendemail, name='resendemail'),
+    url(r'^createsecret/', views.createsecret, name='createsecret'),
 )
 
 urlpatterns += staticfiles_urlpatterns()
