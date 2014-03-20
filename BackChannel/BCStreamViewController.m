@@ -19,12 +19,12 @@
 #import "BCModels.h"
 #import "BCGlobalsManager.h"
 #import "BCStreamCollectionViewCell.h"
+#import "BCAPIClient.h"
 
 static const float kCellHeight = 251.0f;
 static const float kSecretFontSize = 16.0;
 static const float kCellComposeHeight = 50.0f;
 static const float kHeaderFooterHeight = 30.0;
-static const float kSentimentLength = 40.0;
 static const float kRowSpacing = 0.0f;
 static const float kPublishBarHeight = 60.0;
 static const int kMaxCharCount = 140;
@@ -146,7 +146,6 @@ typedef enum Direction {
     [self addSubview:bar];
     [bar setY:CGRectGetMaxY(_textView.frame)];
     
-    self.opaque = YES;
     self.backgroundColor = [UIColor whiteColor];
     
     return self;
@@ -231,29 +230,16 @@ typedef enum Direction {
 - (id)initWithText:(BCSecretModel*)model withWidth:(float)width
 {
     self = [super init];
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
-    UIColor *fontColor = [UIColor blackColor];
-    
-    // NOTE: This code updates the text color. Commented out for now.
-    /*
-    if (model.vote == VOTE_AGREE) {
-        fontColor = [[BCGlobalsManager globalsManager] greenColor];
-    } else if (model.vote == VOTE_DISAGREE) {
-        fontColor = [[BCGlobalsManager globalsManager] redColor];
-    }
-    */
-    
-    NSAttributedString *attributedText = [[NSAttributedString alloc]
-                                          initWithString:model.text
-                                          attributes:@{ NSFontAttributeName:font, NSForegroundColorAttributeName: fontColor}];
-    CGRect rect = [BCCellTopLayerTextView getViewRect:width withText:model.text];
-    TTTAttributedLabel *textLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectZero];
-    textLabel.attributedText = attributedText;
-    textLabel.lineBreakMode = NSLineBreakByWordWrapping;
-    [textLabel setSize:rect.size];
+
+    UILabel *textLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    [textLabel setWidth:width];
     textLabel.numberOfLines = 0;
+    textLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];;
+    textLabel.text = model.text;
+    [textLabel sizeToFit];
     [self addSubview:textLabel];
-    [self setSizeWidth:width andHeight:CGRectGetHeight(rect)];
+    [self setSizeWidth:width andHeight:CGRectGetHeight(textLabel.bounds)];
+
     return self;
 }
 
@@ -286,7 +272,7 @@ typedef enum Direction {
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
     UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:12.0];
-    NSString *voteText = [NSString stringWithFormat:@"%d agrees \u00B7 %d disagrees", model.agrees, model.disagrees];
+    NSString *voteText = [NSString stringWithFormat:@"%d agrees \u00B7 %d disagrees", (int)model.agrees, (int)model.disagrees];
     NSRange range = [voteText rangeOfString:@"\u00B7"];
     NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc]
                                                  initWithString:voteText
@@ -375,7 +361,7 @@ typedef enum Direction {
     agreeLabel.text = @"1";
     agreeLabel.textColor = [[BCGlobalsManager globalsManager] greenColor];
     [agreeLabel sizeToFit];
-    
+    agreeLabel.clipsToBounds = NO;
     UILabel *plusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
     [agreeLabel addSubview:plusLabel];
     plusLabel.font = [UIFont fontWithName:@"Tisa Pro" size:24.0];
@@ -389,6 +375,7 @@ typedef enum Direction {
     disagreeLabel.text = @"1";
     disagreeLabel.textColor = [[BCGlobalsManager globalsManager] redColor];
     [disagreeLabel sizeToFit];
+    disagreeLabel.clipsToBounds = NO;
     
     UILabel *minusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
     [disagreeLabel addSubview:minusLabel];
@@ -455,7 +442,8 @@ static BOOL isSwipeLocked = NO;
     static const float margin = 10.0;
     [_footerView setY:(CGRectGetMaxY(_textView.frame) + margin)];
     
-    if (_secretModel.vote) {
+    
+    if (_secretModel.vote != VOTE_NONE) {
         [self updateVoteView];
     }
     self.backgroundColor = [UIColor whiteColor];
@@ -501,7 +489,7 @@ static BOOL isSwipeLocked = NO;
 
 - (void)handleSwipe:(UIPanGestureRecognizer*)gesture
 {
-    if (isSwipeLocked) {
+    if (isSwipeLocked || _secretModel.vote != VOTE_NONE) {
         return;
     }
 
@@ -626,24 +614,28 @@ static BOOL isSwipeLocked = NO;
     [self.view addSubview:_messageTable];
 }
 
-- (void)setupMessages
-{
-    BCSecretModel *s1 = [[BCSecretModel alloc] init:@"Vijay is a problem child and I'm really really pissed off at him because he does really terible work and this is a test to see how terrible he really is." withTime:0.0 withAgrees:0 withDisagree:0];
-    BCSecretModel *s2 = [[BCSecretModel alloc] init:@"VP of Product needs to go" withTime:0.0 withAgrees:1 withDisagree:0];
-    BCSecretModel *s3 = [[BCSecretModel alloc] init:@"Andrew Langer is a complete goofball" withTime:0.0 withAgrees:0 withDisagree:2];
-    BCSecretModel *s4 = [[BCSecretModel alloc] init:@"My manager should get fired" withTime:0.0 withAgrees:0 withDisagree:0];
-    BCSecretModel *s5 = [[BCSecretModel alloc] init:@"This dude who sits next to me keeps farting. He needs to stop that." withTime:0.0 withAgrees:12 withDisagree:2];
-
-    [_messages addObject:s1];
-    [_messages addObject:s2];
-    [_messages addObject:s3];
-    [_messages addObject:s4];
-    [_messages addObject:s5];
-}
-
 - (void)addSecret:(NSString*)text
 {
-    BCSecretModel *s = [[BCSecretModel alloc] init:text withTime:0.0 withAgrees:0 withDisagree:0];
+    __block BCSecretModel *s = [[BCSecretModel alloc] init:text
+                                                    withSid:(NSUInteger)0
+                                                   withTime:0.0
+                                                withTimeStr:@"now"
+                                                 withAgrees:0
+                                               withDisagree:0
+                                                   withVote:VOTE_NONE];
+
+    SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"Create success");
+        s.sid = (NSUInteger)responseObject[@"sid"];
+    };
+
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error in create: %@", error);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
+    };
+    
+    [[BCAPIClient sharedClient] createSecret:s.text success:success failure:failure];
+    
     [_messages insertObject:s atIndex:0];
 }
 
@@ -686,11 +678,19 @@ static BOOL isSwipeLocked = NO;
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+
+    void (^success)(NSMutableArray*) = ^(NSMutableArray *secrets) {
+        NSLog(@"Get stream success");
+        _messages = secrets;
+        [_messageTable reloadData];
+    };
     
-    // NOTE: Write to server
-    //
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error in get stream: %@", error);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
+    };
     
-    [self setupMessages];
+    [[BCAPIClient sharedClient] getStream:success failure:failure];
 }
 
 - (void)didReceiveMemoryWarning
@@ -845,10 +845,6 @@ static BOOL isSwipeLocked = NO;
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
     [self addSecret:ccv.textView.text];
     
-    // NOTE: Write to server
-    //
-    
-    
     [_messageTable performBatchUpdates:^{
         [_messageTable.collectionViewLayout invalidateLayout];
         [self removeCompose];
@@ -977,9 +973,18 @@ static BOOL isSwipeLocked = NO;
         secretModel.disagrees++;
         secretModel.vote = VOTE_DISAGREE;
     }
-    // NOTE: Write to server
-    //
+
+    SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"Vote success");
+    };
     
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error in vote: %@", error);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
+    };
+    
+    [[BCAPIClient sharedClient] setVote:secretModel withVote:secretModel.vote success:success failure:failure];
+
     [containerView updateVoteView];
 }
 

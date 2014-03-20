@@ -155,7 +155,16 @@ static const float kGreatLabelMargin = 40.0;
 - (void)openMailTap:(UITapGestureRecognizer*)gesture
 {
     NSLog(@"Deep link to Mail.app");
+    
+    #if TARGET_IPHONE_SIMULATOR
+    BCStreamViewController *vc = [[BCStreamViewController alloc] init];
+    vc.title = @"Backchannel";
+    UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
+    vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+    [self presentViewController:nc animated:YES completion:^() {}];
+    #else
     [[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"message:DUMMY"]];
+    #endif
 }
 
 - (void)resendEmailTap:(UITapGestureRecognizer*)gesture
