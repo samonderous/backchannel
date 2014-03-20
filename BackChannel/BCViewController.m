@@ -12,7 +12,7 @@
 #import "BCAuthViewController.h"
 #import "BCVerificationViewController.h"
 #import "BCGlobalsManager.h"
-
+#import "BCAPIClient.h"
 
 typedef enum TransitionType {
     TRANSITION_AUTH = 1,
@@ -54,10 +54,36 @@ typedef enum TransitionType {
     
     if ([verified isEqualToString:@"NO"]) {
         [defaults setObject:@"YES" forKey:kVerifiedKey];
-        BCStreamViewController *vc = [[BCStreamViewController alloc] init];
-        vc.title = @"Backchannel";
-        UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
-        return nc;
+        
+        __block BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
+        
+        SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
+            NSLog(@"Verified user success");
+            int status = (int)[responseObject[@"status"] integerValue];
+            if (status == 1) {
+                NSLog(@"Error in creating user on server");
+                // TODO: If no user notify user who's waiting on verification page
+                
+            } else {
+                BCStreamViewController *sc = [[BCStreamViewController alloc] init];
+                sc.title = @"Backchannel";
+                UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:sc];
+                sc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+                [vc presentViewController:nc animated:YES completion:^() {}];
+            }
+        };
+        
+        FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+            NSLog(@"Error in verified user: %@", error);
+            NSLog(@"error code %d", (int)operation.response.statusCode);
+            
+            // TODO: Show generic IE failure screen
+        };
+
+        [[BCAPIClient sharedClient] sendVerification:success failure:failure];
+        
+        // Keep on verified page until we get a success. We want to make sure we have a user.
+        return vc;
     } else if (NO) {
         // TODO: Case when someone auth'd but need to check if my UDID == UDID from email link
         // This protects from case where I auth, but forward my email to someone else who has auth'd
@@ -81,8 +107,7 @@ typedef enum TransitionType {
     if (!udid || ![udid isEqualToString:[[UIDevice currentDevice].identifierForVendor UUIDString]] || verified == nil) {
         return TRANSITION_AUTH;
     } else if ([verified isEqualToString:@"NO"]) {
-        //return TRANSITION_VERIFY;
-        return TRANSITION_STREAM; // for testing
+        return TRANSITION_VERIFY;
     } else {
         return TRANSITION_STREAM;
     }

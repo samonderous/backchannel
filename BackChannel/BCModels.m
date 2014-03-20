@@ -13,21 +13,17 @@
 
 @implementation BCSecretModel
 
-- (id)init:(NSString*)text withTime:(float)time withAgrees:(int)agrees withDisagree:(int)disagrees
+- (id)init:(NSString*)text withSid:(NSUInteger)sid withTime:(NSInteger)time withTimeStr:(NSString*)timeStr withAgrees:(NSInteger)agrees withDisagree:(NSInteger)disagrees withVote:(Vote)vote
 {
     self = [super init];
+    _sid = sid;
     _text = text;
     _time = time;
     _agrees = agrees;
     _disagrees = disagrees;
-    _timeStr = [self convertTimeToString];
-    _vote = VOTE_NONE;
+    _timeStr = timeStr;
+    _vote = vote;
     return self;
-}
-
-- (NSString*)convertTimeToString
-{
-    return @"12 hrs ago";
 }
 
 @end
