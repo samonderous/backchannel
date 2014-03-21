@@ -436,8 +436,8 @@ static BOOL isSwipeLocked = NO;
     [self addSubview:_textView];
     [self addSubview:_footerView];
     
-    [_textView placeIn:self alignedAt:CENTER];
     [_footerView placeIn:self alignedAt:CENTER];
+    [_textView placeIn:self alignedAt:CENTER];
 
     static const float margin = 10.0;
     [_footerView setY:(CGRectGetMaxY(_textView.frame) + margin)];
@@ -545,7 +545,9 @@ static BOOL isSwipeLocked = NO;
                                                  [gesture.view setX:0.0];
                                              }
                                              completion:^(BOOL finished) {
-                                                 [self.delegate swipeReleaseAnimationBackComplete:self inDirection: direction];
+                                                 if (finalX) {
+                                                      [self.delegate swipeReleaseAnimationBackComplete:self inDirection: direction];
+                                                 }
                                              }];
         }];
     }
@@ -596,9 +598,10 @@ static BOOL isSwipeLocked = NO;
     layout.sectionInset = UIEdgeInsetsMake(0.0, kCellEdgeInset, 0.0, kCellEdgeInset);
     _messageTable = [[UICollectionView alloc] initWithFrame:[UIScreen mainScreen].bounds collectionViewLayout:layout];
     [self.view addSubview:_messageTable];
+    self.view.backgroundColor = [UIColor whiteColor];
 }
 
-- (void)addSecret:(NSString*)text
+- (BCSecretModel*)addSecret:(NSString*)text
 {
     __block BCSecretModel *s = [[BCSecretModel alloc] init:text
                                                     withSid:(NSUInteger)0
@@ -621,6 +624,7 @@ static BOOL isSwipeLocked = NO;
     [[BCAPIClient sharedClient] createSecret:s.text success:success failure:failure];
     
     [_messages insertObject:s atIndex:0];
+    return s;
 }
 
 - (void)setupStreamBar
@@ -834,19 +838,36 @@ static BOOL isSwipeLocked = NO;
      return 0.0f;
  }
 
+- (void)animateNewText:(BCSecretModel*)model
+{
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:1 inSection:0];
+    BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
+    BCCellTopLayerContainerView *tcv = (BCCellTopLayerContainerView*)[cell.subviews lastObject];
+    
+    [UIView animateWithDuration:1.0
+                     animations:^{
+                         [_messageTable setY:0.0];
+                         [tcv.textView placeIn:tcv alignedAt:CENTER];
+                     } completion:^(BOOL finished) {
+                     }];
+}
+
 - (void)addNewSecretToStream
 {
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
-    [self addSecret:ccv.textView.text];
+    BCSecretModel *secret = [self addSecret:ccv.textView.text];
     
     [_messageTable performBatchUpdates:^{
         [_messageTable.collectionViewLayout invalidateLayout];
-        [self removeCompose];
         [_messageTable insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:1 inSection:0]]];
+        [self removeCompose];
+        //[_messageTable setY:CGRectGetMinY(_messageTable.frame) - kCellComposeHeight];
+        
     } completion:^(BOOL finished) {
-    
+        //NSLog(@"When does this print");
+        //[self animateNewText:secret];
     }];
 }
 
