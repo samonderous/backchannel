@@ -34,10 +34,8 @@ def auth(request):
     domain = ''
     try:
         domain = email.split('@')[1]
-        domains = Org.objects.values_list('domain', flat=True).all()
-        if not domain or domain not in domains:
-            raise
-        send_email.send_verify_email(email)
+        org = Org.objects.get(domain=domain)
+        send_email.send_verify_email(org, email)
     except Exception, e:
         print "%s" % e
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
@@ -72,7 +70,6 @@ def verify(request):
 
 @csrf_exempt
 def vote(request):
-
     response = {'status': 1}
     if request.method != "POST":
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
@@ -150,7 +147,7 @@ def stream(request):
     except Exception, e:
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
-    secrets = Secret.objects.filter(org=user.org).reverse()
+    secrets = Secret.objects.filter(org=user.org).order_by('-id')[:50]
 
     secrets_list = []
 
@@ -181,7 +178,9 @@ def resendemail(request):
     email = request.GET.get('email')
     print "Need to resend email to %s" % email
     try:
-        send_email.send_verify_email(email)
+        domain = email.split('@')[1]
+        org = Org.objects.get(domain=domain)
+        send_email.send_verify_email(org, email)
     except Exception, e:
         response = {'status': 1}
         return HttpResponse(simplejson.dumps(response), content_type="application/json")

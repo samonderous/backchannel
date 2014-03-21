@@ -18,20 +18,19 @@ try:
 except:
         pass
 
-def send_verify_email(email=None):
+def send_verify_email(org, email=None):
 
 	to_email = email or 'saureen@gmail.com'
-	subject = "WorkStory Manager Insights Day"
+	subject = "Verify your email to enter %s's Backchannel" % org.name
 
-	link = "http://workstory.co:8001/backend/verify?name=test"
-	item_html = "Click on link to verify your account: %s" % link
+	link = "http://backchannel.it:8001/backend/verify?name=test"
+	item_html = "Click on link from your mobile phone to verify your account: %s" % link
 
-	footer = "<br /><br />Thank You,<br />WorkStory Team"
-	msg = EmailMultiAlternatives(subject, "", from_email = "WorkStory <workstory@workstory.co>", to=[to_email])
+	footer = "<br /><br />Thank You,<br />Backchannel Team"
+	msg = EmailMultiAlternatives(subject, "", from_email = "Backchannel <backchannel@backchannel.it>", to=[to_email])
 	msg.attach_alternative(item_html + footer, "text/html")
 
 	try:
-		print "HERE NOW"
 		msg.send()
 	except Exception, e:
 		print "send_email exception = %s" % e
