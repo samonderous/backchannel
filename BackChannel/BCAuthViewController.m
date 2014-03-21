@@ -69,6 +69,8 @@ static const float kEmailMargin = 30.0;
                                                            width,
                                                            emailRect.size.height + 10.0)];
     [self addSubview:_email];
+    _email.autocapitalizationType = UITextAutocapitalizationTypeNone;
+    _email.autocorrectionType = UITextAutocorrectionTypeNo;
     _email.attributedText = emailAttributedString;
     _email.placeholder = @"Enter corporate email";
     _email.font = emailFont;
