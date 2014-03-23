@@ -355,6 +355,7 @@ typedef enum Direction {
 {
     self = [self initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
 
+    /*
     UILabel *agreeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
     [self addSubview:agreeLabel];
     agreeLabel.font = [UIFont fontWithName:@"Tisa Pro" size:36.0];
@@ -393,6 +394,11 @@ typedef enum Direction {
     [disagreeLabel setX:CGRectGetWidth(minusLabel.bounds)];
     [minusLabel setX:-CGRectGetWidth(minusLabel.bounds)];
 
+    NSLog(NSStringFromCGRect(disagreeLabel.frame));
+    NSLog(NSStringFromCGRect(agreeLabel.frame));
+    [agreeLabel debug];
+    */
+    
     return self;
 }
 
@@ -405,19 +411,22 @@ typedef enum Direction {
 
 
 @interface BCCellTopLayerContainerView ()
+@property (strong, nonatomic) BCCellBottomLayerContainerView *bottomLayerContainerView;
 @property (strong, nonatomic) BCCellTopLayerTextView *textView;
 @property (strong, nonatomic) BCCellTopLayerFooterView *footerView;
 @property (strong, nonatomic) BCCellTopLayerHeaderView *headerView;
 @property (strong, nonatomic) BCSecretModel *secretModel;
 @property (assign) CGSize size;
 @property (assign) BOOL isDragging;
+@property (strong, nonatomic) UIView *agreeContainer;
+@property (strong, nonatomic) UIView *disagreeContainer;
 @end
 
 @implementation BCCellTopLayerContainerView
 
 static BOOL isSwipeLocked = NO;
 
-- (id)init:(BCSecretModel*)secretModel withSize:(CGSize)size
+- (id)init:(BCSecretModel*)secretModel withSize:(CGSize)size withBottomContainer:(BCCellBottomLayerContainerView*)bottomLayerContainerView
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
     static dispatch_once_t oncePredicate;
@@ -428,6 +437,7 @@ static BOOL isSwipeLocked = NO;
     
     _size = size;
     _secretModel = secretModel;
+    _bottomLayerContainerView = bottomLayerContainerView;
     _isDragging = NO;
 
     _textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel withWidth:size.width];
@@ -435,6 +445,7 @@ static BOOL isSwipeLocked = NO;
 
     [self addSubview:_textView];
     [self addSubview:_footerView];
+    [self addVoteViews];
     
     [_footerView placeIn:self alignedAt:CENTER];
     [_textView placeIn:self alignedAt:CENTER];
@@ -449,6 +460,70 @@ static BOOL isSwipeLocked = NO;
     self.backgroundColor = [UIColor whiteColor];
     
     return self;
+}
+
+
+- (void)addVoteViews
+{
+    self.clipsToBounds = NO;
+    
+    _agreeContainer = [[UIView alloc] initWithFrame:CGRectZero];
+    _disagreeContainer = [[UIView alloc] initWithFrame:CGRectZero];
+    
+    
+    UILabel *agreeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, _size.width, _size.height)];
+    agreeLabel.font = [UIFont fontWithName:@"Tisa Pro" size:36.0];
+    agreeLabel.text = @"1";
+    agreeLabel.textColor = [[BCGlobalsManager globalsManager] greenColor];
+    [agreeLabel sizeToFit];
+    agreeLabel.clipsToBounds = NO;
+    UILabel *plusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, _size.width, _size.height)];
+    plusLabel.font = [UIFont fontWithName:@"Tisa Pro" size:24.0];
+    plusLabel.text = @"+";
+    plusLabel.textColor = [[BCGlobalsManager globalsManager] greenColor];
+    [plusLabel sizeToFit];
+    
+    [_agreeContainer addSubview:agreeLabel];
+    [_agreeContainer addSubview:plusLabel];
+    [_agreeContainer setSize:(CGSize){CGRectGetWidth(agreeLabel.bounds) + CGRectGetWidth(plusLabel.bounds),
+                                    CGRectGetHeight(agreeLabel.bounds)}];
+    
+    [plusLabel placeIn:_agreeContainer alignedAt:CENTER_LEFT];
+    [agreeLabel placeIn:_agreeContainer alignedAt:CENTER_RIGTH];
+    
+    UILabel *disagreeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, _size.width, _size.height)];
+    disagreeLabel.font = [UIFont fontWithName:@"Tisa Pro" size:36.0];
+    disagreeLabel.text = @"1";
+    disagreeLabel.textColor = [[BCGlobalsManager globalsManager] redColor];
+    [disagreeLabel sizeToFit];
+    disagreeLabel.clipsToBounds = NO;
+    UILabel *minusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, _size.width, _size.height)];
+    minusLabel.font = [UIFont fontWithName:@"Tisa Pro" size:24.0];
+    minusLabel.text = @"-";
+    minusLabel.textColor = [[BCGlobalsManager globalsManager] redColor];
+    [minusLabel sizeToFit];
+    
+    [_disagreeContainer addSubview:disagreeLabel];
+    [_disagreeContainer addSubview:minusLabel];
+    [_disagreeContainer setSize:(CGSize){CGRectGetWidth(disagreeLabel.bounds) + CGRectGetWidth(minusLabel.bounds),
+                                        CGRectGetHeight(disagreeLabel.bounds)}];
+    [minusLabel placeIn:_disagreeContainer alignedAt:CENTER_LEFT];
+    [disagreeLabel placeIn:_disagreeContainer alignedAt:CENTER_RIGTH];
+    
+    [self addSubview:_agreeContainer];
+    [self addSubview:_disagreeContainer];
+    
+    // Place outside cell
+    [_agreeContainer placeIn:self alignedAt:CENTER_LEFT withMargin:-kCellEdgeInset - CGRectGetWidth(_agreeContainer.bounds)];
+    [_disagreeContainer placeIn:self alignedAt:CENTER_RIGTH withMargin:-kCellEdgeInset - CGRectGetWidth(_disagreeContainer.bounds)];
+    
+    //[_agreeContainer debug];
+    //[_disagreeContainer debug];
+    _agreeContainer.clipsToBounds = NO;
+    _disagreeContainer.clipsToBounds = NO;
+    
+    NSLog(NSStringFromCGRect(_agreeContainer.frame));
+    NSLog(NSStringFromCGRect(_disagreeContainer.frame));
 }
 
 - (void)updateVoteView
@@ -482,6 +557,53 @@ static BOOL isSwipeLocked = NO;
     
 }
 
+
+- (void)animateVoteInteraction:(UIView*)view inDirection:(Direction)direction
+{
+    CGAffineTransform scaleTransform = CGAffineTransformScale(view.transform, 1.5, 1.5);
+    [UIView animateWithDuration:0.5 delay:0 options:0
+                     animations:^{
+                         view.transform = scaleTransform;
+                         view.alpha = 0.0;
+                     } completion:^(BOOL finished) {
+                         [self.delegate swipeReleaseAnimationBackComplete:self inDirection: direction];
+                         view.transform = CGAffineTransformIdentity;
+                     }];
+}
+
+- (void)swipeVoteInteractionHandle:(BOOL)islockPlace inDirection:(Direction)direction
+{
+    BCCellBottomLayerContainerView *bcv = self.bottomLayerContainerView;
+
+    if (islockPlace) {
+        if (direction == RIGHT_DIRECTION && _agreeContainer.superview != bcv) {
+            [_agreeContainer removeFromSuperview];
+            [bcv addSubview:_agreeContainer];
+            [_agreeContainer placeIn:bcv alignedAt:CENTER_LEFT];
+            [self animateVoteInteraction:_agreeContainer inDirection:RIGHT_DIRECTION];
+        }
+        if (direction == LEFT_DIRECTION && _disagreeContainer.superview != bcv) {
+            [_disagreeContainer removeFromSuperview];
+            [bcv addSubview:_disagreeContainer];
+            [_disagreeContainer placeIn:bcv alignedAt:CENTER_RIGTH];
+            [self animateVoteInteraction:_disagreeContainer inDirection:LEFT_DIRECTION];
+        }
+    } else { // Not necessary but in case we want to push the containers back
+        if (_agreeContainer.superview != self) {
+            [_agreeContainer removeFromSuperview];
+            [self addSubview:_agreeContainer];
+            [_agreeContainer placeIn:self alignedAt:CENTER_LEFT withMargin:-CGRectGetWidth(_agreeContainer.bounds) - kCellEdgeInset];
+        }
+        
+        if (_disagreeContainer.superview != self) {
+            [_disagreeContainer removeFromSuperview];
+            [self addSubview:_disagreeContainer];
+            [_disagreeContainer placeIn:self alignedAt:CENTER_RIGTH withMargin:-CGRectGetWidth(_agreeContainer.bounds) - kCellEdgeInset];
+        }
+    }
+    
+}
+
 - (Direction)getSwipeDirection:(CGPoint)velocity
 {
     return velocity.x <= 0 ? LEFT_DIRECTION : RIGHT_DIRECTION;
@@ -493,11 +615,11 @@ static BOOL isSwipeLocked = NO;
         return;
     }
 
-    CGFloat width = CGRectGetWidth(gesture.view.bounds);
-    float threshhold = CGRectGetWidth(gesture.view.bounds) / 2.0;
+    float width = CGRectGetWidth(gesture.view.bounds);
     static const float cutOffPercentage = 0.7;
     static const float resistPan = 10.0;
     const float fullDuration = 0.7;
+    float threshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset;
     float totalSwipeDistance = width * cutOffPercentage;
     
     UIGestureRecognizerState state = gesture.state;
@@ -508,10 +630,16 @@ static BOOL isSwipeLocked = NO;
     direction = [self getSwipeDirection:velocity];
     
     
+    if (fabsf(gesture.view.frame.origin.x) >= threshhold) {
+        [self swipeVoteInteractionHandle:YES inDirection:direction];
+    } else {
+        [self swipeVoteInteractionHandle:NO inDirection:direction];
+    }
+    
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
         _isDragging = YES;
         
-        if (fabsf(gesture.view.frame.origin.x) >= totalSwipeDistance) {
+        if (fabsf(gesture.view.frame.origin.x) >= threshhold) {
             gesture.view.center = CGPointMake(gesture.view.center.x, gesture.view.center.y);
             [gesture setTranslation:CGPointZero inView:self.superview];
         } else {
@@ -538,6 +666,7 @@ static BOOL isSwipeLocked = NO;
                          }
                          completion:^(BOOL finished) {
                             // Slide back to origin
+                             isSwipeLocked = NO;
                              [UIView animateWithDuration:(fullDuration * (fabsf(gesture.view.frame.origin.x) / totalSwipeDistance))
                                                   delay:0.0
                                                 options: UIViewAnimationOptionCurveLinear
@@ -545,9 +674,8 @@ static BOOL isSwipeLocked = NO;
                                                  [gesture.view setX:0.0];
                                              }
                                              completion:^(BOOL finished) {
-                                                 if (finalX) {
-                                                      [self.delegate swipeReleaseAnimationBackComplete:self inDirection: direction];
-                                                 }
+                                                 _agreeContainer.alpha = 1;
+                                                 _disagreeContainer.alpha = 1;
                                              }];
         }];
     }
@@ -623,6 +751,7 @@ static BOOL isSwipeLocked = NO;
     
     [[BCAPIClient sharedClient] createSecret:s.text success:success failure:failure];
     
+    // Hope to get a new idea assigned on success callback. Maybe handle error cases better.
     [_messages insertObject:s atIndex:0];
     return s;
 }
@@ -750,12 +879,12 @@ static BOOL isSwipeLocked = NO;
         float width = CGRectGetWidth(cell.bounds);
         CGSize size = (CGSize){width, CGRectGetHeight(cell.contentView.bounds)};
         BCCellBottomLayerContainerView *bcv = [[BCCellBottomLayerContainerView alloc] init:size];
-        BCCellTopLayerContainerView *cv = [[BCCellTopLayerContainerView alloc] init:secretModel withSize:size];
-        
-        cv.delegate = self;
-        [cv addSwipes];
+        BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:secretModel withSize:size withBottomContainer:bcv];
+
+        tcv.delegate = self;
+        [tcv addSwipes];
         [cell.contentView addSubview:bcv];
-        [cell.contentView addSubview:cv];
+        [cell.contentView addSubview:tcv];
         
         [bcv placeIn:cell.contentView alignedAt:CENTER];
         
@@ -786,7 +915,7 @@ static BOOL isSwipeLocked = NO;
 {
     // This delegate gets called on init for some weird reason
     if (_messageTable.contentOffset.y > 0.0) {
-        [BCCellTopLayerContainerView setSwipeLocked:NO];
+        [BCCellTopLayerContainerView setSwipeLocked:YES];
     }
 }
 
@@ -838,6 +967,8 @@ static BOOL isSwipeLocked = NO;
      return 0.0f;
  }
 
+// Trial to fix compose -> stream transition
+/*
 - (void)animateNewText:(BCSecretModel*)model
 {
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:1 inSection:0];
@@ -851,6 +982,7 @@ static BOOL isSwipeLocked = NO;
                      } completion:^(BOOL finished) {
                      }];
 }
+*/
 
 - (void)addNewSecretToStream
 {
@@ -936,7 +1068,6 @@ static BOOL isSwipeLocked = NO;
 {
     _isComposeMode = YES;
     [collectionView.collectionViewLayout invalidateLayout];
-    [self setupComposeBar];
     collectionView.scrollEnabled = NO;
     
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[collectionView cellForItemAtIndexPath:indexPath];
@@ -984,11 +1115,11 @@ static BOOL isSwipeLocked = NO;
     }
     
     if (direction == LEFT_DIRECTION) {
-        secretModel.agrees++;
-        secretModel.vote = VOTE_AGREE;
-    } else if (direction == RIGHT_DIRECTION) {
         secretModel.disagrees++;
         secretModel.vote = VOTE_DISAGREE;
+    } else if (direction == RIGHT_DIRECTION) {
+        secretModel.agrees++;
+        secretModel.vote = VOTE_AGREE;
     }
 
     SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
@@ -1004,5 +1135,7 @@ static BOOL isSwipeLocked = NO;
 
     [containerView updateVoteView];
 }
+
+
 
 @end

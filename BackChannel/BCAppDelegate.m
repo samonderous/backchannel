@@ -36,7 +36,8 @@
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
 {
-    UIViewController *vc = [BCViewController setVerifiedAndTransition];
+    NSDictionary *parsedQueryDict = [self parseQueryString:[url query]];
+    UIViewController *vc = [BCViewController setVerifiedAndTransition:parsedQueryDict[@"u"]];
     self.window.rootViewController = vc;
 
     return YES;

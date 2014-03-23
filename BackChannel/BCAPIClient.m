@@ -89,7 +89,7 @@ static NSString *kVerificationPath = @"backend/verify/";
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *email = (NSString*)[defaults objectForKey:kEmailKey];
-    NSDictionary *params = @{@"email": email};
+    NSDictionary *params = @{@"email": email, @"udid": [[UIDevice currentDevice].identifierForVendor UUIDString]};
     NSMutableDictionary *parameters = [NSMutableDictionary dictionaryWithDictionary:params];
     [[BCAPIClient sharedClient] GET:kResendemailPath parameters:parameters success:success failure:failure];
 }

@@ -10,5 +10,5 @@
 
 @interface BCViewController : UIViewController
 
-+ (UIViewController*)setVerifiedAndTransition;
++ (UIViewController*)setVerifiedAndTransition:(NSString*)udidIN;
 @end

@@ -192,6 +192,7 @@
 		C100166E18BD4D4000347A31 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C1316E1918B56D04005A85B8 /* Helpers */,
 				C14C9DAB18D3CD5500A79BFD /* envelope.png */,
 				C14C9DAC18D3CD5500A79BFD /* envelope@2x.png */,
 				C14C9D6018CF8EF300A79BFD /* verify_asset.png */,
@@ -249,7 +250,6 @@
 			children = (
 				C100167618BD747F00347A31 /* Libraries */,
 				C100166E18BD4D4000347A31 /* Resources */,
-				C1316E1918B56D04005A85B8 /* Helpers */,
 				C1316DEA18B3F741005A85B8 /* BCAppDelegate.h */,
 				C1316DEB18B3F741005A85B8 /* BCAppDelegate.m */,
 				C14C9D9C18D0F24300A79BFD /* BCAPIClient.h */,
