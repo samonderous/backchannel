@@ -81,7 +81,7 @@ static NSString *kVerificationPath = @"backend/verify/";
     [params setObject:(NSString*)[[UIDevice currentDevice].identifierForVendor UUIDString] forKey:@"udid"];
     [params setObject:[NSNumber numberWithInteger:model.sid] forKey:@"sid"];
     [params setObject:vote == VOTE_AGREE ? @"agree" : @"disagree" forKey:@"vote"];
-    
+
     [[BCAPIClient sharedClient] POST:kVotePath parameters:params success:success failure:failure];
 }
 

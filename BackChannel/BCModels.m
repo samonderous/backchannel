@@ -23,7 +23,8 @@
     _disagrees = disagrees;
     _timeStr = timeStr;
     _vote = vote;
-
+    _isNew = NO;
+    
     return self;
 }
 

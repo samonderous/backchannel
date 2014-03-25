@@ -18,7 +18,6 @@
 #import "BCStreamViewController.h"
 #import "BCModels.h"
 #import "BCGlobalsManager.h"
-#import "BCStreamCollectionViewCell.h"
 #import "BCAPIClient.h"
 
 static const float kCellHeight = 251.0f;
@@ -30,55 +29,7 @@ static const float kPublishBarHeight = 60.0;
 static const int kMaxCharCount = 140;
 static const int kCellEdgeInset = 30.0;
 static const float kPublishPushDuration = 1.0;
-
-
-
-typedef enum Direction {
-    LEFT_DIRECTION = 1,
-    RIGHT_DIRECTION
-} Direction;
-
-@class BCCellTopLayerContainerView;
-
-@interface BCComposeContainerView : UIView
-@property (strong, nonatomic) UITextView *textView;
-@property (strong, nonatomic) UIButton *nevermind;
-@property (strong, nonatomic) UIButton *publish;
-
-@end
-
-@interface BCCellComposeView : UIView
-@end
-
-@interface BCCellTopLayerTextView : UIView
-+ (CGRect)getViewRect:(float)width withText:(NSString*)text;
-@end
-
-@interface BCCellTopLayerHeaderView : UIView
-@end
-
-@interface BCCellTopLayerFooterView : UIView
-+ (float)getFooterHeight;
-@end
-
-@protocol BCCellTopLayerContainerViewDelegate <NSObject>
-@optional
-
-- (void)swipeReleaseAnimationBackComplete:(BCCellTopLayerContainerView*)containerView inDirection:(Direction)direction;
-
-@end
-
-@interface BCCellTopLayerContainerView : UIView<UIGestureRecognizerDelegate>
-
-@property (nonatomic, assign) id <BCCellTopLayerContainerViewDelegate>delegate;
-
-- (void)addSwipes;
-+ (BOOL)isSwipeLocked;
-@end
-
-@interface BCCellBottomLayerContainerView : UIView
-@end
-
+static const float kComposeTextViewFooterViewMargin = 10.0;
 
 
 @interface BCComposeContainerView ()
@@ -110,6 +61,7 @@ typedef enum Direction {
     [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenColor] forState:UIControlStateNormal];
     _publish.backgroundColor = [[BCGlobalsManager globalsManager] greenBackgroundColor];
     _publish.titleLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
+    _publish.userInteractionEnabled = NO;
     
     _charCountLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 30.0, 30.0)];
     [_publish addSubview:_charCountLabel];
@@ -127,15 +79,16 @@ typedef enum Direction {
     [_charCountLabel setSize:rect.size];
     [_charCountLabel placeIn:_publish alignedAt:CENTER_RIGTH withMargin:0];
     
-    
+    UIFont *textFont = [[BCGlobalsManager globalsManager] composeFont];
     _textView = [[UITextView alloc] initWithFrame:CGRectMake(CGRectGetMinX(cell.frame),
                                                              0.0,
                                                              CGRectGetWidth(cell.contentView.bounds),
                                                              height - kPublishBarHeight)];
     [[UITextView appearance] setTintColor:[[BCGlobalsManager globalsManager] blueColor]];
     _textView.scrollEnabled = NO;
-    _textView.font = [[BCGlobalsManager globalsManager] composeFont];
-    
+    _textView.contentInset = UIEdgeInsetsMake(-4, 0, 0, 0); // To cancel out the textview top padding by default
+    _textView.font = textFont;
+
     _publishMeter = [[UIView alloc] initWithFrame:CGRectMake(-width, 0.0, width, 1.0)];
     _publishMeter.backgroundColor = [[BCGlobalsManager globalsManager] greenColor];
     
@@ -145,7 +98,7 @@ typedef enum Direction {
     [self addSubview:_publishMeter];
     [self addSubview:bar];
     [bar setY:CGRectGetMaxY(_textView.frame)];
-    
+
     self.backgroundColor = [UIColor whiteColor];
     
     return self;
@@ -181,6 +134,10 @@ typedef enum Direction {
                                           attributes:@{ NSFontAttributeName:font, NSForegroundColorAttributeName: fontColor}];
     
     _charCountLabel.attributedText = attributedText;
+    
+    if (count <= 0) {
+        _publish.userInteractionEnabled = NO;
+    }
 }
 
 
@@ -354,51 +311,6 @@ typedef enum Direction {
 - (id)init:(CGSize)size
 {
     self = [self initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
-
-    /*
-    UILabel *agreeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
-    [self addSubview:agreeLabel];
-    agreeLabel.font = [UIFont fontWithName:@"Tisa Pro" size:36.0];
-    agreeLabel.text = @"1";
-    agreeLabel.textColor = [[BCGlobalsManager globalsManager] greenColor];
-    [agreeLabel sizeToFit];
-    agreeLabel.clipsToBounds = NO;
-    UILabel *plusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
-    [agreeLabel addSubview:plusLabel];
-    plusLabel.font = [UIFont fontWithName:@"Tisa Pro" size:24.0];
-    plusLabel.text = @"+";
-    plusLabel.textColor = [[BCGlobalsManager globalsManager] greenColor];
-    [plusLabel sizeToFit];
-    
-    UILabel *disagreeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
-    [self addSubview:disagreeLabel];
-    disagreeLabel.font = [UIFont fontWithName:@"Tisa Pro" size:36.0];
-    disagreeLabel.text = @"1";
-    disagreeLabel.textColor = [[BCGlobalsManager globalsManager] redColor];
-    [disagreeLabel sizeToFit];
-    disagreeLabel.clipsToBounds = NO;
-    
-    UILabel *minusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
-    [disagreeLabel addSubview:minusLabel];
-    minusLabel.font = [UIFont fontWithName:@"Tisa Pro" size:24.0];
-    minusLabel.text = @"-";
-    minusLabel.textColor = [[BCGlobalsManager globalsManager] redColor];
-    [minusLabel sizeToFit];
-    
-    [agreeLabel placeIn:self alignedAt:CENTER_RIGTH];
-    [disagreeLabel placeIn:self alignedAt:CENTER_LEFT];
-    [plusLabel placeIn:agreeLabel alignedAt:CENTER];
-    [minusLabel placeIn:disagreeLabel alignedAt:CENTER];
-    
-    [plusLabel setX:-CGRectGetWidth(agreeLabel.bounds)];
-    [disagreeLabel setX:CGRectGetWidth(minusLabel.bounds)];
-    [minusLabel setX:-CGRectGetWidth(minusLabel.bounds)];
-
-    NSLog(NSStringFromCGRect(disagreeLabel.frame));
-    NSLog(NSStringFromCGRect(agreeLabel.frame));
-    [agreeLabel debug];
-    */
-    
     return self;
 }
 
@@ -449,10 +361,14 @@ static BOOL isSwipeLocked = NO;
     
     [_footerView placeIn:self alignedAt:CENTER];
     [_textView placeIn:self alignedAt:CENTER];
-
-    static const float margin = 10.0;
-    [_footerView setY:(CGRectGetMaxY(_textView.frame) + margin)];
     
+    if (secretModel.isNew) {
+        [_textView setY:4.0];
+        secretModel.isNew = NO;
+        NSLog(@"After isnew in textvie create");
+    }
+
+    [_footerView setY:(CGRectGetMaxY(_textView.frame) + kComposeTextViewFooterViewMargin)];
     
     if (_secretModel.vote != VOTE_NONE) {
         [self updateVoteView];
@@ -522,8 +438,8 @@ static BOOL isSwipeLocked = NO;
     _agreeContainer.clipsToBounds = NO;
     _disagreeContainer.clipsToBounds = NO;
     
-    NSLog(NSStringFromCGRect(_agreeContainer.frame));
-    NSLog(NSStringFromCGRect(_disagreeContainer.frame));
+    //NSLog(NSStringFromCGRect(_agreeContainer.frame));
+    //NSLog(NSStringFromCGRect(_disagreeContainer.frame));
 }
 
 - (void)updateVoteView
@@ -557,7 +473,6 @@ static BOOL isSwipeLocked = NO;
     
 }
 
-
 - (void)animateVoteInteraction:(UIView*)view inDirection:(Direction)direction
 {
     CGAffineTransform scaleTransform = CGAffineTransformScale(view.transform, 1.5, 1.5);
@@ -566,8 +481,9 @@ static BOOL isSwipeLocked = NO;
                          view.transform = scaleTransform;
                          view.alpha = 0.0;
                      } completion:^(BOOL finished) {
-                         [self.delegate swipeReleaseAnimationBackComplete:self inDirection: direction];
-                         view.transform = CGAffineTransformIdentity;
+                         if (finished) {
+                             view.transform = CGAffineTransformIdentity;
+                         }
                      }];
 }
 
@@ -601,7 +517,6 @@ static BOOL isSwipeLocked = NO;
             [_disagreeContainer placeIn:self alignedAt:CENTER_RIGTH withMargin:-CGRectGetWidth(_agreeContainer.bounds) - kCellEdgeInset];
         }
     }
-    
 }
 
 - (Direction)getSwipeDirection:(CGPoint)velocity
@@ -628,18 +543,17 @@ static BOOL isSwipeLocked = NO;
     Direction direction;
   
     direction = [self getSwipeDirection:velocity];
-    
-    
-    if (fabsf(gesture.view.frame.origin.x) >= threshhold) {
-        [self swipeVoteInteractionHandle:YES inDirection:direction];
-    } else {
-        [self swipeVoteInteractionHandle:NO inDirection:direction];
-    }
-    
+
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
         _isDragging = YES;
         
         if (fabsf(gesture.view.frame.origin.x) >= threshhold) {
+            [self swipeVoteInteractionHandle:YES inDirection:direction];
+        } else {
+            [self swipeVoteInteractionHandle:NO inDirection:direction];
+        }
+        
+        if (fabsf(gesture.view.frame.origin.x) >= totalSwipeDistance) {
             gesture.view.center = CGPointMake(gesture.view.center.x, gesture.view.center.y);
             [gesture setTranslation:CGPointZero inView:self.superview];
         } else {
@@ -674,8 +588,11 @@ static BOOL isSwipeLocked = NO;
                                                  [gesture.view setX:0.0];
                                              }
                                              completion:^(BOOL finished) {
-                                                 _agreeContainer.alpha = 1;
-                                                 _disagreeContainer.alpha = 1;
+                                                 if (finalX) {
+                                                     [self.delegate swipeReleaseAnimationBackComplete:self inDirection: direction];
+                                                     _agreeContainer.alpha = 1;
+                                                     _disagreeContainer.alpha = 1;
+                                                 }
                                              }];
         }];
     }
@@ -686,7 +603,6 @@ static BOOL isSwipeLocked = NO;
 }
 
 @end
-
 
 
 
@@ -731,17 +647,18 @@ static BOOL isSwipeLocked = NO;
 
 - (BCSecretModel*)addSecret:(NSString*)text
 {
-    __block BCSecretModel *s = [[BCSecretModel alloc] init:text
+    __block BCSecretModel *secret = [[BCSecretModel alloc] init:text
                                                     withSid:(NSUInteger)0
                                                    withTime:0.0
                                                 withTimeStr:@"now"
                                                  withAgrees:0
                                                withDisagree:0
                                                    withVote:VOTE_NONE];
-
+    secret.isNew = YES;
+    
     SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"Create success");
-        s.sid = (NSUInteger)responseObject[@"sid"];
+        secret.sid = (NSUInteger)responseObject[@"sid"];
     };
 
     FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -749,11 +666,11 @@ static BOOL isSwipeLocked = NO;
         NSLog(@"error code %d", (int)operation.response.statusCode);
     };
     
-    [[BCAPIClient sharedClient] createSecret:s.text success:success failure:failure];
+    [[BCAPIClient sharedClient] createSecret:secret.text success:success failure:failure];
     
     // Hope to get a new idea assigned on success callback. Maybe handle error cases better.
-    [_messages insertObject:s atIndex:0];
-    return s;
+    [_messages insertObject:secret atIndex:0];
+    return secret;
 }
 
 - (void)setupStreamBar
@@ -810,6 +727,7 @@ static BOOL isSwipeLocked = NO;
     _refreshControl = [[UIRefreshControl alloc] init];
     [_refreshControl addTarget:self action:@selector(refreshSecrets)
              forControlEvents:UIControlEventValueChanged];
+
     [_messageTable addSubview:_refreshControl];
     _messageTable.alwaysBounceVertical = YES;
     
@@ -849,7 +767,7 @@ static BOOL isSwipeLocked = NO;
 - (void)setSeparator:(UIView*)contentView indexPath:(NSIndexPath*)indexPath
 {
     CALayer *separatorLine = [[CALayer alloc] init];
-    if (indexPath.row == 0) {
+    if (indexPath.item == 0) {
         separatorLine.frame = CGRectMake(0.0,
                                          CGRectGetMaxY(contentView.bounds) - 1.0,
                                          CGRectGetWidth(contentView.bounds),
@@ -867,15 +785,15 @@ static BOOL isSwipeLocked = NO;
 
 
 
-- (void)prepareCell:(UICollectionViewCell*)cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath
+- (void)prepareCell:(BCStreamCollectionViewCell*)cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath
 {
-    if (indexPath.row == 0) {
+    if (indexPath.item == 0) {
         BCCellComposeView *cv = [[BCCellComposeView alloc] init:CGRectGetWidth(cell.bounds)];
         [cell.contentView addSubview:cv];
         [self setSeparator:cell.contentView indexPath:indexPath];
         [cv placeIn:cell.contentView alignedAt:CENTER_LEFT];
     } else {
-        BCSecretModel *secretModel = [_messages objectAtIndex:indexPath.row - 1];
+        BCSecretModel *secretModel = [_messages objectAtIndex:indexPath.item - 1];
         float width = CGRectGetWidth(cell.bounds);
         CGSize size = (CGSize){width, CGRectGetHeight(cell.contentView.bounds)};
         BCCellBottomLayerContainerView *bcv = [[BCCellBottomLayerContainerView alloc] init:size];
@@ -885,6 +803,7 @@ static BOOL isSwipeLocked = NO;
         [tcv addSwipes];
         [cell.contentView addSubview:bcv];
         [cell.contentView addSubview:tcv];
+        cell.tcv = tcv;
         
         [bcv placeIn:cell.contentView alignedAt:CENTER];
         
@@ -933,16 +852,14 @@ static BOOL isSwipeLocked = NO;
 
 - (float)getComposeWindowHeight
 {
-    return CGRectGetHeight([UIScreen mainScreen].bounds) - kKeyboardHeight -
-            CGRectGetHeight(self.navigationController.navigationBar.bounds) -
-            [UIApplication sharedApplication].statusBarFrame.size.height;
+    return CGRectGetHeight([UIScreen mainScreen].bounds) - kKeyboardHeight - CGRectGetHeight(self.navigationController.navigationBar.bounds) - [UIApplication sharedApplication].statusBarFrame.size.height;
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout*)collectionViewLayout;
     float width = CGRectGetWidth([UIScreen mainScreen].bounds) - flowLayout.sectionInset.left - flowLayout.sectionInset.right;
-    if (indexPath.row == 0) {
+    if (indexPath.item == 0) {
         CGSize headerCellSize = (CGSize){0.0, 0.0};
         if (_isComposeMode) {
             float composeCellHeight = [self getComposeWindowHeight];
@@ -968,38 +885,38 @@ static BOOL isSwipeLocked = NO;
  }
 
 // Trial to fix compose -> stream transition
-/*
-- (void)animateNewText:(BCSecretModel*)model
+
+- (void)addSecretTextAndAnimate:(BCSecretModel*)model
 {
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:1 inSection:0];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:1 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
-    BCCellTopLayerContainerView *tcv = (BCCellTopLayerContainerView*)[cell.subviews lastObject];
-    
-    [UIView animateWithDuration:1.0
+    BCCellTopLayerContainerView *tcv = cell.tcv;
+
+    [UIView animateWithDuration:1.0 delay:0.0 options:UIViewAnimationOptionCurveLinear
                      animations:^{
                          [_messageTable setY:0.0];
                          [tcv.textView placeIn:tcv alignedAt:CENTER];
+                         [tcv.footerView setY:(CGRectGetMaxY(tcv.textView.frame) + kComposeTextViewFooterViewMargin)];
                      } completion:^(BOOL finished) {
+                         NSLog(@"FINSIHED animation");
                      }];
 }
-*/
+
 
 - (void)addNewSecretToStream
 {
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
-    BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+    BCComposeContainerView *ccv = cell.ccv;
     BCSecretModel *secret = [self addSecret:ccv.textView.text];
-    
     [_messageTable performBatchUpdates:^{
-        [_messageTable.collectionViewLayout invalidateLayout];
-        [_messageTable insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:1 inSection:0]]];
+        //[_messageTable.collectionViewLayout invalidateLayout];
+        //[_messageTable reloadSections:[NSIndexSet indexSetWithIndex:0]];
+        [_messageTable insertItemsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForItem:1 inSection:0]]];
         [self removeCompose];
-        //[_messageTable setY:CGRectGetMinY(_messageTable.frame) - kCellComposeHeight];
-        
+        [_messageTable setY:CGRectGetMinY(_messageTable.frame) - kCellComposeHeight];
     } completion:^(BOOL finished) {
-        //NSLog(@"When does this print");
-        //[self animateNewText:secret];
+        [self addSecretTextAndAnimate:secret];
     }];
 }
 
@@ -1013,9 +930,9 @@ static BOOL isSwipeLocked = NO;
 
 - (void)publishHoldDown
 {
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
-    BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+    BCComposeContainerView *ccv = cell.ccv;
     [ccv.publishMeter.layer removeAllAnimations];
     [ccv setPublishPush];
     [UIView animateWithDuration:kPublishPushDuration delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
@@ -1032,9 +949,10 @@ static BOOL isSwipeLocked = NO;
 - (void)publishHoldRelease
 {
 
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
-    BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+    BCComposeContainerView *ccv = cell.ccv;
+    
     CALayer *layer = ccv.publishMeter.layer.presentationLayer; // not entirely sure why I need to pick x out of this layer
     float maxX = CGRectGetMaxX(layer.frame);
     CGRect layerFrame = ccv.publishMeter.layer.frame;
@@ -1053,11 +971,11 @@ static BOOL isSwipeLocked = NO;
 
 - (void)removeCompose
 {
-    [self setupStreamBar];
-    
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    //[self setupStreamBar];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
-    BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+    BCComposeContainerView *ccv = cell.ccv;
+    
     _isComposeMode = NO;
     _messageTable.scrollEnabled = YES;
     [ccv removeFromSuperview];
@@ -1073,6 +991,8 @@ static BOOL isSwipeLocked = NO;
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[collectionView cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = [[BCComposeContainerView alloc] init:cell withHeight:[self getComposeWindowHeight]];
     [cell addSubview:ccv];
+    cell.ccv = ccv;
+    
     UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout*)collectionView.collectionViewLayout;
     [ccv setX:-flowLayout.sectionInset.left];
     
@@ -1086,7 +1006,7 @@ static BOOL isSwipeLocked = NO;
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row != 0 || _isComposeMode) {
+    if (indexPath.item != 0 || _isComposeMode) {
         return;
     }
 
@@ -1100,9 +1020,10 @@ static BOOL isSwipeLocked = NO;
 # pragma Text View Delegate
 - (void)textViewDidChange:(UITextView *)textView
 {
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
-    BCComposeContainerView *ccv = (BCComposeContainerView*)[cell.subviews lastObject];
+    BCComposeContainerView *ccv = cell.ccv;
+    
    [ccv update:(int)textView.text.length];
 }
 

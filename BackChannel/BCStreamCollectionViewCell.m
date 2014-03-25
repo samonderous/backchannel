@@ -35,6 +35,8 @@
     for (CALayer *layer in self.contentView.layer.sublayers) {
         [layer removeFromSuperlayer];
     }
+    _tcv = nil;
+    _ccv = nil;
 }
 
 @end

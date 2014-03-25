@@ -42,7 +42,7 @@ NSString *kEmailKey = @"email";
     _greenPublishColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:0.40];
     _redColor = [UIColor colorWithRed:(204.0/255.0) green:(76.0/255.0) blue:(69.9/255.0) alpha:1.0];
     
-    _composeFont = [UIFont fontWithName:@"Tisa Pro" size:19];
+    _composeFont = [UIFont fontWithName:@"Tisa Pro" size:18];
     _blackDividerColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.1];
     _blackTimestampColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.4];
 }
