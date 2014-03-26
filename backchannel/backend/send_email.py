@@ -18,13 +18,13 @@ try:
 except:
         pass
 
-def send_verify_email(org, email=None):
+def send_verify_email(org, email, udid):
 
 	to_email = email or 'saureen@gmail.com'
 	subject = "Verify your email to enter %s's Backchannel" % org.name
 
-	link = "http://backchannel.it:8001/backend/verify?name=test"
-	item_html = "Click on link from your mobile phone to verify your account: %s" % link
+	link = "<a href='backchannel://backchannel.it/?u=%s'>Click here</a>" % udid
+	item_html = "%s on your iPhone to verify your account" % link
 
 	footer = "<br /><br />Thank You,<br />Backchannel Team"
 	msg = EmailMultiAlternatives(subject, "", from_email = "Backchannel <backchannel@backchannel.it>", to=[to_email])
