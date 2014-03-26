@@ -31,11 +31,12 @@ except:
 def auth(request):
     response = {'status': 1, 'domain': ''}
     email = request.POST.get('email')
+    udid = request.POST.get('udid')
     domain = ''
     try:
         domain = email.split('@')[1]
         org = Org.objects.get(domain=domain)
-        send_email.send_verify_email(org, email)
+        send_email.send_verify_email(org, email, udid)
     except Exception, e:
         print "%s" % e
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
@@ -122,22 +123,22 @@ def createsecret(request):
     response = {'status': 0, 'sid': secret.id}
     return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
+def _time_str(time_delta):
+    time_str = ""
+    if time_delta <= 10:
+        time_str = "few seconds ago"
+    elif time_delta > 10 and time_delta < 60:
+        time_str = "%ss" % time_delta
+    elif time_delta >= 60 and time_delta < 3600:
+        time_str = "%sm" % (time_delta / 60)
+    elif time_delta >= 3600 and time_delta < 86400:
+        time_str = "%sh" % (time_delta / 60 / 60)
+    else:
+        time_str = "a few days ago"
+
+    return time_str
+
 def stream(request):
-
-    def _time_str(time_delta):
-        time_str = ""
-        if time_delta <= 10:
-            time_str = "few seconds ago"
-        elif time_delta > 10 and time_delta < 60:
-            time_str = "%ss" % time_delta
-        elif time_delta >= 60 and time_delta < 3600:
-            time_str = "%sm" % (time_delta / 60)
-        elif time_delta >= 3600 and time_delta < 86400:
-            time_str = "%sh" % (time_delta / 60 / 60)
-        else:
-            time_str = "a few days ago"
-
-        return time_str
 
     response = {'status': 1}
     udid = request.GET.get('udid')
@@ -150,6 +151,9 @@ def stream(request):
     secrets = Secret.objects.filter(org=user.org).order_by('-id')[:50]
 
     secrets_list = []
+    #secrets = list(secrets)[30:] + list(secrets)
+    #secrets = list(secrets)[40:] + list(secrets)
+    #secrets = list(secrets)[:3]
 
     for s in secrets:
         try:
@@ -172,15 +176,53 @@ def stream(request):
 
     response = {'status': 0, 'secrets': secrets_list}
     return HttpResponse(simplejson.dumps(response), content_type="application/json")
-    
+
+def getlatestsecrets(request):
+
+    response = {'status': 1}
+    udid = request.GET.get('udid')
+    stid = request.GET.get('tsid')
+ 
+    try:
+        user = User.objects.get(udid=udid)
+    except Exception, e:
+        return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
+    # TODO: Fix this up if traffic ever warrants [:50] will be an issue
+    secrets = Secret.objects.filter(org=user.org, id__gt=stid).order_by('-id')[:50]
+
+    secrets_list = []
+    for s in secrets:
+        try:
+            us = UserSecret.objects.get(secret=s, user=user)
+            vote = us.vote
+        except Exception, e:
+            vote = UserSecret.VOTE_NONE
+
+        time_ago = int(time.time()) - s.time_created
+        secret_dict = {
+            'sid': s.id,
+            'secrettext': s.secrettext,
+            'time_created': s.time_created,
+            'time_ago': _time_str(time_ago),
+            'agrees': s.agrees,
+            'disagrees': s.disagrees,
+            'vote': vote
+        }
+        secrets_list.append(secret_dict)
+
+    response = {'status': 0, 'secrets': secrets_list}
+    return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
 def resendemail(request):
     email = request.GET.get('email')
+    udid = request.POST.get('udid')
+
     print "Need to resend email to %s" % email
     try:
         domain = email.split('@')[1]
         org = Org.objects.get(domain=domain)
-        send_email.send_verify_email(org, email)
+        send_email.send_verify_email(org, email, udid)
     except Exception, e:
         response = {'status': 1}
         return HttpResponse(simplejson.dumps(response), content_type="application/json")

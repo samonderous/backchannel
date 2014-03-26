@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     url(r'^stream/', views.stream, name='stream'),
     url(r'^resendemail/', views.resendemail, name='resendemail'),
     url(r'^createsecret/', views.createsecret, name='createsecret'),
+    url(r'^getlatestsecrets/', views.getlatestsecrets, name='getlatestsecrets'),
 )
 
 urlpatterns += staticfiles_urlpatterns()
