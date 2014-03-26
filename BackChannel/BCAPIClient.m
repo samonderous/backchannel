@@ -81,7 +81,7 @@ static NSString *kVerificationPath = @"backend/verify/";
     [params setObject:(NSString*)[[UIDevice currentDevice].identifierForVendor UUIDString] forKey:@"udid"];
     [params setObject:[NSNumber numberWithInteger:model.sid] forKey:@"sid"];
     [params setObject:vote == VOTE_AGREE ? @"agree" : @"disagree" forKey:@"vote"];
-    
+
     [[BCAPIClient sharedClient] POST:kVotePath parameters:params success:success failure:failure];
 }
 
@@ -89,7 +89,7 @@ static NSString *kVerificationPath = @"backend/verify/";
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *email = (NSString*)[defaults objectForKey:kEmailKey];
-    NSDictionary *params = @{@"email": email};
+    NSDictionary *params = @{@"email": email, @"udid": [[UIDevice currentDevice].identifierForVendor UUIDString]};
     NSMutableDictionary *parameters = [NSMutableDictionary dictionaryWithDictionary:params];
     [[BCAPIClient sharedClient] GET:kResendemailPath parameters:parameters success:success failure:failure];
 }

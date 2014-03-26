@@ -47,14 +47,18 @@ typedef enum TransitionType {
     // Dispose of any resources that can be recreated.
 }
 
-+ (UIViewController*)setVerifiedAndTransition
++ (UIViewController*)setVerifiedAndTransition:(NSString*)udidIN
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *verified = [defaults objectForKey:kVerifiedKey];
     
     if ([verified isEqualToString:@"NO"]) {
-        [defaults setObject:@"YES" forKey:kVerifiedKey];
+        if (![udidIN isEqualToString:[defaults objectForKey:kUdidKey]]) {
+            BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
+            return vc;
+        }
         
+        [defaults setObject:@"YES" forKey:kVerifiedKey];
         __block BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
         
         SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
@@ -83,14 +87,6 @@ typedef enum TransitionType {
         [[BCAPIClient sharedClient] sendVerification:success failure:failure];
         
         // Keep on verified page until we get a success. We want to make sure we have a user.
-        return vc;
-    } else if (NO) {
-        // TODO: Case when someone auth'd but need to check if my UDID == UDID from email link
-        // This protects from case where I auth, but forward my email to someone else who has auth'd
-        // but is going to verify using my link.
-        //
-        // Keep on verify page
-        BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
         return vc;
     } else {
         BCAuthViewController *vc = [[BCAuthViewController alloc] init];

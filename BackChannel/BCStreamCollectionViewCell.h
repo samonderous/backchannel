@@ -7,7 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BCStreamViewController.h"
+
+@class BCCellTopLayerContainerView;
+@class BCComposeContainerView;
 
 @interface BCStreamCollectionViewCell : UICollectionViewCell
+
+@property (strong, nonatomic) BCComposeContainerView *ccv;
+@property (strong, nonatomic) BCCellTopLayerContainerView *tcv;
 
 @end
