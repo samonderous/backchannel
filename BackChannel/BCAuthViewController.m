@@ -73,6 +73,10 @@ static const float kEmailMargin = 30.0;
     _email.autocorrectionType = UITextAutocorrectionTypeNo;
     _email.attributedText = emailAttributedString;
     _email.placeholder = @"Enter corporate email";
+    if ([_email respondsToSelector:@selector(setAttributedPlaceholder:)]) {
+        UIColor *color = [[BCGlobalsManager globalsManager] emptyPostCellColor];;
+        _email.attributedPlaceholder = [[NSAttributedString alloc] initWithString:@"Enter corporate email" attributes:@{NSForegroundColorAttributeName: color}];
+    }
     _email.font = emailFont;
     [_email placeIn:self alignedAt:CENTER];
     

@@ -59,7 +59,10 @@ typedef enum Direction {
 @end
 
 
-@interface BCStreamViewController : UIViewController<UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UITextViewDelegate>
+@interface BCStreamViewController : UIViewController<UICollectionViewDataSource,
+                                                        UICollectionViewDelegate,
+                                                        UICollectionViewDelegateFlowLayout,
+                                                        UITextViewDelegate>
 
 @end
 

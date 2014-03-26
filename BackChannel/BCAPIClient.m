@@ -16,6 +16,7 @@ static NSString *kStreamPath = @"backend/stream/";
 static NSString *kResendemailPath = @"backend/resendemail/";
 static NSString *kCreatePostPath = @"backend/createsecret/";
 static NSString *kVerificationPath = @"backend/verify/";
+static NSString *kLatestSecretsPath = @"backend/getlatestsecrets/";
 
 @implementation BCAPIClient
 
@@ -49,14 +50,13 @@ static NSString *kVerificationPath = @"backend/verify/";
     [[BCAPIClient sharedClient] POST:kCreatePostPath parameters:params success:success failure:failure];
 }
 
-- (void)getStream:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure
+- (void)fetchSecrets:(NSString*)path success:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withParams:(NSDictionary*)params
 {
-    NSDictionary *params = @{@"udid": [[UIDevice currentDevice].identifierForVendor UUIDString]};
-    [[BCAPIClient sharedClient] GET:kStreamPath
+    [[BCAPIClient sharedClient] GET:path
                          parameters:params
                             success:^(AFHTTPRequestOperation *operation, id responseObject) {
                                 NSMutableArray *secrets = [[NSMutableArray alloc] init];
-                                NSLog(@"%@", responseObject);
+                                //NSLog(@"%@", responseObject);
                                 for (NSDictionary *secret in responseObject[@"secrets"]) {
                                     BCSecretModel *secretModel = [[BCSecretModel alloc] init:secret[@"secrettext"]
                                                                                      withSid:[((NSString*)secret[@"sid"]) integerValue]
@@ -70,9 +70,22 @@ static NSString *kVerificationPath = @"backend/verify/";
                                 success(secrets);
                             }
                             failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-                            
+                                
                                 failure(operation, error);
                             }];
+}
+
+- (void)getStream:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure
+{
+    NSDictionary *params = @{@"udid": [[UIDevice currentDevice].identifierForVendor UUIDString]};
+    [self fetchSecrets:kStreamPath success:success failure:failure withParams:params];
+}
+
+- (void)getLatestSecrets:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withTopSid:(int)topSid
+{
+    NSDictionary *params = @{@"udid": [[UIDevice currentDevice].identifierForVendor UUIDString],
+                             @"tsid": [NSString stringWithFormat:@"%d", topSid]};
+    [self fetchSecrets:kLatestSecretsPath success:success failure:failure withParams:params];
 }
 
 - (void)setVote:(BCSecretModel*)model withVote:(Vote)vote success:(SuccessCallback)success failure:(FailureCallback)failure

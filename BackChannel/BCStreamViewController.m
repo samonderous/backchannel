@@ -22,7 +22,7 @@
 
 static const float kCellHeight = 251.0f;
 static const float kSecretFontSize = 16.0;
-static const float kCellComposeHeight = 50.0f;
+static const float kCellComposeHeight = 64.0;
 static const float kHeaderFooterHeight = 30.0;
 static const float kRowSpacing = 0.0f;
 static const float kPublishBarHeight = 60.0;
@@ -30,7 +30,9 @@ static const int kMaxCharCount = 140;
 static const int kCellEdgeInset = 30.0;
 static const float kPublishPushDuration = 1.0;
 static const float kComposeTextViewFooterViewMargin = 10.0;
-
+static const int kMaxStreamSize = 50;
+static const int kTopDividerLineWidth = 50;
+static const float kNewPostStartPositionY = 25.0;
 
 @interface BCComposeContainerView ()
 @property (strong, nonatomic) TTTAttributedLabel *charCountLabel;
@@ -70,8 +72,9 @@ static const float kComposeTextViewFooterViewMargin = 10.0;
     NSAttributedString *attributedText = [[NSMutableAttributedString alloc]
                                           initWithString:[NSString stringWithFormat:@"%d", kMaxCharCount]
                                           attributes:@{ NSFontAttributeName:font, NSForegroundColorAttributeName: fontColor}];
-    _charCountLabel.attributedText = attributedText;
     _charCountLabel.textColor = fontColor;
+    _charCountLabel.font = font;
+    _charCountLabel.attributedText = attributedText;
     CGRect rect = [attributedText boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX}
                                                options:NSStringDrawingUsesLineFragmentOrigin
                                                context:nil];
@@ -86,9 +89,10 @@ static const float kComposeTextViewFooterViewMargin = 10.0;
                                                              height - kPublishBarHeight)];
     [[UITextView appearance] setTintColor:[[BCGlobalsManager globalsManager] blueColor]];
     _textView.scrollEnabled = NO;
-    _textView.contentInset = UIEdgeInsetsMake(-4, 0, 0, 0); // To cancel out the textview top padding by default
+    //_textView.contentInset = UIEdgeInsetsMake(-14, -4, 0, 0); // Removes all padding top and left.
+    _textView.contentInset = UIEdgeInsetsMake(11, -4, 0, 0); // To cancel out the textview top padding by default
     _textView.font = textFont;
-
+    //[_textView debug];
     _publishMeter = [[UIView alloc] initWithFrame:CGRectMake(-width, 0.0, width, 1.0)];
     _publishMeter.backgroundColor = [[BCGlobalsManager globalsManager] greenColor];
     
@@ -112,7 +116,7 @@ static const float kComposeTextViewFooterViewMargin = 10.0;
 - (void)update:(int)count
 {
     UIColor *fontColor = [[BCGlobalsManager globalsManager] fontColor];
-    UIFont *font = [UIFont systemFontOfSize:12.0];
+    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:15.0];
     
     NSMutableAttributedString *mutableAttributedString = [[NSMutableAttributedString alloc]
                                 initWithString:_textView.text
@@ -132,7 +136,7 @@ static const float kComposeTextViewFooterViewMargin = 10.0;
     NSAttributedString *attributedText = [[NSMutableAttributedString alloc]
                                           initWithString:[NSString stringWithFormat:@"%d", abs(kMaxCharCount - count)]
                                           attributes:@{ NSFontAttributeName:font, NSForegroundColorAttributeName: fontColor}];
-    
+    _charCountLabel.font = font;
     _charCountLabel.attributedText = attributedText;
     
     if (count <= 0) {
@@ -164,7 +168,7 @@ static const float kComposeTextViewFooterViewMargin = 10.0;
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kCellComposeHeight)];
     UILabel *textLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 250.0, kCellComposeHeight)];
-    textLabel.text = @"Tap to say something...";
+    textLabel.text = @"Tap to say something new...";
     textLabel.textColor = [[BCGlobalsManager globalsManager] emptyPostCellColor];
     textLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
     [self addSubview:textLabel];
@@ -363,7 +367,7 @@ static BOOL isSwipeLocked = NO;
     [_textView placeIn:self alignedAt:CENTER];
     
     if (secretModel.isNew) {
-        [_textView setY:4.0];
+        [_textView setY:kNewPostStartPositionY];
         secretModel.isNew = NO;
         NSLog(@"After isnew in textvie create");
     }
@@ -690,7 +694,42 @@ static BOOL isSwipeLocked = NO;
                                                                       NSFontAttributeName: [UIFont fontWithName:@"Tisa Pro" size:18.0]}];
 }
 
-- (void)refreshSecrets
+- (void)getLatestSecrets
+{
+    void (^success)(NSMutableArray*) = ^(NSMutableArray *newSecrets) {
+        NSLog(@"Get new secrets");
+
+        NSMutableArray *secretIndexPaths = [NSMutableArray array];
+        for (int i=0; i < newSecrets.count; i++) {
+            [secretIndexPaths addObject:[NSIndexPath indexPathForItem:i+1 inSection:0]];
+        }
+
+        NSMutableArray *newMessages = [NSMutableArray arrayWithArray:[newSecrets copy]];
+        [newMessages addObjectsFromArray:[_messages copy]];
+        _messages = newMessages;
+        
+        [_messageTable performBatchUpdates:^{
+            [_messageTable insertItemsAtIndexPaths:secretIndexPaths];
+        } completion:^(BOOL finished) {
+        }];
+
+        [_refreshControl endRefreshing];
+    };
+
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error in get stream: %@", error);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
+        [_refreshControl endRefreshing];
+    };
+    
+    int topSid = 0;
+    if (_messages.count) {
+        topSid = ((BCSecretModel*)[_messages objectAtIndex:0]).sid;
+    }
+    [[BCAPIClient sharedClient] getLatestSecrets:success failure:failure withTopSid:topSid];
+}
+
+- (void)getSecrets
 {
     void (^success)(NSMutableArray*) = ^(NSMutableArray *secrets) {
         NSLog(@"Get stream success");
@@ -725,7 +764,7 @@ static BOOL isSwipeLocked = NO;
     [BCCellTopLayerContainerView setSwipeLocked:NO];
 
     _refreshControl = [[UIRefreshControl alloc] init];
-    [_refreshControl addTarget:self action:@selector(refreshSecrets)
+    [_refreshControl addTarget:self action:@selector(getLatestSecrets)
              forControlEvents:UIControlEventValueChanged];
 
     [_messageTable addSubview:_refreshControl];
@@ -737,7 +776,7 @@ static BOOL isSwipeLocked = NO;
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [self refreshSecrets];
+    [self getSecrets];
 }
 
 - (void)didReceiveMemoryWarning
@@ -768,10 +807,11 @@ static BOOL isSwipeLocked = NO;
 {
     CALayer *separatorLine = [[CALayer alloc] init];
     if (indexPath.item == 0) {
-        separatorLine.frame = CGRectMake(0.0,
+        separatorLine.frame = CGRectMake((CGRectGetWidth(contentView.bounds) - kTopDividerLineWidth) / 2.0,
                                          CGRectGetMaxY(contentView.bounds) - 1.0,
-                                         CGRectGetWidth(contentView.bounds),
+                                         kTopDividerLineWidth,
                                          1.0);
+        
     } else {
         static const float separatorLineWidth = 80.0;
         separatorLine.frame = CGRectMake(CGRectGetMidX(contentView.bounds) - (separatorLineWidth / 2.0),

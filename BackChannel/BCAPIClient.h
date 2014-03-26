@@ -26,5 +26,6 @@ typedef  void (^FailureCallback)(AFHTTPRequestOperation *operation, NSError *err
 - (void)sendVerificationEmail:(SuccessCallback)success failure:(FailureCallback)failure;
 - (void)createSecret:(NSString*)text success:(SuccessCallback)success failure:(FailureCallback)failure;
 - (void)sendVerification:(SuccessCallback)success failure:(FailureCallback)failure;
+- (void)getLatestSecrets:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withTopSid:(int)topSid;
 
 @end
