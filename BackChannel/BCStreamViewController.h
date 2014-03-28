@@ -19,15 +19,28 @@ typedef enum Direction {
 @class BCCellTopLayerContainerView;
 
 
-@interface BCComposeContainerView : UIView
-@property (strong, nonatomic) UITextView *textView;
+@interface BCComposeBarView : UIView
 @property (strong, nonatomic) UIButton *nevermind;
 @property (strong, nonatomic) UIButton *publish;
 
+- (void)updateBar:(int)count;
+
 @end
 
-@interface BCCellComposeView : UIView
+@interface BCComposeContainerView : UIView
+@property (strong, nonatomic) UITextView *textView;
+@property (strong, nonatomic) BCComposeBarView *bar;
+
+- (void)update:(int)count;
+
 @end
+
+@interface BCCellContainerView : UIView
+@end
+
+@interface BCCellComposeView : BCCellContainerView
+@end
+
 
 @interface BCCellTopLayerTextView : UIView
 + (CGRect)getViewRect:(float)width withText:(NSString*)text;
@@ -47,7 +60,7 @@ typedef enum Direction {
 
 @end
 
-@interface BCCellTopLayerContainerView : UIView<UIGestureRecognizerDelegate>
+@interface BCCellTopLayerContainerView : BCCellContainerView<UIGestureRecognizerDelegate>
 
 @property (nonatomic, assign) id <BCCellTopLayerContainerViewDelegate>delegate;
 
