@@ -29,7 +29,7 @@ static const float kPublishBarHeight = 60.0;
 static const int kMaxCharCount = 140;
 static const int kCellEdgeInset = 30.0;
 static const float kPublishPushDuration = 1.0;
-static const float kComposeTextViewFooterViewMargin = 10.0;
+static const float kComposeTextViewFooterViewMargin = 15.0;
 static const int kTopDividerLineWidth = 50;
 static const float kNewPostStartPositionY = 25.0;
 static const float kPublishMeterHeight = 2.0;
@@ -125,6 +125,8 @@ static const float kPublishMeterHeight = 2.0;
     _publish.backgroundColor = [[BCGlobalsManager globalsManager] greenBackgroundColor];
     _publish.titleLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
     _publish.userInteractionEnabled = NO;
+    _publish.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+    _publish.titleEdgeInsets = UIEdgeInsetsMake(0, 32, 0, 0);
     
     _charCountLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 30.0, 30.0)];
     [_publish addSubview:_charCountLabel];
@@ -141,7 +143,8 @@ static const float kPublishMeterHeight = 2.0;
                                                context:nil];
     rect.size.width += 20.0;
     [_charCountLabel setSize:rect.size];
-    [_charCountLabel placeIn:_publish alignedAt:CENTER_RIGTH withMargin:0];
+    // 32 from left edge of button + width of button + 15 extra margin
+    [_charCountLabel placeIn:_publish alignedAt:CENTER_LEFT withMargin:32.0 + 60.0 + 15.0];
     
     _publishMeter = [[UIView alloc] initWithFrame:CGRectMake(-width, -kPublishMeterHeight, width, kPublishMeterHeight)];
     _publishMeter.backgroundColor = [[BCGlobalsManager globalsManager] greenColor];
@@ -150,6 +153,8 @@ static const float kPublishMeterHeight = 2.0;
     [self addSubview:_publish];
     [self addSubview:_publishMeter];
 
+    //[_charCountLabel debug];
+    
     self.backgroundColor = [UIColor whiteColor];
     self.clipsToBounds = NO;
     
@@ -276,13 +281,17 @@ static const float kPublishMeterHeight = 2.0;
 - (id)init:(BCSecretModel*)model withWidth:(float)width
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:12.0];
-    NSString *voteText = [NSString stringWithFormat:@"%d agrees \u00B7 %d disagrees", (int)model.agrees, (int)model.disagrees];
-    NSRange range = [voteText rangeOfString:@"\u00B7"];
+    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:15.0];
+    NSString *voteText = [NSString stringWithFormat:@"+%d / -%d", (int)model.agrees, (int)model.disagrees];
+    NSRange range = [voteText rangeOfString:@"/"];
     NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc]
                                                  initWithString:voteText
                                                  attributes:@{ NSFontAttributeName:font,
                                                                NSForegroundColorAttributeName: [[BCGlobalsManager globalsManager] creamColor]}];
+    
+    
+    [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] blackTaglineColor]
+                           range: NSMakeRange(range.location, range.location)];
     
     if (model.vote == VOTE_AGREE) {
         [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] greenColor]
@@ -321,18 +330,14 @@ static const float kPublishMeterHeight = 2.0;
 - (id)init:(NSString*)time withWidth:(float)width
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:12.0];
+    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:15.0];
     UILabel *timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
-    timeLabel.text = time;
     timeLabel.font = font;
-    timeLabel.textColor = [[BCGlobalsManager globalsManager] blackTimestampColor];
+    timeLabel.textColor = [[BCGlobalsManager globalsManager] blackTaglineColor];
+    timeLabel.text = time;
     [self addSubview:timeLabel];
-    CGRect rect = [timeLabel.text boundingRectWithSize:(CGSize){CGFLOAT_MAX, kHeaderFooterHeight}
-                                               options:NSStringDrawingUsesLineFragmentOrigin
-                                            attributes:@{NSFontAttributeName: font}
-                                               context:nil];
-    [timeLabel setWidth:rect.size.width];
-    [timeLabel placeIn:self alignedAt:CENTER];
+    [timeLabel sizeToFit];
+    [timeLabel placeIn:self alignedAt:CENTER_LEFT];
     
     return self;
 }
@@ -414,7 +419,6 @@ static BOOL isSwipeLocked = NO;
         _textView.hidden = YES;
         [_textView setY:kNewPostStartPositionY];
         secretModel.isNew = NO;
-        NSLog(@"After isnew in textvie create");
     }
 
     [_footerView setY:(CGRectGetMaxY(_textView.frame) + kComposeTextViewFooterViewMargin)];
@@ -481,14 +485,9 @@ static BOOL isSwipeLocked = NO;
     // Place outside cell
     [_agreeContainer placeIn:self alignedAt:CENTER_LEFT withMargin:-kCellEdgeInset - CGRectGetWidth(_agreeContainer.bounds)];
     [_disagreeContainer placeIn:self alignedAt:CENTER_RIGTH withMargin:-kCellEdgeInset - CGRectGetWidth(_disagreeContainer.bounds)];
-    
-    //[_agreeContainer debug];
-    //[_disagreeContainer debug];
+
     _agreeContainer.clipsToBounds = NO;
     _disagreeContainer.clipsToBounds = NO;
-    
-    //NSLog(NSStringFromCGRect(_agreeContainer.frame));
-    //NSLog(NSStringFromCGRect(_disagreeContainer.frame));
 }
 
 - (void)updateVoteView
@@ -1125,7 +1124,6 @@ static BOOL isSwipeLocked = NO;
     [cbv.nevermind addTarget:self action:@selector(nevermindTap) forControlEvents:UIControlEventTouchUpInside];
     [cbv.publish addTarget:self action:@selector(publishHoldDown) forControlEvents:UIControlEventTouchDown];
     [cbv.publish addTarget:self action:@selector(publishHoldRelease) forControlEvents:UIControlEventTouchUpInside];
-    
     
     ccv.textView.delegate = self;
     

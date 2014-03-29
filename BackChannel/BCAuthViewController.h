@@ -8,6 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
+@interface BCAuthView : UIView
+
++ (UILabel*)getTitle;
++ (UILabel*)getTagline;
+@end
+
 @interface BCAuthViewController : UIViewController
 
 @end

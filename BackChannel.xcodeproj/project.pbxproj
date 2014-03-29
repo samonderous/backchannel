@@ -192,7 +192,6 @@
 		C100166E18BD4D4000347A31 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				C1316E1918B56D04005A85B8 /* Helpers */,
 				C14C9DAB18D3CD5500A79BFD /* envelope.png */,
 				C14C9DAC18D3CD5500A79BFD /* envelope@2x.png */,
 				C14C9D6018CF8EF300A79BFD /* verify_asset.png */,
@@ -321,6 +320,7 @@
 			children = (
 				C1316E2318B572BE005A85B8 /* MCSwipeTableViewCell.h */,
 				C1316E2418B572BE005A85B8 /* MCSwipeTableViewCell.m */,
+				C1316E1918B56D04005A85B8 /* Helpers */,
 			);
 			name = MCSwipeTableViewCell;
 			sourceTree = "<group>";

@@ -10,6 +10,7 @@
 #import "BCGlobalsManager.h"
 #import "BCStreamViewController.h"
 #import "BCAPIClient.h"
+#import "BCAuthViewController.h"
 
 #import "TTTAttributedLabel.h"
 
@@ -22,7 +23,8 @@ static const float kGreatLabelMargin = 40.0;
 
 @interface BCVerificationView ()
 @property (strong, nonatomic) UIImageView *verifyView;
-@property (strong, nonatomic) TTTAttributedLabel *title;
+@property (strong, nonatomic) UILabel *title;
+@property (strong, nonatomic) UILabel *tagLine;
 @property (strong, nonatomic, getter = getOpenMailButton) UIView *openMailButton;
 @property (strong, nonatomic, getter = getResendEmailButton) UIView *resendEmailButton;
 @end
@@ -33,25 +35,15 @@ static const float kGreatLabelMargin = 40.0;
 {
     self = [super initWithFrame:[UIScreen mainScreen].applicationFrame];
     
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:kTitleFontSize];
-    UIColor *fontColor = [[BCGlobalsManager globalsManager] blueColor];
-    NSAttributedString *titleAttributedString = [[NSMutableAttributedString alloc]
-                                                 initWithString:[NSString stringWithFormat:@"Backchannel"]
-                                                 attributes:@{NSFontAttributeName:font,
-                                                              NSForegroundColorAttributeName: fontColor}];
-    
-    CGRect titleRect = [titleAttributedString boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX}
-                                                           options:NSStringDrawingUsesLineFragmentOrigin
-                                                           context:nil];
-    _title = [[TTTAttributedLabel alloc] init];
-    _title.attributedText = titleAttributedString;
+    _title = [BCAuthView getTitle];
     [self addSubview:_title];
-    
-    [_title setSize:titleRect.size];
     [_title placeIn:self alignedAt:CENTER];
     [_title setY:kTitleTopMargin];
-    
-    
+
+    _tagLine = [BCAuthView getTagline];
+    [self addSubview:_tagLine];
+    [_tagLine placeIn:self alignedAt:CENTER];
+    [_tagLine setY:CGRectGetMaxY(_title.frame) + kTitleTaglineSpacing];
     
     _openMailButton = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth(self.bounds), kButtonHeight)];
     _resendEmailButton = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth(self.bounds), kButtonHeight)];

@@ -12,6 +12,9 @@
 extern const float kKeyboardHeight;
 extern const float kTitleTopMargin;
 extern const float kTitleFontSize;
+extern const float kTagLineFont;
+extern const float kTitleTaglineSpacing;
+
 extern NSString *kUdidKey;
 extern NSString *kVerifiedKey;
 extern NSString *kEmailKey;
@@ -32,7 +35,7 @@ extern NSString *kEmailKey;
 @property (strong, nonatomic) UIColor *emptyPostCellColor;
 @property (strong, nonatomic) UIColor *blackDividerColor;
 @property (strong, nonatomic) UIColor *blackTimestampColor;
-
+@property (strong, nonatomic) UIColor *blackTaglineColor;
 
 + (id)globalsManager;
 - (void)loadConfig;

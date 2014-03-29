@@ -16,18 +16,15 @@
 static const float kJoinBarHeight = 60.0;
 static const float kEmailMargin = 30.0;
 
-
-@interface BCAuthView : UIView
-@end
-
 @interface BCAuthView ()
-@property (strong, nonatomic) TTTAttributedLabel *title;
+@property (strong, nonatomic) UILabel *title;
 @property (strong, nonatomic, getter = getEmail) UITextField *email;
 @property (strong, nonatomic) UIView *divider;
 @property (strong, nonatomic) TTTAttributedLabel *errorText;
 @property (strong, nonatomic, getter = getJoinBar) UIView *joinBar;
 @property (strong, nonatomic) TTTAttributedLabel *joinLabel;
 @property (assign, getter = hasErrors) BOOL hasErrors;
+@property (strong, nonatomic) UILabel *tagLine;
 @end
 
 @implementation BCAuthView
@@ -38,23 +35,19 @@ static const float kEmailMargin = 30.0;
                                            CGRectGetMinY([UIScreen mainScreen].applicationFrame),
                                            CGRectGetWidth([UIScreen mainScreen].bounds),
                                            CGRectGetHeight([UIScreen mainScreen].applicationFrame) - kKeyboardHeight)];
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:kTitleFontSize];
-    UIColor *fontColor = [[BCGlobalsManager globalsManager] blueColor];
-    NSAttributedString *titleAttributedString = [[NSMutableAttributedString alloc]
-                                                 initWithString:[NSString stringWithFormat:@"Backchannel"]
-                                                 attributes:@{NSFontAttributeName:font, NSForegroundColorAttributeName: fontColor}];
-
-    CGRect titleRect = [titleAttributedString boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX}
-                                                           options:NSStringDrawingUsesLineFragmentOrigin
-                                                           context:nil];
-    _title = [[TTTAttributedLabel alloc] init];
-    _title.attributedText = titleAttributedString;
-    [self addSubview:_title];
     
-    [_title setSize:titleRect.size];
+    _title = [BCAuthView getTitle];
+    [self addSubview:_title];
     [_title placeIn:self alignedAt:CENTER];
     [_title setY:kTitleTopMargin];
 
+    
+    _tagLine = [BCAuthView getTagline];
+    [self addSubview:_tagLine];
+    [_tagLine placeIn:self alignedAt:CENTER];
+    [_title debug];
+    [_tagLine setY:CGRectGetMaxY(_title.frame) + kTitleTaglineSpacing];
+    
     UIFont *emailFont = [UIFont fontWithName:@"Tisa Pro" size:18.0];
     NSMutableAttributedString *emailAttributedString = [[NSMutableAttributedString alloc]
                                                         initWithString:@""
@@ -169,6 +162,32 @@ static const float kEmailMargin = 30.0;
     if (isError) {
         [self showError];
     }
+}
+
++ (UILabel*)getTitle
+{
+    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:kTitleFontSize];
+    UIColor *fontColor = [[BCGlobalsManager globalsManager] blueColor];
+    UILabel *title = [[UILabel alloc] init];
+    title.font = font;
+    title.textColor = fontColor;
+    title.text = @"Backchannel";
+    [title sizeToFit];
+    
+    return title;
+}
+
++ (UILabel*)getTagline
+{
+    UIFont *tagLineFont = [UIFont fontWithName:@"Tisa Pro" size:kTagLineFont];
+    UIColor *tagLineColor = [[BCGlobalsManager globalsManager] blackTaglineColor];
+    UILabel *tagLine = [[UILabel alloc] init];
+    tagLine.font = tagLineFont;
+    tagLine.textColor = tagLineColor;
+    tagLine.text = @"Speak with ease at work";
+    [tagLine sizeToFit];
+
+    return tagLine;
 }
 
 @end
