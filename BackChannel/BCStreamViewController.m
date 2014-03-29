@@ -380,6 +380,13 @@ static const float kPublishMeterHeight = 2.0;
 @property (assign) BOOL isDragging;
 @property (strong, nonatomic) UIView *agreeContainer;
 @property (strong, nonatomic) UIView *disagreeContainer;
+
+@property UIDynamicAnimator *animator;
+@property UIGravityBehavior *gravityBehavior;
+@property UICollisionBehavior *collisionBehavior;
+@property UIPushBehavior *pushBehavior;
+@property CGFloat swipeCellStartX;
+
 @end
 
 @implementation BCCellTopLayerContainerView
@@ -423,6 +430,9 @@ static BOOL isSwipeLocked = NO;
         [self updateVoteView];
     }
     self.backgroundColor = [UIColor whiteColor];
+    
+    _animator = [[UIDynamicAnimator alloc] initWithReferenceView:self.superview];
+    _swipeCellStartX = 0;
     
     return self;
 }
@@ -579,6 +589,52 @@ static BOOL isSwipeLocked = NO;
         return;
     }
 
+    CGPoint delta = [gesture translationInView:gesture.view.superview];
+    CGPoint velocity = [gesture velocityInView:gesture.view.superview];
+    CGPoint location = [gesture locationInView:gesture.view.superview];
+    location.y = CGRectGetMidY(gesture.view.superview.bounds);
+    
+    if (gesture.state == UIGestureRecognizerStateBegan)
+    {
+        _swipeCellStartX = gesture.view.frame.origin.x;
+        [_animator removeAllBehaviors];
+    }
+    else if (gesture.state == UIGestureRecognizerStateChanged)
+    {
+        [UIView animateWithDuration:0.0 animations:^
+        {
+            gesture.view.frame = CGRectMake(_swipeCellStartX + delta.x, gesture.view.frame.origin.y, gesture.view.frame.size.width, gesture.view.frame.size.height);
+        } completion:nil];
+    }
+    else if (gesture.state == UIGestureRecognizerStateEnded)
+    {
+        _swipeCellStartX = 0;
+        
+        _collisionBehavior = [[UICollisionBehavior alloc] initWithItems:@[gesture.view]];
+        CGFloat side = delta.x  > 0 ? 1.0f : -1.0f;
+        if (side > 0)
+        {
+            [_collisionBehavior addBoundaryWithIdentifier:@"leftScreenEdge" fromPoint:CGPointMake(0, 0) toPoint:CGPointMake(0, 1136)];
+        }
+        else
+        {
+            [_collisionBehavior addBoundaryWithIdentifier:@"rightScreenEdge" fromPoint:CGPointMake(260, 0) toPoint:CGPointMake(260, 1136)];
+        }
+        [_animator addBehavior:_collisionBehavior];
+
+        _gravityBehavior = [[UIGravityBehavior alloc] initWithItems:@[gesture.view]];
+        _gravityBehavior.gravityDirection = CGVectorMake(-3.0f * side, 0.0f);
+        [_animator addBehavior:_gravityBehavior];
+
+        _pushBehavior = [[UIPushBehavior alloc] initWithItems:@[gesture.view] mode:UIPushBehaviorModeInstantaneous];
+        _pushBehavior.magnitude = 0.0f;
+        _pushBehavior.angle = 0.0f;
+        _pushBehavior.pushDirection = CGVectorMake(velocity.x / 100.0f, 0.0f);
+        _pushBehavior.active = YES;
+        [_animator addBehavior:_pushBehavior];
+    }
+    
+    /*
     float width = CGRectGetWidth(gesture.view.bounds);
     static const float cutOffPercentage = 0.7;
     static const float resistPan = 10.0;
@@ -645,6 +701,7 @@ static BOOL isSwipeLocked = NO;
                                              }];
         }];
     }
+    */
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
