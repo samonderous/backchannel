@@ -588,6 +588,8 @@ static BOOL isSwipeLocked = NO;
     if (isSwipeLocked || _secretModel.vote != VOTE_NONE) {
         return;
     }
+    
+    CGFloat dragThreshold = 10.0f;
 
     CGPoint delta = [gesture translationInView:gesture.view.superview];
     CGPoint velocity = [gesture velocityInView:gesture.view.superview];
@@ -601,9 +603,12 @@ static BOOL isSwipeLocked = NO;
     }
     else if (gesture.state == UIGestureRecognizerStateChanged)
     {
+        if (abs(delta.x) < dragThreshold) return; // create "resistance" to cell panning immediately
+        
         [UIView animateWithDuration:0.0 animations:^
         {
-            gesture.view.frame = CGRectMake(_swipeCellStartX + delta.x, gesture.view.frame.origin.y, gesture.view.frame.size.width, gesture.view.frame.size.height);
+            CGFloat newX = _swipeCellStartX + delta.x - (velocity.x / abs(velocity.x)) * dragThreshold;
+            gesture.view.frame = CGRectMake(newX, gesture.view.frame.origin.y, gesture.view.frame.size.width, gesture.view.frame.size.height);
         } completion:nil];
     }
     else if (gesture.state == UIGestureRecognizerStateEnded)
