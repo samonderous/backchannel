@@ -591,6 +591,7 @@ static BOOL isSwipeLocked = NO;
     }
     
     CGFloat dragThreshold = 10.0f;
+    CGFloat voteThreshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset;
 
     CGPoint delta = [gesture translationInView:gesture.view.superview];
     CGPoint velocity = [gesture velocityInView:gesture.view.superview];
@@ -612,6 +613,10 @@ static BOOL isSwipeLocked = NO;
             CGFloat newX = _swipeCellStartX + delta.x - (velocity.x / fabsf(velocity.x)) * dragThreshold;
             gesture.view.frame = CGRectMake(newX, gesture.view.frame.origin.y, gesture.view.frame.size.width, gesture.view.frame.size.height);
         } completion:nil];
+        
+        // trigger vote if threshold crossed
+        BOOL thresholdCrossed = (fabsf(gesture.view.frame.origin.x) >= voteThreshhold);
+        [self swipeVoteInteractionHandle:thresholdCrossed inDirection:[self getSwipeDirection:velocity]];
     }
     else if (gesture.state == UIGestureRecognizerStateEnded)
     {
