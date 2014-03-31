@@ -236,7 +236,7 @@ static const float kEmailMargin = 30.0;
             [defaults setObject:@"NO" forKey:kVerifiedKey];
             [defaults synchronize];
             BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
-            vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+            vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
             [_av updateEmail:persons withError:NO];
             [self presentViewController:vc animated:YES completion:^() {}];
         }

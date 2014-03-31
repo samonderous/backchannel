@@ -72,7 +72,7 @@ typedef enum TransitionType {
                 BCStreamViewController *sc = [[BCStreamViewController alloc] init];
                 sc.title = @"Backchannel";
                 UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:sc];
-                sc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+                sc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
                 [vc presentViewController:nc animated:YES completion:^() {}];
             }
         };
@@ -114,18 +114,18 @@ typedef enum TransitionType {
     TransitionType transition = [BCViewController checkAuth];
     if (transition == TRANSITION_AUTH) {
         BCAuthViewController *vc = [[BCAuthViewController alloc] init];
-        vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+        vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
         [self presentViewController:vc animated:YES completion:^() {}];
     } else if (transition == TRANSITION_VERIFY){
         BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
-        vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+        vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
         [self presentViewController:vc animated:YES completion:^() {}];
         
     } else if (transition == TRANSITION_STREAM) {
         BCStreamViewController *vc = [[BCStreamViewController alloc] init];
         UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
         vc.title = @"Backchannel";
-        vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+        vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
         [self presentViewController:nc animated:YES completion:^() {}];
     }
 }

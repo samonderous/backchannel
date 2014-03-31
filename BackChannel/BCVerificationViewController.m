@@ -152,7 +152,7 @@ static const float kGreatLabelMargin = 40.0;
     BCStreamViewController *vc = [[BCStreamViewController alloc] init];
     vc.title = @"Backchannel";
     UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
-    vc.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+    vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     [self presentViewController:nc animated:YES completion:^() {}];
     #else
     [[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"message:DUMMY"]];
