@@ -585,7 +585,8 @@ static BOOL isSwipeLocked = NO;
 
 - (void)handleSwipe:(UIPanGestureRecognizer*)gesture
 {
-    if (isSwipeLocked || _secretModel.vote != VOTE_NONE) {
+    if (_secretModel.vote != VOTE_NONE)
+    {
         return;
     }
     
@@ -603,11 +604,12 @@ static BOOL isSwipeLocked = NO;
     }
     else if (gesture.state == UIGestureRecognizerStateChanged)
     {
-        if (abs(delta.x) < dragThreshold) return; // create "resistance" to cell panning immediately
+        if (fabsf(delta.x) < dragThreshold) return; // create "resistance" to cell panning immediately
         
+        // animate cell to track swipe
         [UIView animateWithDuration:0.0 animations:^
         {
-            CGFloat newX = _swipeCellStartX + delta.x - (velocity.x / abs(velocity.x)) * dragThreshold;
+            CGFloat newX = _swipeCellStartX + delta.x - (velocity.x / fabsf(velocity.x)) * dragThreshold;
             gesture.view.frame = CGRectMake(newX, gesture.view.frame.origin.y, gesture.view.frame.size.width, gesture.view.frame.size.height);
         } completion:nil];
     }
