@@ -606,9 +606,9 @@ static BOOL isSwipeLocked = NO;
         if (fabsf(delta.x) < dragThreshold) return;
         
         // move cell to track swipe
-        CGFloat newX = _swipeCellStartX + delta.x - (velocity.x / fabsf(velocity.x)) * dragThreshold;
+        CGFloat xDirection = (velocity.x > 0) ? 1.0f : -1.0f;
+        CGFloat newX = _swipeCellStartX + delta.x - xDirection * dragThreshold;
         CGRect newFrame = CGRectMake(newX, gesture.view.frame.origin.y, gesture.view.frame.size.width, gesture.view.frame.size.height);
-        NSLog(@"newFrame = %@", NSStringFromCGRect(newFrame));
         gesture.view.frame = newFrame;
         
         // trigger vote if threshold crossed
