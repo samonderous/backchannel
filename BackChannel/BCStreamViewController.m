@@ -386,6 +386,7 @@ static const float kPUblishButtonCharCountLabelSpacing = 15.0;
 @property (assign) BOOL isDragging;
 @property (strong, nonatomic) UIView *agreeContainer;
 @property (strong, nonatomic) UIView *disagreeContainer;
+@property (assign) BOOL thresholdCrossed;
 
 @property UIDynamicAnimator *animator;
 @property UIGravityBehavior *gravityBehavior;
@@ -438,6 +439,7 @@ static BOOL isSwipeLocked = NO;
     
     _animator = [[UIDynamicAnimator alloc] initWithReferenceView:self.superview];
     _swipeCellStartX = 0;
+    _thresholdCrossed = NO;
     
     return self;
 }
@@ -599,6 +601,7 @@ static BOOL isSwipeLocked = NO;
     
     if (gesture.state == UIGestureRecognizerStateBegan)
     {
+        _thresholdCrossed = NO;
         _swipeCellStartX = gesture.view.frame.origin.x;
         [_animator removeAllBehaviors];
     }
@@ -614,10 +617,8 @@ static BOOL isSwipeLocked = NO;
         gesture.view.frame = newFrame;
         
         // trigger vote if threshold crossed
-        BOOL thresholdCrossed = (fabsf(gesture.view.frame.origin.x) >= voteThreshhold);
-        [self swipeVoteInteractionHandle:thresholdCrossed inDirection:direction];
-        //_agreeContainer.alpha = 1;
-        //_disagreeContainer.alpha = 1;
+        _thresholdCrossed = (fabsf(gesture.view.frame.origin.x) >= voteThreshhold);
+        [self swipeVoteInteractionHandle:_thresholdCrossed inDirection:direction];
     }
     else if (gesture.state == UIGestureRecognizerStateEnded)
     {
@@ -646,7 +647,10 @@ static BOOL isSwipeLocked = NO;
         _pushBehavior.active = YES;
         [_animator addBehavior:_pushBehavior];
         
-        [self.delegate swipeReleaseAnimationBackComplete:self inDirection:direction];
+        if (_thresholdCrossed)
+        {
+            [self.delegate swipeReleaseAnimationBackComplete:self inDirection:direction];
+        }
     }
 }
 
