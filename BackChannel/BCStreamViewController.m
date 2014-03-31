@@ -595,6 +595,8 @@ static BOOL isSwipeLocked = NO;
     CGPoint location = [gesture locationInView:gesture.view.superview];
     location.y = CGRectGetMidY(gesture.view.superview.bounds);
     
+    Direction direction = [self getSwipeDirection:velocity];
+    
     if (gesture.state == UIGestureRecognizerStateBegan)
     {
         _swipeCellStartX = gesture.view.frame.origin.x;
@@ -613,7 +615,9 @@ static BOOL isSwipeLocked = NO;
         
         // trigger vote if threshold crossed
         BOOL thresholdCrossed = (fabsf(gesture.view.frame.origin.x) >= voteThreshhold);
-        [self swipeVoteInteractionHandle:thresholdCrossed inDirection:[self getSwipeDirection:velocity]];
+        [self swipeVoteInteractionHandle:thresholdCrossed inDirection:direction];
+        //_agreeContainer.alpha = 1;
+        //_disagreeContainer.alpha = 1;
     }
     else if (gesture.state == UIGestureRecognizerStateEnded)
     {
@@ -641,76 +645,9 @@ static BOOL isSwipeLocked = NO;
         _pushBehavior.pushDirection = CGVectorMake(velocity.x / 100.0f, 0.0f);
         _pushBehavior.active = YES;
         [_animator addBehavior:_pushBehavior];
+        
+        [self.delegate swipeReleaseAnimationBackComplete:self inDirection:direction];
     }
-    
-    /*
-    float width = CGRectGetWidth(gesture.view.bounds);
-    static const float cutOffPercentage = 0.7;
-    static const float resistPan = 10.0;
-    const float fullDuration = 0.7;
-    float threshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset;
-    float totalSwipeDistance = width * cutOffPercentage;
-    
-    UIGestureRecognizerState state = gesture.state;
-    CGPoint delta = [gesture translationInView:gesture.view.superview];
-    CGPoint velocity = [gesture velocityInView:gesture.view.superview];
-    Direction direction;
-  
-    direction = [self getSwipeDirection:velocity];
-
-    if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
-        _isDragging = YES;
-        
-        if (fabsf(gesture.view.frame.origin.x) >= threshhold) {
-            [self swipeVoteInteractionHandle:YES inDirection:direction];
-        } else {
-            [self swipeVoteInteractionHandle:NO inDirection:direction];
-        }
-        
-        if (fabsf(gesture.view.frame.origin.x) >= totalSwipeDistance) {
-            gesture.view.center = CGPointMake(gesture.view.center.x, gesture.view.center.y);
-            [gesture setTranslation:CGPointZero inView:self.superview];
-        } else {
-            gesture.view.center = CGPointMake(gesture.view.center.x + delta.x, gesture.view.center.y);
-            [gesture setTranslation:CGPointZero inView:self.superview];
-        }
-    } else if (state == UIGestureRecognizerStateEnded || state == UIGestureRecognizerStateCancelled) {
-        _isDragging = NO;
-        
-        float finalX = 0.0;
-        float duration = 0.0;
-        if (fabsf(gesture.view.frame.origin.x) < resistPan) {
-            finalX = 0.0;
-        } else if (fabsf(gesture.view.frame.origin.x) > threshhold || fabsf(velocity.x) > 1000.0) {
-            finalX = (width * cutOffPercentage) * (gesture.view.frame.origin.x < 0.0 ? -1.0 : 1.0);
-            duration = fullDuration * ((fabsf(finalX - gesture.view.frame.origin.x) / totalSwipeDistance));
-        } else {
-            duration = fullDuration * ((fabsf(finalX - gesture.view.frame.origin.x) / totalSwipeDistance));
-        }
-
-        [UIView animateWithDuration:duration delay:0.0 options: UIViewAnimationOptionCurveLinear
-                         animations:^{
-                             [gesture.view setX:finalX];
-                         }
-                         completion:^(BOOL finished) {
-                            // Slide back to origin
-                             isSwipeLocked = NO;
-                             [UIView animateWithDuration:(fullDuration * (fabsf(gesture.view.frame.origin.x) / totalSwipeDistance))
-                                                  delay:0.0
-                                                options: UIViewAnimationOptionCurveLinear
-                                             animations:^{
-                                                 [gesture.view setX:0.0];
-                                             }
-                                             completion:^(BOOL finished) {
-                                                 if (finalX) {
-                                                     [self.delegate swipeReleaseAnimationBackComplete:self inDirection: direction];
-                                                     _agreeContainer.alpha = 1;
-                                                     _disagreeContainer.alpha = 1;
-                                                 }
-                                             }];
-        }];
-    }
-    */
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
