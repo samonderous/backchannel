@@ -585,10 +585,7 @@ static BOOL isSwipeLocked = NO;
 
 - (void)handleSwipe:(UIPanGestureRecognizer*)gesture
 {
-    if (_secretModel.vote != VOTE_NONE)
-    {
-        return;
-    }
+    if (_secretModel.vote != VOTE_NONE) return;
     
     CGFloat dragThreshold = 10.0f;
     CGFloat voteThreshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset;
@@ -610,7 +607,9 @@ static BOOL isSwipeLocked = NO;
         
         // move cell to track swipe
         CGFloat newX = _swipeCellStartX + delta.x - (velocity.x / fabsf(velocity.x)) * dragThreshold;
-        gesture.view.frame = CGRectMake(newX, gesture.view.frame.origin.y, gesture.view.frame.size.width, gesture.view.frame.size.height);
+        CGRect newFrame = CGRectMake(newX, gesture.view.frame.origin.y, gesture.view.frame.size.width, gesture.view.frame.size.height);
+        NSLog(@"newFrame = %@", NSStringFromCGRect(newFrame));
+        gesture.view.frame = newFrame;
         
         // trigger vote if threshold crossed
         BOOL thresholdCrossed = (fabsf(gesture.view.frame.origin.x) >= voteThreshhold);
