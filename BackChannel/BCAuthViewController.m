@@ -45,7 +45,6 @@ static const float kEmailMargin = 30.0;
     _tagLine = [BCAuthView getTagline];
     [self addSubview:_tagLine];
     [_tagLine placeIn:self alignedAt:CENTER];
-    [_title debug];
     [_tagLine setY:CGRectGetMaxY(_title.frame) + kTitleTaglineSpacing];
     
     UIFont *emailFont = [UIFont fontWithName:@"Tisa Pro" size:18.0];

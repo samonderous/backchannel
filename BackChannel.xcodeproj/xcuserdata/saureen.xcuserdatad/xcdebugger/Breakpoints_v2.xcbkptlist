@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BackChannel/BCStreamViewController.m"
-            timestampString = "417824052.891193"
+            timestampString = "417827556.264606"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "878"
-            endingLineNumber = "878"
+            startingLineNumber = "888"
+            endingLineNumber = "888"
             landmarkName = "-prepareCell:collectionView:indexPath:"
             landmarkType = "5">
          </BreakpointContent>

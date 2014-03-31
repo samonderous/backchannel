@@ -33,6 +33,7 @@ static const float kComposeTextViewFooterViewMargin = 15.0;
 static const int kTopDividerLineWidth = 50;
 static const float kNewPostStartPositionY = 25.0;
 static const float kPublishMeterHeight = 2.0;
+static const float kPUblishButtonCharCountLabelSpacing = 15.0;
 
 
 
@@ -144,7 +145,7 @@ static const float kPublishMeterHeight = 2.0;
     rect.size.width += 20.0;
     [_charCountLabel setSize:rect.size];
     // 32 from left edge of button + width of button + 15 extra margin
-    [_charCountLabel placeIn:_publish alignedAt:CENTER_LEFT withMargin:32.0 + 60.0 + 15.0];
+    [_charCountLabel placeIn:_publish alignedAt:CENTER_LEFT withMargin:32.0 + 60.0 + kPUblishButtonCharCountLabelSpacing];
     
     _publishMeter = [[UIView alloc] initWithFrame:CGRectMake(-width, -kPublishMeterHeight, width, kPublishMeterHeight)];
     _publishMeter.backgroundColor = [[BCGlobalsManager globalsManager] greenColor];
@@ -669,8 +670,6 @@ static BOOL isSwipeLocked = NO;
 - (id)init
 {
     self = [super init];
-    //self.edgesForExtendedLayout = UIRectEdgeAll;
-    //self.automaticallyAdjustsScrollViewInsets = YES;
     return self;
 }
 
@@ -768,7 +767,7 @@ static BOOL isSwipeLocked = NO;
     
     int topSid = 0;
     if (_messages.count) {
-        topSid = ((BCSecretModel*)[_messages objectAtIndex:0]).sid;
+        topSid = (int)((BCSecretModel*)[_messages objectAtIndex:0]).sid;
     }
     [[BCAPIClient sharedClient] getLatestSecrets:success failure:failure withTopSid:topSid];
 }
@@ -794,6 +793,11 @@ static BOOL isSwipeLocked = NO;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    /*
+    self.automaticallyAdjustsScrollViewInsets = NO;
+    self.edgesForExtendedLayout = UIRectEdgeNone;
+     */
+    
     _isSwipeLock = NO;
 
 	// Do any additional setup after loading the view.
@@ -815,6 +819,12 @@ static BOOL isSwipeLocked = NO;
     _messageTable.alwaysBounceVertical = YES;
     
     [self setupStreamBar];
+    
+    /*
+    self.extendedLayoutIncludesOpaqueBars = YES;
+    self.edgesForExtendedLayout = UIRectEdgeNone;
+    self.automaticallyAdjustsScrollViewInsets = YES;
+     */
 }
 
 - (void)viewWillAppear:(BOOL)animated
