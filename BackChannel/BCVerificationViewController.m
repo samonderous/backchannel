@@ -142,6 +142,7 @@ static const float kGreatLabelMargin = 40.0;
     [super loadView];
     _vc = [[BCVerificationView alloc] init];
     [self.view addSubview:_vc];
+    self.view.backgroundColor = [UIColor whiteColor];
 }
 
 - (void)openMailTap:(UITapGestureRecognizer*)gesture
@@ -175,6 +176,8 @@ static const float kGreatLabelMargin = 40.0;
 
 - (void)viewDidLoad
 {
+  
+
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     

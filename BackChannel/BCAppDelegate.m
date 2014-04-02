@@ -6,6 +6,9 @@
 //  Copyright (c) 2014 Saureen Shah. All rights reserved.
 //
 
+#import <Crashlytics/Crashlytics.h>
+#import "Flurry.h"
+
 #import "BCAppDelegate.h"
 #import "BCGlobalsManager.h"
 #import "BCViewController.h"
@@ -39,14 +42,21 @@
     NSDictionary *parsedQueryDict = [self parseQueryString:[url query]];
     UIViewController *vc = [BCViewController setVerifiedAndTransition:parsedQueryDict[@"u"]];
     self.window.rootViewController = vc;
-
+    
     return YES;
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    //[[AFNetworkActivityLogger sharedLogger] startLogging];
+    //[[Crashlytics sharedInstance] setDebugMode:YES];
+    [Crashlytics startWithAPIKey:@"f59d6a71a710bdff855cd287d71b64b426d0e957"];
+    
+    [Flurry setCrashReportingEnabled:YES];
+    [Flurry startSession:@"MWV2G8ZG3JTK75ZPRNMC"];
+    
     [[BCGlobalsManager globalsManager] loadConfig];
+    //[[AFNetworkActivityLogger sharedLogger] startLogging];
+
     // Override point for customization after application launch.
     return YES;
 }

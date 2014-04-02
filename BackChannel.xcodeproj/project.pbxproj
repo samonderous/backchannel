@@ -54,6 +54,9 @@
 		C14C9DA718D194CD00A79BFD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C14C9DA618D194CD00A79BFD /* QuartzCore.framework */; };
 		C14C9DAD18D3CD5500A79BFD /* envelope.png in Resources */ = {isa = PBXBuildFile; fileRef = C14C9DAB18D3CD5500A79BFD /* envelope.png */; };
 		C14C9DAE18D3CD5500A79BFD /* envelope@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C14C9DAC18D3CD5500A79BFD /* envelope@2x.png */; };
+		C16D092318EA358400BB88FB /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C16D092218EA358400BB88FB /* Crashlytics.framework */; };
+		C1E6D95018EB901F0007BF21 /* libFlurry_4.4.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E6D94F18EB901F0007BF21 /* libFlurry_4.4.0.a */; };
+		C1E6D95218EB90510007BF21 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E6D95118EB90510007BF21 /* SystemConfiguration.framework */; };
 		C1F0C31218C51C5500009BDD /* BCGlobalsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */; };
 		C1F5B74118CBC6E600D3FD32 /* BCAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5B74018CBC6E600D3FD32 /* BCAuthViewController.m */; };
 		C1F5B74418CBC6FE00D3FD32 /* BCVerificationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5B74318CBC6FE00D3FD32 /* BCVerificationViewController.m */; };
@@ -155,6 +158,10 @@
 		C14C9DA618D194CD00A79BFD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		C14C9DAB18D3CD5500A79BFD /* envelope.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = envelope.png; sourceTree = "<group>"; };
 		C14C9DAC18D3CD5500A79BFD /* envelope@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "envelope@2x.png"; sourceTree = "<group>"; };
+		C16D092218EA358400BB88FB /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
+		C1E6D94E18EB901F0007BF21 /* Flurry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Flurry.h; sourceTree = "<group>"; };
+		C1E6D94F18EB901F0007BF21 /* libFlurry_4.4.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libFlurry_4.4.0.a; sourceTree = "<group>"; };
+		C1E6D95118EB90510007BF21 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		C1F0C31018C51C5500009BDD /* BCGlobalsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BCGlobalsManager.h; sourceTree = "<group>"; };
 		C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BCGlobalsManager.m; sourceTree = "<group>"; };
 		C1F0C31418C68A2600009BDD /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
@@ -169,7 +176,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1E6D95218EB90510007BF21 /* SystemConfiguration.framework in Frameworks */,
 				C14C9DA718D194CD00A79BFD /* QuartzCore.framework in Frameworks */,
+				C16D092318EA358400BB88FB /* Crashlytics.framework in Frameworks */,
+				C1E6D95018EB901F0007BF21 /* libFlurry_4.4.0.a in Frameworks */,
 				C1316DDE18B3F741005A85B8 /* CoreGraphics.framework in Frameworks */,
 				C1316DE018B3F741005A85B8 /* UIKit.framework in Frameworks */,
 				C1316DDC18B3F741005A85B8 /* Foundation.framework in Frameworks */,
@@ -203,6 +213,7 @@
 		C100167618BD747F00347A31 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				C1E6D94D18EB901F0007BF21 /* Flurry */,
 				C14C9D6318CFC92F00A79BFD /* AFNetworking */,
 				C14C9D8018CFC95A00A79BFD /* UIKit+AFNetworking */,
 				C1316E3218B5760E005A85B8 /* SVPullToRefresh */,
@@ -234,6 +245,8 @@
 		C1316DDA18B3F741005A85B8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C1E6D95118EB90510007BF21 /* SystemConfiguration.framework */,
+				C16D092218EA358400BB88FB /* Crashlytics.framework */,
 				C14C9DA618D194CD00A79BFD /* QuartzCore.framework */,
 				C1F0C31418C68A2600009BDD /* CoreText.framework */,
 				C1316DDB18B3F741005A85B8 /* Foundation.framework */,
@@ -398,6 +411,16 @@
 			path = "UIKit+AFNetworking";
 			sourceTree = "<group>";
 		};
+		C1E6D94D18EB901F0007BF21 /* Flurry */ = {
+			isa = PBXGroup;
+			children = (
+				C1E6D94E18EB901F0007BF21 /* Flurry.h */,
+				C1E6D94F18EB901F0007BF21 /* libFlurry_4.4.0.a */,
+			);
+			name = Flurry;
+			path = ../Flurry;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -408,6 +431,7 @@
 				C1316DD418B3F741005A85B8 /* Sources */,
 				C1316DD518B3F741005A85B8 /* Frameworks */,
 				C1316DD618B3F741005A85B8 /* Resources */,
+				C16D092118EA354300BB88FB /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -498,6 +522,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C16D092118EA354300BB88FB /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "./Crashlytics.framework/run f59d6a71a710bdff855cd287d71b64b426d0e957 8aea21451ccf9cea2bdbf20143ee882aacab354836800e133860775ec39fe0ad";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		C1316DD418B3F741005A85B8 /* Sources */ = {
@@ -676,9 +716,17 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BackChannel/BackChannel-Prefix.pch";
 				INFOPLIST_FILE = "BackChannel/BackChannel-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Flurry",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -692,9 +740,17 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BackChannel/BackChannel-Prefix.pch";
 				INFOPLIST_FILE = "BackChannel/BackChannel-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Flurry",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;

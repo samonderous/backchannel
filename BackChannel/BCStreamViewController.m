@@ -29,12 +29,12 @@ static const float kPublishBarHeight = 60.0;
 static const int kMaxCharCount = 140;
 static const int kCellEdgeInset = 30.0;
 static const float kPublishPushDuration = 1.0;
-static const float kComposeTextViewFooterViewMargin = 15.0;
 static const int kTopDividerLineWidth = 50;
 static const float kNewPostStartPositionY = 25.0;
 static const float kPublishMeterHeight = 2.0;
 static const float kPUblishButtonCharCountLabelSpacing = 15.0;
-
+static const float kComposeTextViewFooterViewMargin = 15.0;
+static const float kComposeTextViewHeaderViewMargin = 30.0;
 
 
 @implementation BCCellContainerView
@@ -505,12 +505,11 @@ static BOOL isSwipeLocked = NO;
 
 - (void)updateVoteView
 {
-    static const float margin = 10.0;
     [_headerView removeFromSuperview];
     _headerView = [[BCCellTopLayerHeaderView alloc] init:_secretModel withWidth:_size.width];
     [_headerView placeIn:self alignedAt:CENTER];
     [self addSubview:_headerView];
-    [_headerView setY:CGRectGetMinY(_textView.frame) - CGRectGetHeight(_footerView.bounds) - margin];
+    [_headerView setY:kComposeTextViewHeaderViewMargin];
 }
 
 + (void)setSwipeLocked:(BOOL)isLock
@@ -694,9 +693,8 @@ static BOOL isSwipeLocked = NO;
     self.view = [[UIView alloc] initWithFrame:[UIScreen mainScreen].applicationFrame];
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
     layout.sectionInset = UIEdgeInsetsMake(0.0, kCellEdgeInset, 0.0, kCellEdgeInset);
-    _messageTable = [[UICollectionView alloc] initWithFrame:[UIScreen mainScreen].bounds collectionViewLayout:layout];
+    _messageTable = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
     [self.view addSubview:_messageTable];
-    self.view.backgroundColor = [UIColor whiteColor];
 }
 
 - (BCSecretModel*)addSecret:(NSString*)text
@@ -730,7 +728,7 @@ static BOOL isSwipeLocked = NO;
 - (void)setupStreamBar
 {
     self.navigationController.navigationBar.barTintColor = [[BCGlobalsManager globalsManager] blueColor];
-    self.navigationController.navigationBar.translucent = YES;
+    self.navigationController.navigationBar.translucent = NO;
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
     [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor],
                                                                       NSFontAttributeName: [UIFont fontWithName:@"Tisa Pro" size:18.0]}];
@@ -800,11 +798,8 @@ static BOOL isSwipeLocked = NO;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    /*
-    self.automaticallyAdjustsScrollViewInsets = NO;
-    self.edgesForExtendedLayout = UIRectEdgeNone;
-     */
-    
+
+    self.view.backgroundColor = [UIColor whiteColor];
     _isSwipeLock = NO;
 
 	// Do any additional setup after loading the view.
@@ -826,12 +821,12 @@ static BOOL isSwipeLocked = NO;
     _messageTable.alwaysBounceVertical = YES;
     
     [self setupStreamBar];
-    
-    /*
-    self.extendedLayoutIncludesOpaqueBars = YES;
-    self.edgesForExtendedLayout = UIRectEdgeNone;
-    self.automaticallyAdjustsScrollViewInsets = YES;
-     */
+}
+
+- (void)viewDidLayoutSubviews
+{
+    [super viewDidLayoutSubviews];
+    _messageTable.frame = self.view.bounds;
 }
 
 - (void)viewWillAppear:(BOOL)animated
