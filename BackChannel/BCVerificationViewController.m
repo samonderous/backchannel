@@ -150,14 +150,21 @@ static const float kGreatLabelMargin = 40.0;
     NSLog(@"Deep link to Mail.app");
     
     #if TARGET_IPHONE_SIMULATOR
+    
     BCStreamViewController *vc = [[BCStreamViewController alloc] init];
     vc.title = @"Backchannel";
     UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
+    [[BCGlobalsManager globalsManager] logFlurryAllPageViews:nc];
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     [self presentViewController:nc animated:YES completion:^() {}];
+    
     #else
+    
     [[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"message:DUMMY"]];
+    
     #endif
+    
+    [[BCGlobalsManager globalsManager] logFlurryEvent:@"openmail_tap" withParams:nil];
 }
 
 - (void)resendEmailTap:(UITapGestureRecognizer*)gesture
@@ -172,6 +179,8 @@ static const float kGreatLabelMargin = 40.0;
     };
     
     [[BCAPIClient sharedClient] sendVerificationEmail:success failure:failure];
+    
+    [[BCGlobalsManager globalsManager] logFlurryEvent:@"resendmail_tap" withParams:nil];
 }
 
 - (void)viewDidLoad
@@ -188,6 +197,12 @@ static const float kGreatLabelMargin = 40.0;
     UIView *reb = _vc.getResendEmailButton;
     tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(resendEmailTap:)];
     [reb addGestureRecognizer:tapGesture];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [[BCGlobalsManager globalsManager] logFlurryPageView];
 }
 
 - (void)didReceiveMemoryWarning

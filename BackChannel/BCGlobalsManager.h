@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import "Flurry.h"
+
 
 extern const float kKeyboardHeight;
 extern const float kTitleTopMargin;
@@ -39,5 +41,10 @@ extern NSString *kEmailKey;
 
 + (id)globalsManager;
 - (void)loadConfig;
+- (void)logFlurryEvent:(NSString*)eventName withParams:(NSDictionary*)params;
+- (void)logFlurryEventTimed:(NSString*)eventName withParams:(NSDictionary*)params;
+- (void)logFlurryEventEndTimed:(NSString*)eventName withParams:(NSDictionary*)params;
+- (void)logFlurryPageView;
+- (void)logFlurryAllPageViews:(UINavigationController*)navigationController;
 
 @end

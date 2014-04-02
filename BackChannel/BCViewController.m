@@ -124,6 +124,7 @@ typedef enum TransitionType {
     } else if (transition == TRANSITION_STREAM) {
         BCStreamViewController *vc = [[BCStreamViewController alloc] init];
         UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
+        [[BCGlobalsManager globalsManager] logFlurryAllPageViews:nc];
         vc.title = @"Backchannel";
         vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
         [self presentViewController:nc animated:YES completion:^() {}];

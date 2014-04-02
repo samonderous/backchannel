@@ -248,6 +248,7 @@ static const float kEmailMargin = 30.0;
     };
     
     [[BCAPIClient sharedClient] sendAuth:_av.email.text success:success failure:failure];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:@"join_tap" withParams:nil];
 }
 
 - (void)viewDidLoad
@@ -261,6 +262,12 @@ static const float kEmailMargin = 30.0;
     UIView *joinBar = _av.getJoinBar;
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(joinTapped:)];
     [joinBar addGestureRecognizer:tapGesture];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [[BCGlobalsManager globalsManager] logFlurryPageView];
 }
 
 - (void)didReceiveMemoryWarning

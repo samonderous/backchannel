@@ -1060,6 +1060,8 @@ static BOOL isSwipeLocked = NO;
         [self removeCompose];
     } completion:^(BOOL finished) {
     }];
+    
+    [[BCGlobalsManager globalsManager] logFlurryEvent:@"tap_nevermind" withParams:nil];
 }
 
 - (void)publishHoldDown
@@ -1069,14 +1071,21 @@ static BOOL isSwipeLocked = NO;
     BCComposeContainerView *ccv = cell.ccv;
     [ccv.bar.publishMeter.layer removeAllAnimations];
     [ccv.bar setPublishPush];
+
+    [[BCGlobalsManager globalsManager] logFlurryEventTimed:@"tap_publish" withParams:nil];
+
     [UIView animateWithDuration:kPublishPushDuration delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
         [ccv.bar.publishMeter setX:0.0];
     } completion:^(BOOL finished) {
         if (finished) {
             ccv.bar.publishMeter.hidden = YES;
             [self addNewSecretToStream];
+            
+            NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"state", @"finished", nil];
+            [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:@"tap_publish" withParams:params];
         } else {
-            //[ccv.publishMeter setX:-CGRectGetWidth([UIScreen mainScreen].bounds)];
+            NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"state", @"unfinished", nil];
+            [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:@"tap_publish" withParams:params];
         }
     }];
 }
@@ -1195,6 +1204,8 @@ static BOOL isSwipeLocked = NO;
         [self setupCompose:collectionView indexPath:indexPath];
     } completion:^(BOOL finished) {
     }];
+    
+    [[BCGlobalsManager globalsManager] logFlurryEvent:@"tap_to_create" withParams:nil];
 }
 
 # pragma Text View Delegate
@@ -1218,9 +1229,11 @@ static BOOL isSwipeLocked = NO;
     if (direction == LEFT_DIRECTION) {
         secretModel.disagrees++;
         secretModel.vote = VOTE_DISAGREE;
+        [[BCGlobalsManager globalsManager] logFlurryEvent:@"vote_plus_one" withParams:nil];
     } else if (direction == RIGHT_DIRECTION) {
         secretModel.agrees++;
         secretModel.vote = VOTE_AGREE;
+        [[BCGlobalsManager globalsManager] logFlurryEvent:@"vote_neg_one" withParams:nil];
     }
 
     SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {

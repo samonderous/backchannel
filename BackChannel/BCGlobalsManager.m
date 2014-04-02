@@ -51,4 +51,38 @@ NSString *kEmailKey = @"email";
     _blackTaglineColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.5];
 }
 
+- (void)logFlurryEvent:(NSString*)eventName withParams:(NSDictionary*)params
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary *defaultparams = [NSDictionary dictionaryWithObjectsAndKeys:
+                            @"User", [defaults objectForKey:kEmailKey], nil];
+    
+    [Flurry logEvent:eventName withParameters:defaultparams];
+}
+
+- (void)logFlurryEventTimed:(NSString*)eventName withParams:(NSDictionary*)params
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary *defaultparams = [NSDictionary dictionaryWithObjectsAndKeys:
+                                   @"User", [defaults objectForKey:kEmailKey], nil];
+    
+    [Flurry logEvent:eventName withParameters:defaultparams timed:YES];
+}
+
+- (void)logFlurryEventEndTimed:(NSString*)eventName withParams:(NSDictionary*)params
+{
+    [Flurry endTimedEvent:eventName withParameters:params];
+}
+
+- (void)logFlurryPageView
+{
+    [Flurry logPageView];
+}
+
+- (void)logFlurryAllPageViews:(UINavigationController*)navigationController
+{
+    [Flurry logAllPageViews:navigationController];
+}
+
+
 @end
