@@ -950,7 +950,7 @@ static BOOL isSwipeLocked = NO;
 
 - (float)getComposeWindowHeight
 {
-    float temp =  CGRectGetHeight([UIScreen mainScreen].bounds) - kKeyboardHeight - CGRectGetHeight(self.navigationController.navigationBar.bounds) - [UIApplication sharedApplication].statusBarFrame.size.height;
+    //float temp =  CGRectGetHeight([UIScreen mainScreen].bounds) - kKeyboardHeight - CGRectGetHeight(self.navigationController.navigationBar.bounds) - [UIApplication sharedApplication].statusBarFrame.size.height;
     return kCellHeight;
 }
 

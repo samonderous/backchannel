@@ -11,7 +11,7 @@
 
 #import "BCModels.h"
 
-static NSString *kAPIBaseURL = @"http://ec2-50-19-254-169.compute-1.amazonaws.com:8001/";
+static NSString *kAPIBaseURL = @"http://backchannel.it:8001/";
 
 typedef  void (^SuccessCallback)(AFHTTPRequestOperation *operation, id responseObject);
 typedef  void (^FailureCallback)(AFHTTPRequestOperation *operation, NSError *error);
