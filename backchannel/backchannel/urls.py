@@ -8,7 +8,7 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'backchannel.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
-    url(r'^$', 'backend.views.init', name='init'),
+    #url(r'^$', 'backend.views.init', name='init'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^backend/', include('backend.urls')),
 )

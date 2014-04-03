@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 
 class User(models.Model):
     udid = models.CharField(max_length=200)
@@ -37,3 +38,23 @@ class UserSecret(models.Model):
 
     class Meta:
         db_table = 'user_secret'
+
+
+# Admin
+class UserAdmin(admin.ModelAdmin):
+    pass
+
+class OrgAdmin(admin.ModelAdmin):
+    pass
+
+class SecretAdmin(admin.ModelAdmin):
+    pass
+
+class UserSecretAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(User, UserAdmin)
+admin.site.register(Org, OrgAdmin)
+admin.site.register(Secret, SecretAdmin)
+admin.site.register(UserSecret, UserSecretAdmin)
+
