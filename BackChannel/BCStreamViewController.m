@@ -554,26 +554,26 @@ static BOOL isSwipeLocked = NO;
         if (direction == RIGHT_DIRECTION && _agreeContainer.superview != bcv) {
             [_agreeContainer removeFromSuperview];
             [bcv addSubview:_agreeContainer];
-            [_agreeContainer placeIn:bcv alignedAt:CENTER_LEFT];
+            [_agreeContainer placeIn:bcv alignedAt:CENTER_LEFT withMargin:kVoteThresholdMargin];
             [self animateVoteInteraction:_agreeContainer inDirection:RIGHT_DIRECTION];
         }
         if (direction == LEFT_DIRECTION && _disagreeContainer.superview != bcv) {
             [_disagreeContainer removeFromSuperview];
             [bcv addSubview:_disagreeContainer];
-            [_disagreeContainer placeIn:bcv alignedAt:CENTER_RIGTH];
+            [_disagreeContainer placeIn:bcv alignedAt:CENTER_RIGTH withMargin:kVoteThresholdMargin];
             [self animateVoteInteraction:_disagreeContainer inDirection:LEFT_DIRECTION];
         }
     } else { // Not necessary but in case we want to push the containers back
         if (_agreeContainer.superview != self) {
             [_agreeContainer removeFromSuperview];
             [self addSubview:_agreeContainer];
-            [_agreeContainer placeIn:self alignedAt:CENTER_LEFT withMargin:-CGRectGetWidth(_agreeContainer.bounds) - kCellEdgeInset - kVoteThresholdMargin];
+            [_agreeContainer placeIn:self alignedAt:CENTER_LEFT withMargin:-CGRectGetWidth(_agreeContainer.bounds) - kCellEdgeInset];
         }
         
         if (_disagreeContainer.superview != self) {
             [_disagreeContainer removeFromSuperview];
             [self addSubview:_disagreeContainer];
-            [_disagreeContainer placeIn:self alignedAt:CENTER_RIGTH withMargin:-CGRectGetWidth(_agreeContainer.bounds) - kCellEdgeInset - kVoteThresholdMargin];
+            [_disagreeContainer placeIn:self alignedAt:CENTER_RIGTH withMargin:-CGRectGetWidth(_agreeContainer.bounds) - kCellEdgeInset];
         }
     }
 }
