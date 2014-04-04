@@ -51,7 +51,7 @@
     //[[Crashlytics sharedInstance] setDebugMode:YES];
     [Crashlytics startWithAPIKey:@"f59d6a71a710bdff855cd287d71b64b426d0e957"];
     
-    [Flurry setCrashReportingEnabled:YES];
+    //[Flurry setCrashReportingEnabled:YES];
     [Flurry startSession:@"MWV2G8ZG3JTK75ZPRNMC"];
     
     [[BCGlobalsManager globalsManager] loadConfig];
