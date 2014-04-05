@@ -132,6 +132,7 @@ static const float kVoteThresholdMargin = 20.0;
     
     _charCountLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 30.0, 30.0)];
     [_publish addSubview:_charCountLabel];
+    _charCountLabel.userInteractionEnabled = NO; // so touch event passes up hierarchy
 
     UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:15.0];
     NSAttributedString *attributedText = [[NSMutableAttributedString alloc]
