@@ -26,29 +26,6 @@ typedef enum TransitionType {
 
 @implementation BCViewController
 
-/*
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
-
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    [self performSelector:@selector(performSegue) withObject:nil afterDelay:0];
-}
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-*/
-
 + (UIViewController*)setVerifiedAndTransition:(NSString*)udidIN
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -118,21 +95,17 @@ typedef enum TransitionType {
         BCAuthViewController *vc = [[BCAuthViewController alloc] init];
         vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
         return vc;
-        //[self presentViewController:vc animated:YES completion:^() {}];
     } else if (transition == TRANSITION_VERIFY){
         BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
         vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
         return vc;
-        //[self presentViewController:vc animated:YES completion:^() {}];
-        
     } else {
         BCStreamViewController *vc = [[BCStreamViewController alloc] init];
         UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
         [[BCGlobalsManager globalsManager] logFlurryAllPageViews:nc];
         vc.title = @"Backchannel";
         vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-        return vc;
-        //[self presentViewController:nc animated:YES completion:^() {}];
+        return nc;
     }
 }
 

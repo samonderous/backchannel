@@ -922,7 +922,6 @@ static BOOL isSwipeLocked = NO;
 #pragma mark Collection View Scroll
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
-    NSLog(@"coming into dragging scroll");
     [BCCellTopLayerContainerView setSwipeLocked:YES];
 }
 
