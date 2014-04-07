@@ -33,7 +33,7 @@ static const int kTopDividerLineWidth = 50;
 static const float kNewPostStartPositionY = 25.0;
 static const float kPublishMeterHeight = 2.0;
 static const float kPUblishButtonCharCountLabelSpacing = 15.0;
-static const float kComposeTextViewFooterViewMargin = 15.0;
+static const float kComposeTextViewFooterViewMargin = 0.0;
 static const float kComposeTextViewHeaderViewMargin = 30.0;
 static const float kVoteThresholdMargin = 20.0;
 
