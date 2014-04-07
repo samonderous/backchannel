@@ -28,12 +28,12 @@ static const float kRowSpacing = 0.0f;
 static const float kPublishBarHeight = 60.0;
 static const int kMaxCharCount = 140;
 static const int kCellEdgeInset = 30.0;
-static const float kPublishPushDuration = 1.0;
+static const float kPublishPushDuration = 0.5;
 static const int kTopDividerLineWidth = 50;
 static const float kNewPostStartPositionY = 25.0;
 static const float kPublishMeterHeight = 2.0;
 static const float kPUblishButtonCharCountLabelSpacing = 15.0;
-static const float kComposeTextViewFooterViewMargin = 15.0;
+static const float kComposeTextViewFooterViewMargin = 0.0;
 static const float kComposeTextViewHeaderViewMargin = 30.0;
 static const float kVoteThresholdMargin = 20.0;
 
@@ -220,7 +220,7 @@ static const float kVoteThresholdMargin = 20.0;
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kCellComposeHeight)];
     UILabel *textLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 250.0, kCellComposeHeight)];
-    textLabel.text = @"Tap to say something new...";
+    textLabel.text = @"Tap to add your thoughts...";
     textLabel.textColor = [[BCGlobalsManager globalsManager] emptyPostCellColor];
     textLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
     [self addSubview:textLabel];
@@ -1170,8 +1170,9 @@ static BOOL isSwipeLocked = NO;
     float duration = (kCellHeight - kPublishBarHeight) / 864.0; // nasty calc off keboard rate 216pt / 0.25s
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
                      animations:^{
-                         [cell.separator setY:kCellHeight - 1];
-                         [cv setY:-kCellComposeHeight];
+                         cell.alpha = 0;
+                         //[cell.separator setY:kCellHeight - 1];
+                         //[cv setY:-kCellComposeHeight];
                      } completion:^(BOOL finished) {
                          cell.ccv.hidden = NO;
                      }];
