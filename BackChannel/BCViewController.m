@@ -26,6 +26,7 @@ typedef enum TransitionType {
 
 @implementation BCViewController
 
+/*
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -38,7 +39,7 @@ typedef enum TransitionType {
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [self performSelector:@selector(performSegue) withObject:nil afterDelay:1.0];
+    [self performSelector:@selector(performSegue) withObject:nil afterDelay:0];
 }
 
 - (void)didReceiveMemoryWarning
@@ -46,6 +47,7 @@ typedef enum TransitionType {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+*/
 
 + (UIViewController*)setVerifiedAndTransition:(NSString*)udidIN
 {
@@ -109,25 +111,28 @@ typedef enum TransitionType {
     }
 }
 
-- (void)performSegue
++ (UIViewController*)performSegue
 {
     TransitionType transition = [BCViewController checkAuth];
     if (transition == TRANSITION_AUTH) {
         BCAuthViewController *vc = [[BCAuthViewController alloc] init];
         vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-        [self presentViewController:vc animated:YES completion:^() {}];
+        return vc;
+        //[self presentViewController:vc animated:YES completion:^() {}];
     } else if (transition == TRANSITION_VERIFY){
         BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
         vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-        [self presentViewController:vc animated:YES completion:^() {}];
+        return vc;
+        //[self presentViewController:vc animated:YES completion:^() {}];
         
-    } else if (transition == TRANSITION_STREAM) {
+    } else {
         BCStreamViewController *vc = [[BCStreamViewController alloc] init];
         UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
         [[BCGlobalsManager globalsManager] logFlurryAllPageViews:nc];
         vc.title = @"Backchannel";
         vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-        [self presentViewController:nc animated:YES completion:^() {}];
+        return vc;
+        //[self presentViewController:nc animated:YES completion:^() {}];
     }
 }
 

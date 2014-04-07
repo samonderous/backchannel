@@ -8,7 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface BCViewController : UIViewController
+@interface BCViewController : NSObject
 
 + (UIViewController*)setVerifiedAndTransition:(NSString*)udidIN;
++ (UIViewController*)performSegue;
+
 @end
