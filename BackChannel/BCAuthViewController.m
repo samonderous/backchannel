@@ -183,7 +183,7 @@ static const float kEmailMargin = 30.0;
     UILabel *tagLine = [[UILabel alloc] init];
     tagLine.font = tagLineFont;
     tagLine.textColor = tagLineColor;
-    tagLine.text = @"Speak with ease at work";
+    tagLine.text = @"";
     [tagLine sizeToFit];
 
     return tagLine;

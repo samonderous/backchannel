@@ -220,7 +220,7 @@ static const float kVoteThresholdMargin = 20.0;
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kCellComposeHeight)];
     UILabel *textLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 250.0, kCellComposeHeight)];
-    textLabel.text = @"Tap to say something new...";
+    textLabel.text = @"Tap to add your thoughts...";
     textLabel.textColor = [[BCGlobalsManager globalsManager] emptyPostCellColor];
     textLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
     [self addSubview:textLabel];
