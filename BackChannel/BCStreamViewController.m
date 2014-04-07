@@ -1170,8 +1170,9 @@ static BOOL isSwipeLocked = NO;
     float duration = (kCellHeight - kPublishBarHeight) / 864.0; // nasty calc off keboard rate 216pt / 0.25s
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
                      animations:^{
-                         [cell.separator setY:kCellHeight - 1];
-                         [cv setY:-kCellComposeHeight];
+                         cell.alpha = 0;
+                         //[cell.separator setY:kCellHeight - 1];
+                         //[cv setY:-kCellComposeHeight];
                      } completion:^(BOOL finished) {
                          cell.ccv.hidden = NO;
                      }];
