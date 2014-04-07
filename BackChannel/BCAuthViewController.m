@@ -218,14 +218,12 @@ static const float kEmailMargin = 30.0;
 
 - (void)joinTapped:(UITapGestureRecognizer*)gesture
 {
-    
-    // NOTE: Write to server
-    //
     int persons = 18;
     SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
         int status = (int)[responseObject[@"status"] integerValue];
         if (status == 1) {
-            [_av updateEmail:persons withError:YES];
+            // FIXME: turn this on when we decide on the teaser
+            //[_av updateEmail:persons withError:YES];
         } else {
             NSString *udid = [[UIDevice currentDevice].identifierForVendor UUIDString];
             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -237,7 +235,7 @@ static const float kEmailMargin = 30.0;
             [defaults synchronize];
             BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
             vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-            [_av updateEmail:persons withError:NO];
+            //[_av updateEmail:persons withError:NO];
             [self presentViewController:vc animated:YES completion:^() {}];
         }
     };

@@ -35,6 +35,7 @@ static const float kPublishMeterHeight = 2.0;
 static const float kPUblishButtonCharCountLabelSpacing = 15.0;
 static const float kComposeTextViewFooterViewMargin = 15.0;
 static const float kComposeTextViewHeaderViewMargin = 30.0;
+static const float kVoteThresholdMargin = 20.0;
 
 
 @implementation BCCellContainerView
@@ -131,6 +132,7 @@ static const float kComposeTextViewHeaderViewMargin = 30.0;
     
     _charCountLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 30.0, 30.0)];
     [_publish addSubview:_charCountLabel];
+    _charCountLabel.userInteractionEnabled = NO; // so touch event passes up hierarchy
 
     UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:15.0];
     NSAttributedString *attributedText = [[NSMutableAttributedString alloc]
@@ -525,12 +527,10 @@ static BOOL isSwipeLocked = NO;
 - (void)addSwipes
 {
     UIPanGestureRecognizer *panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
-	[panRecognizer setMinimumNumberOfTouches:1];
-	[panRecognizer setMaximumNumberOfTouches:1];
-	[panRecognizer setDelegate:self];
-	[self addGestureRecognizer:panRecognizer];
+    panRecognizer.maximumNumberOfTouches = 1;
+    panRecognizer.minimumNumberOfTouches = 1;
     panRecognizer.delegate = self;
-    
+	[self addGestureRecognizer:panRecognizer];
 }
 
 - (void)animateVoteInteraction:(UIView*)view inDirection:(Direction)direction
@@ -555,13 +555,13 @@ static BOOL isSwipeLocked = NO;
         if (direction == RIGHT_DIRECTION && _agreeContainer.superview != bcv) {
             [_agreeContainer removeFromSuperview];
             [bcv addSubview:_agreeContainer];
-            [_agreeContainer placeIn:bcv alignedAt:CENTER_LEFT];
+            [_agreeContainer placeIn:bcv alignedAt:CENTER_LEFT withMargin:kVoteThresholdMargin];
             [self animateVoteInteraction:_agreeContainer inDirection:RIGHT_DIRECTION];
         }
         if (direction == LEFT_DIRECTION && _disagreeContainer.superview != bcv) {
             [_disagreeContainer removeFromSuperview];
             [bcv addSubview:_disagreeContainer];
-            [_disagreeContainer placeIn:bcv alignedAt:CENTER_RIGTH];
+            [_disagreeContainer placeIn:bcv alignedAt:CENTER_RIGTH withMargin:kVoteThresholdMargin];
             [self animateVoteInteraction:_disagreeContainer inDirection:LEFT_DIRECTION];
         }
     } else { // Not necessary but in case we want to push the containers back
@@ -586,10 +586,10 @@ static BOOL isSwipeLocked = NO;
 
 - (void)handleSwipe:(UIPanGestureRecognizer*)gesture
 {
-    if (_secretModel.vote != VOTE_NONE) return;
+    if (_secretModel.vote != VOTE_NONE || isSwipeLocked) return;
     
-    CGFloat dragThreshold = 10.0f;
-    CGFloat voteThreshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset;
+    CGFloat dragThreshold = 1.0f;
+    CGFloat voteThreshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset + kVoteThresholdMargin;
 
     CGPoint delta = [gesture translationInView:gesture.view.superview];
     CGPoint velocity = [gesture velocityInView:gesture.view.superview];
@@ -600,20 +600,21 @@ static BOOL isSwipeLocked = NO;
     
     if (gesture.state == UIGestureRecognizerStateBegan)
     {
+        _isDragging = YES;
         _thresholdCrossed = NO;
         _swipeCellStartX = gesture.view.frame.origin.x;
         [_animator removeAllBehaviors];
     }
     else if (gesture.state == UIGestureRecognizerStateChanged)
     {
+        _isDragging = YES;
         // create "resistance" to cell panning immediately
-        if (fabsf(delta.x) < dragThreshold) return;
+        //if (fabsf(delta.x) < dragThreshold) return;
         
         // move cell to track swipe
         CGFloat xDirection = (velocity.x > 0) ? 1.0f : -1.0f;
         CGFloat newX = _swipeCellStartX + delta.x - xDirection * dragThreshold;
-        CGRect newFrame = CGRectMake(newX, gesture.view.frame.origin.y, gesture.view.frame.size.width, gesture.view.frame.size.height);
-        gesture.view.frame = newFrame;
+        [gesture.view setX:newX];
         
         // trigger vote if threshold crossed
         _thresholdCrossed = (fabsf(gesture.view.frame.origin.x) >= voteThreshhold);
@@ -621,6 +622,7 @@ static BOOL isSwipeLocked = NO;
     }
     else if (gesture.state == UIGestureRecognizerStateEnded)
     {
+        _isDragging = NO;
         _swipeCellStartX = 0;
         
         _collisionBehavior = [[UICollisionBehavior alloc] initWithItems:@[gesture.view]];
@@ -920,6 +922,7 @@ static BOOL isSwipeLocked = NO;
 #pragma mark Collection View Scroll
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
+    NSLog(@"coming into dragging scroll");
     [BCCellTopLayerContainerView setSwipeLocked:YES];
 }
 
@@ -950,7 +953,7 @@ static BOOL isSwipeLocked = NO;
 
 - (float)getComposeWindowHeight
 {
-    float temp =  CGRectGetHeight([UIScreen mainScreen].bounds) - kKeyboardHeight - CGRectGetHeight(self.navigationController.navigationBar.bounds) - [UIApplication sharedApplication].statusBarFrame.size.height;
+    //float temp =  CGRectGetHeight([UIScreen mainScreen].bounds) - kKeyboardHeight - CGRectGetHeight(self.navigationController.navigationBar.bounds) - [UIApplication sharedApplication].statusBarFrame.size.height;
     return kCellHeight;
 }
 

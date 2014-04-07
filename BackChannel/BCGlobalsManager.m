@@ -54,8 +54,9 @@ NSString *kEmailKey = @"email";
 - (void)logFlurryEvent:(NSString*)eventName withParams:(NSDictionary*)params
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *email = [defaults objectForKey:kEmailKey];
     NSDictionary *defaultparams = [NSDictionary dictionaryWithObjectsAndKeys:
-                            @"User", [defaults objectForKey:kEmailKey], nil];
+                            @"User", email ? email : @"", nil];
     
     [Flurry logEvent:eventName withParameters:defaultparams];
 }
@@ -63,8 +64,9 @@ NSString *kEmailKey = @"email";
 - (void)logFlurryEventTimed:(NSString*)eventName withParams:(NSDictionary*)params
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *email = [defaults objectForKey:kEmailKey];
     NSDictionary *defaultparams = [NSDictionary dictionaryWithObjectsAndKeys:
-                                   @"User", [defaults objectForKey:kEmailKey], nil];
+                                   @"User", email ? email : @"", nil];
     
     [Flurry logEvent:eventName withParameters:defaultparams timed:YES];
 }
