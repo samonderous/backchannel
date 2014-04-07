@@ -36,12 +36,14 @@ def auth(request):
     try:
         domain = email.split('@')[1]
         org = Org.objects.get(domain=domain)
+        # TODO: Make async
         send_email.send_verify_email(org, email, udid)
     except Exception, e:
         print "%s" % e
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
-    response = {'status': 0, 'email': email}
+    emp_count = User.objects.filter(org=org).count()
+    response = {'status': 0, 'email': email, 'emp_count': emp_count}
     return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
 @csrf_exempt

@@ -42,13 +42,13 @@ class UserSecret(models.Model):
 
 # Admin
 class UserAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('email',)
 
 class OrgAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name',)
 
 class SecretAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('secrettext',)
 
 class UserSecretAdmin(admin.ModelAdmin):
     pass
