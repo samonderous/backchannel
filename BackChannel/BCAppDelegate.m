@@ -48,6 +48,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+
     //[[Crashlytics sharedInstance] setDebugMode:YES];
     [Crashlytics startWithAPIKey:@"f59d6a71a710bdff855cd287d71b64b426d0e957"];
     
@@ -58,6 +60,10 @@
     //[[AFNetworkActivityLogger sharedLogger] startLogging];
 
     // Override point for customization after application launch.
+    
+    self.window.rootViewController = [BCViewController performSegue];
+    [self.window makeKeyAndVisible];
+    
     return YES;
 }
 							
