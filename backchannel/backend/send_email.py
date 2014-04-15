@@ -23,8 +23,9 @@ def send_verify_email(org, email, udid):
 	to_email = email or 'saureen@gmail.com'
 	subject = "Verify your email to join %s's Backchannel" % org.name
 
-	link = "<a href='backchannel://backchannel.it/?u=%s'>Please click here</a>" % udid
-	item_html = "%s on your iPhone to verify your account" % link
+	link1 = "<a href='backchannel://backchannel.it/?u=%s'>Please click here</a>" % udid
+	link2 = "<a href='http://backchannel.it:8001/backend/verify/?u=%s'>here</a>" % udid
+	item_html = "%s or %s on your iPhone to verify your account" % (link1, link2)
 
 	footer = "<br /><br />Welcome,<br />The Backchannel Team"
 	msg = EmailMultiAlternatives(subject, "", from_email = "Backchannel <backchannel@backchannel.it>", to=[to_email])

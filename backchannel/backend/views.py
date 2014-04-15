@@ -69,7 +69,7 @@ def verify(request):
         response = {'status': 0}
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
-    return render_to_response('verify.html', {})
+    return render_to_response('verify.html', {'u' : request.GET.get('u') })
 
 @csrf_exempt
 def vote(request):
@@ -153,10 +153,6 @@ def stream(request):
     secrets = Secret.objects.filter(org=user.org).order_by('-id')[:50]
 
     secrets_list = []
-    #secrets = list(secrets)[30:] + list(secrets)
-    #secrets = list(secrets)[40:] + list(secrets)
-    #secrets = list(secrets)[:3]
-
     for s in secrets:
         try:
             us = UserSecret.objects.get(secret=s, user=user)
