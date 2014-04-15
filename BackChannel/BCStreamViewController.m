@@ -83,6 +83,7 @@ static const float kVoteThresholdMargin = 20.0;
 {
     UIColor *fontColor = [[BCGlobalsManager globalsManager] fontColor];
     
+    NSRange oldSelectedRange = _textView.selectedRange;
     NSMutableAttributedString *mutableAttributedString = [[NSMutableAttributedString alloc]
                                                           initWithString:_textView.text
                                                           attributes:@{ NSFontAttributeName:[[BCGlobalsManager globalsManager] composeFont]}];
@@ -90,6 +91,12 @@ static const float kVoteThresholdMargin = 20.0;
         fontColor = [[BCGlobalsManager globalsManager] redColor];
         [mutableAttributedString addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] redColor] range: NSMakeRange(kMaxCharCount, count - kMaxCharCount)];
         _textView.attributedText = mutableAttributedString;
+        [_textView setSelectedRange:oldSelectedRange];
+    } else {
+        fontColor = [UIColor blackColor];
+        [mutableAttributedString addAttribute: NSForegroundColorAttributeName value: fontColor range: NSMakeRange(0, mutableAttributedString.length - 1)];
+        _textView.attributedText = mutableAttributedString;
+        [_textView setSelectedRange:oldSelectedRange];
     }
     
     [_bar updateBar:count];

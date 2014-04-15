@@ -140,6 +140,7 @@ static const float kEmailMargin = 30.0;
 
 - (void)updateEmail:(int)persons withError:(BOOL)isError
 {
+    /*
     UIFont *joinFont = [UIFont fontWithName:@"Tisa Pro" size:16.0];
     UIColor *joinFontColor = [[BCGlobalsManager globalsManager] greenColor];
     NSString *joinStr = [NSString stringWithFormat:@"Join %d coworkers", persons];
@@ -157,7 +158,7 @@ static const float kEmailMargin = 30.0;
     _joinLabel.attributedText = joinAttributedString;
     [_joinBar addSubview:_joinLabel];
     [_joinLabel placeIn:_joinBar alignedAt:CENTER];
-    
+    */
     if (isError) {
         [self showError];
     }
@@ -223,7 +224,7 @@ static const float kEmailMargin = 30.0;
         int status = (int)[responseObject[@"status"] integerValue];
         if (status == 1) {
             // FIXME: turn this on when we decide on the teaser
-            //[_av updateEmail:persons withError:YES];
+            [_av updateEmail:persons withError:YES];
         } else {
             NSString *udid = [[UIDevice currentDevice].identifierForVendor UUIDString];
             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
