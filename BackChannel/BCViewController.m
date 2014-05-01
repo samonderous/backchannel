@@ -50,7 +50,10 @@ typedef enum TransitionType {
             } else {
                 NSString *orgName = (NSString*)responseObject[@"name"];
                 NSString *orgDomain = (NSString*)responseObject[@"domain"];
-                [[BCGlobalsManager globalsManager] setOrgModel:orgName withDomain:orgDomain];
+                NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                [defaults setObject:orgName forKey:kOrgNameKey];
+                [defaults setObject:orgDomain forKey:kOrgDomainKey];
+                
                 BCStreamViewController *sc = [[BCStreamViewController alloc] init];
                 sc.title = @"Backchannel";
                 UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:sc];

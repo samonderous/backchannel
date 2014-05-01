@@ -1017,7 +1017,8 @@ static BOOL isSwipeLocked = NO;
     MFMailComposeViewController *picker = [[MFMailComposeViewController alloc] init];
     picker.mailComposeDelegate = self;
     
-    NSString *subject = [NSString stringWithFormat:@"Sharing this on the %@ Backchannel", [[BCGlobalsManager globalsManager] orgModel].name];
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *subject = [NSString stringWithFormat:@"Sharing this on the %@ Backchannel", [defaults objectForKey:kOrgNameKey]];
     [picker setSubject:subject];
     
     // Attach an image to the email
@@ -1027,8 +1028,8 @@ static BOOL isSwipeLocked = NO;
      */
     
     // Fill out the email body text
-    NSString *emailBody = @"There's an app called Backchannel where you can read and share thoughts anonymously with (and only with) other fellow employees. Check it out: <app store url>";
-    [picker setMessageBody:emailBody isHTML:NO];
+    NSString *emailBody = @"There's an app called Backchannel where you can read and share thoughts anonymously with (and only with) other fellow employees. Check out <a href='itms://itunes.com/apps/backchannel'>Backchannel</a>.";
+    [picker setMessageBody:emailBody isHTML:YES];
     
     [self presentViewController:picker animated:YES completion:NULL];
 }

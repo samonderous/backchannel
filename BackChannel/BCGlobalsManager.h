@@ -24,6 +24,10 @@ extern NSString *kVerifiedKey;
 extern NSString *kEmailKey;
 extern NSString *kPublishTutorialKey;
 extern NSString *kStreamTutorialKey;
+extern NSString *kOrgNameKey;
+extern NSString *kOrgDomainKey;
+
+
 @interface BCGlobalsManager : NSObject
 
 @property (strong, nonatomic) UIColor *blueColor;
@@ -43,7 +47,6 @@ extern NSString *kStreamTutorialKey;
 @property (strong, nonatomic) UIColor *blackTimestampColor;
 @property (strong, nonatomic) UIColor *blackTaglineColor;
 @property (strong, nonatomic) UIColor *publishTutorialHintColor;
-@property (strong, nonatomic) BCOrgModel *orgModel;
 
 + (id)globalsManager;
 - (void)loadConfig;
@@ -52,6 +55,5 @@ extern NSString *kStreamTutorialKey;
 - (void)logFlurryEventEndTimed:(NSString*)eventName withParams:(NSDictionary*)params;
 - (void)logFlurryPageView;
 - (void)logFlurryAllPageViews:(UINavigationController*)navigationController;
-- (void)setOrgModel:(NSString*)name withDomain:(NSString*)domain;
 
 @end

@@ -19,6 +19,8 @@ NSString *kVerifiedKey = @"verified";
 NSString *kEmailKey = @"email";
 NSString *kPublishTutorialKey = @"publishTutorial";
 NSString *kStreamTutorialKey = @"streamTutorial";
+NSString *kOrgNameKey = @"orgName";
+NSString *kOrgDomainKey = @"orgDomain";
 
 @implementation BCGlobalsManager
 
@@ -87,11 +89,6 @@ NSString *kStreamTutorialKey = @"streamTutorial";
 - (void)logFlurryAllPageViews:(UINavigationController*)navigationController
 {
     [Flurry logAllPageViews:navigationController];
-}
-
-- (void)setOrgModel:(NSString*)name withDomain:(NSString*)domain
-{
-    _orgModel = [[BCOrgModel alloc] init:name withDomain:domain];
 }
 
 @end

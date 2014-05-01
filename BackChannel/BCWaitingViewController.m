@@ -140,8 +140,8 @@ static const float kAssetTextSpacing = 30.0;
     */
     
     // Fill out the email body text
-    NSString *emailBody = @"This is an interesting app.";
-    [picker setMessageBody:emailBody isHTML:NO];
+    NSString *emailBody = @"There's an app called Backchannel where you can read and share thoughts anonymously with (and only with) other fellow employees. Check out <a href='itms://itunes.com/apps/backchannel'>Backchannel</a>.";
+    [picker setMessageBody:emailBody isHTML:YES];
     
     [self presentViewController:picker animated:YES completion:NULL];
 }
