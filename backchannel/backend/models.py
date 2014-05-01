@@ -70,6 +70,15 @@ class TrackClick(models.Model):
         return self.email
 
 
+class WaitlistOrg(models.Model):
+    email = models.CharField(max_length=200)
+
+    class Meta:
+        db_table = 'waitlistorg'
+
+    def __unicode__(self):
+        return self.email
+
 
 SEED_SECRETS = [
     "Today is going to be a good day :)",
@@ -115,8 +124,13 @@ class UserSecretAdmin(admin.ModelAdmin):
 class TrackClickAdmin(admin.ModelAdmin):
     pass
 
+class WaitlistOrgAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Org, OrgAdmin)
 admin.site.register(Secret, SecretAdmin)
 admin.site.register(UserSecret, UserSecretAdmin)
 admin.site.register(TrackClick, TrackClickAdmin)
+admin.site.register(WaitlistOrg, WaitlistOrgAdmin)

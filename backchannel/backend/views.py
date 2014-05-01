@@ -43,6 +43,9 @@ def auth(request):
         send_email.send_verify_email(org, email, udid)
     except Exception, e:
         response['status'] = 2
+        waitlistorg = WaitlistOrg()
+        waitlistorg.email = domain
+        waitlistorg.save()
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
     emp_count = User.objects.filter(org=org).count()
