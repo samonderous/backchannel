@@ -11,7 +11,7 @@
 
 #import "BCModels.h"
 
-static NSString *kAPIBaseURL = @"http://backchannel.it:8001/";
+static NSString *kAPIBaseURL = @"https://bckchannelapp.com/";
 
 typedef  void (^SuccessCallback)(AFHTTPRequestOperation *operation, id responseObject);
 typedef  void (^FailureCallback)(AFHTTPRequestOperation *operation, NSError *error);
@@ -26,6 +26,7 @@ typedef  void (^FailureCallback)(AFHTTPRequestOperation *operation, NSError *err
 - (void)sendVerificationEmail:(SuccessCallback)success failure:(FailureCallback)failure;
 - (void)createSecret:(NSString*)text success:(SuccessCallback)success failure:(FailureCallback)failure;
 - (void)sendVerification:(SuccessCallback)success failure:(FailureCallback)failure;
-- (void)getLatestSecrets:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withTopSid:(int)topSid;
+- (void)getLatestPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withTopSid:(int)topSid;
+- (void)getOlderPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withLastSid:(int)lastSid;
 
 @end

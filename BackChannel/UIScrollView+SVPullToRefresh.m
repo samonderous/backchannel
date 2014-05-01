@@ -221,7 +221,9 @@ static char UIScrollViewPullToRefreshView;
     
     self.titleLabel.hidden = hasCustomView;
     self.subtitleLabel.hidden = hasCustomView;
-    self.arrow.hidden = hasCustomView;
+    //self.arrow.hidden = hasCustomView;
+    // FIXME: hack saureen
+    self.arrow.hidden = YES;
     
     if(hasCustomView) {
         [self addSubview:customView];
@@ -235,6 +237,7 @@ static char UIScrollViewPullToRefreshView;
             case SVPullToRefreshStateStopped:
                 self.arrow.alpha = 1;
                 [self.activityIndicatorView stopAnimating];
+                
                 switch (self.position) {
                     case SVPullToRefreshPositionTop:
                         [self rotateArrow:0 hide:NO];
@@ -452,7 +455,7 @@ static char UIScrollViewPullToRefreshView;
 - (UIActivityIndicatorView *)activityIndicatorView {
     if(!_activityIndicatorView) {
         _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
-        _activityIndicatorView.hidesWhenStopped = YES;
+        _activityIndicatorView.hidesWhenStopped = NO;
         [self addSubview:_activityIndicatorView];
     }
     return _activityIndicatorView;

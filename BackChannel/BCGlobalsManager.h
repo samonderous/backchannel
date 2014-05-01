@@ -9,7 +9,9 @@
 #import <Foundation/Foundation.h>
 
 #import "Flurry.h"
+#import "BCModels.h"
 
+#define IS_IPHONE_5 ( fabs( ( double )[ [ UIScreen mainScreen ] bounds ].size.height - ( double )568 ) < DBL_EPSILON )
 
 extern const float kKeyboardHeight;
 extern const float kTitleTopMargin;
@@ -20,8 +22,10 @@ extern const float kTitleTaglineSpacing;
 extern NSString *kUdidKey;
 extern NSString *kVerifiedKey;
 extern NSString *kEmailKey;
-
+extern NSString *kPublishTutorialKey;
+extern NSString *kStreamTutorialKey;
 @interface BCGlobalsManager : NSObject
+
 @property (strong, nonatomic) UIColor *blueColor;
 @property (strong, nonatomic) UIColor *blueBackgroundColor;
 @property (strong, nonatomic) UIColor *blackPublishFontColor;
@@ -38,6 +42,8 @@ extern NSString *kEmailKey;
 @property (strong, nonatomic) UIColor *blackDividerColor;
 @property (strong, nonatomic) UIColor *blackTimestampColor;
 @property (strong, nonatomic) UIColor *blackTaglineColor;
+@property (strong, nonatomic) UIColor *publishTutorialHintColor;
+@property (strong, nonatomic) BCOrgModel *orgModel;
 
 + (id)globalsManager;
 - (void)loadConfig;
@@ -46,5 +52,6 @@ extern NSString *kEmailKey;
 - (void)logFlurryEventEndTimed:(NSString*)eventName withParams:(NSDictionary*)params;
 - (void)logFlurryPageView;
 - (void)logFlurryAllPageViews:(UINavigationController*)navigationController;
+- (void)setOrgModel:(NSString*)name withDomain:(NSString*)domain;
 
 @end

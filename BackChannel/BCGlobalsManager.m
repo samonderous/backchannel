@@ -17,6 +17,8 @@ const float kTitleTaglineSpacing = 5.0;
 NSString *kUdidKey = @"udid";
 NSString *kVerifiedKey = @"verified";
 NSString *kEmailKey = @"email";
+NSString *kPublishTutorialKey = @"publishTutorial";
+NSString *kStreamTutorialKey = @"streamTutorial";
 
 @implementation BCGlobalsManager
 
@@ -34,7 +36,7 @@ NSString *kEmailKey = @"email";
 {
     _blueColor = [UIColor colorWithRed:(41.0/255.0) green:(99.0/255.0) blue:(120.0/255.0) alpha:1.0];
     _blueBackgroundColor = [UIColor colorWithRed:(41.0/255.0) green:(99.0/255.0) blue:(120.0/255.0) alpha:0.10];
-    _emptyPostCellColor = [UIColor colorWithRed:(41.0/255.0) green:(99.0/255.0) blue:(120.0/255.0) alpha:0.4];
+    _emptyPostCellColor = [UIColor colorWithRed:(41.0/255.0) green:(99.0/255.0) blue:(120.0/255.0) alpha:0.5];
     _greenColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:1.0];
     _creamColor = [UIColor colorWithRed:(163.0/255.0) green:(161.0/255.0) blue:(121.0/255.0) alpha:1.0];
     _creamBackgroundColor = [UIColor colorWithRed:(163.0/255.0) green:(161.0/255.0) blue:(121.0/255.0) alpha:0.10];
@@ -43,10 +45,11 @@ NSString *kEmailKey = @"email";
     _blackPublishFontColor = [UIColor colorWithRed:(0.0/255.0) green:(0.0/255.0) blue:(0.0/255.0) alpha:0.2];
     _blackPublishBackgroundColor = [UIColor colorWithRed:(0.0/255.0) green:(0.0/255.0) blue:(0.0/255.0) alpha:0.03];
     _greenPublishColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:0.40];
-    _redColor = [UIColor colorWithRed:(204.0/255.0) green:(76.0/255.0) blue:(69.9/255.0) alpha:1.0];
+    _redColor = [UIColor colorWithRed:(204.0/255.0) green:(76.0/255.0) blue:(69.0/255.0) alpha:1.0];
+    _publishTutorialHintColor = [UIColor colorWithRed:(102.0/255.0) green:(102.0/255.0) blue:(102/255.0) alpha:1.0];
     
-    _composeFont = [UIFont fontWithName:@"Tisa Pro" size:18];
-    _blackDividerColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.1];
+    _composeFont = [UIFont fontWithName:@"Poly" size:18];
+    _blackDividerColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.2];
     _blackTimestampColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.4];
     _blackTaglineColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.5];
 }
@@ -86,5 +89,9 @@ NSString *kEmailKey = @"email";
     [Flurry logAllPageViews:navigationController];
 }
 
+- (void)setOrgModel:(NSString*)name withDomain:(NSString*)domain
+{
+    _orgModel = [[BCOrgModel alloc] init:name withDomain:domain];
+}
 
 @end

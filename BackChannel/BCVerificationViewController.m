@@ -55,7 +55,7 @@ static const float kGreatLabelMargin = 40.0;
     _openMailButton.backgroundColor = [[BCGlobalsManager globalsManager] blueBackgroundColor];
     _resendEmailButton.backgroundColor = [[BCGlobalsManager globalsManager] creamBackgroundColor];
     
-    UIFont *openFont = [UIFont fontWithName:@"Tisa Pro" size:18.0];
+    UIFont *openFont = [UIFont fontWithName:@"Poly" size:18.0];
     UIColor *openFontColor = [[BCGlobalsManager globalsManager] blueColor];
     NSMutableAttributedString *openAttributedString = [[NSMutableAttributedString alloc]
                                                        initWithString:@"Open Mail"
@@ -72,7 +72,7 @@ static const float kGreatLabelMargin = 40.0;
     
     [_openMailButton addSubview:openLabel];
     
-    UIFont *resendFont = [UIFont fontWithName:@"Tisa Pro" size:18.0];
+    UIFont *resendFont = [UIFont fontWithName:@"Poly" size:18.0];
     UIColor *resendFontColor = [[BCGlobalsManager globalsManager] creamColor];
     NSMutableAttributedString *resendAttributedString = [[NSMutableAttributedString alloc]
                                                          initWithString:@"Resend email"
@@ -105,7 +105,7 @@ static const float kGreatLabelMargin = 40.0;
     TTTAttributedLabel *greatLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, CGFLOAT_MAX)];
     [self addSubview:greatLabel];
 
-    greatLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
+    greatLabel.font = [UIFont fontWithName:@"Poly" size:18.0];
     greatLabel.numberOfLines = 0;
     greatLabel.textAlignment = NSTextAlignmentCenter;
     greatLabel.text = greatLabelString;

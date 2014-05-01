@@ -13,6 +13,7 @@
 #import "BCGlobalsManager.h"
 #import "BCViewController.h"
 #import "BCStreamViewController.h"
+#import "BCWaitingViewController.h"
 
 #import "AFNetworkActivityLogger.h"
 
@@ -82,6 +83,11 @@
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+    if ([self.window.rootViewController isKindOfClass:[UINavigationController class]] &&
+        [((UINavigationController*)self.window.rootViewController).topViewController isKindOfClass:[BCStreamViewController class]]) {
+        BCStreamViewController *svc = (BCStreamViewController*)((UINavigationController*)self.window.rootViewController).topViewController;
+        [svc getLatestNoscrollPosts];
+    }
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application

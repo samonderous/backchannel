@@ -29,3 +29,20 @@
 }
 
 @end
+
+@interface BCOrgModel ()
+
+@end
+
+@implementation BCOrgModel
+
+- (id)init:(NSString*)name withDomain:(NSString*)domain
+{
+    self = [super init];
+    _name = name;
+    _domain = domain;
+    
+    return self;
+}
+
+@end

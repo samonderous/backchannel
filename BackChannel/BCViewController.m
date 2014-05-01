@@ -48,6 +48,9 @@ typedef enum TransitionType {
                 // TODO: If no user notify user who's waiting on verification page
                 
             } else {
+                NSString *orgName = (NSString*)responseObject[@"name"];
+                NSString *orgDomain = (NSString*)responseObject[@"domain"];
+                [[BCGlobalsManager globalsManager] setOrgModel:orgName withDomain:orgDomain];
                 BCStreamViewController *sc = [[BCStreamViewController alloc] init];
                 sc.title = @"Backchannel";
                 UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:sc];

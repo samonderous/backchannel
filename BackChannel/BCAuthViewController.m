@@ -12,6 +12,7 @@
 #import "BCGlobalsManager.h"
 #import "BCVerificationViewController.h"
 #import "BCAPIClient.h"
+#import "BCWaitingViewController.h"
 
 static const float kJoinBarHeight = 60.0;
 static const float kEmailMargin = 30.0;
@@ -47,7 +48,7 @@ static const float kEmailMargin = 30.0;
     [_tagLine placeIn:self alignedAt:CENTER];
     [_tagLine setY:CGRectGetMaxY(_title.frame) + kTitleTaglineSpacing];
     
-    UIFont *emailFont = [UIFont fontWithName:@"Tisa Pro" size:18.0];
+    UIFont *emailFont = [UIFont fontWithName:@"Poly" size:18.0];
     NSMutableAttributedString *emailAttributedString = [[NSMutableAttributedString alloc]
                                                         initWithString:@""
                                                         attributes:@{ NSFontAttributeName: emailFont}];
@@ -78,7 +79,7 @@ static const float kEmailMargin = 30.0;
     [_divider placeIn:self alignedAt:CENTER];
     [_divider setY:CGRectGetMaxY(_email.frame) + 15.0];
 
-    UIFont *errorFont = [UIFont fontWithName:@"Tisa Pro" size:10.0];
+    UIFont *errorFont = [UIFont fontWithName:@"Poly" size:10.0];
     UIColor *errorFontColor = [[BCGlobalsManager globalsManager] redColor];
     NSMutableAttributedString *errorAttributedString = [[NSMutableAttributedString alloc]
                                                         initWithString:@"Be sure to enter a valid corporate email address"
@@ -100,7 +101,7 @@ static const float kEmailMargin = 30.0;
     [_joinBar setY:CGRectGetMaxY(self.bounds) - CGRectGetHeight(_joinBar.bounds)];
     
     
-    UIFont *joinFont = [UIFont fontWithName:@"Tisa Pro" size:16.0];
+    UIFont *joinFont = [UIFont fontWithName:@"Poly" size:16.0];
     UIColor *joinFontColor = [[BCGlobalsManager globalsManager] greenPublishColor];
     NSMutableAttributedString *joinAttributedString = [[NSMutableAttributedString alloc]
                                                        initWithString:@"Join"
@@ -141,7 +142,7 @@ static const float kEmailMargin = 30.0;
 - (void)updateEmail:(int)persons withError:(BOOL)isError
 {
     /*
-    UIFont *joinFont = [UIFont fontWithName:@"Tisa Pro" size:16.0];
+    UIFont *joinFont = [UIFont fontWithName:@"Poly" size:16.0];
     UIColor *joinFontColor = [[BCGlobalsManager globalsManager] greenColor];
     NSString *joinStr = [NSString stringWithFormat:@"Join %d coworkers", persons];
     
@@ -166,7 +167,7 @@ static const float kEmailMargin = 30.0;
 
 + (UILabel*)getTitle
 {
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:kTitleFontSize];
+    UIFont *font = [UIFont fontWithName:@"Poly" size:kTitleFontSize];
     UIColor *fontColor = [[BCGlobalsManager globalsManager] blueColor];
     UILabel *title = [[UILabel alloc] init];
     title.font = font;
@@ -179,12 +180,12 @@ static const float kEmailMargin = 30.0;
 
 + (UILabel*)getTagline
 {
-    UIFont *tagLineFont = [UIFont fontWithName:@"Tisa Pro" size:kTagLineFont];
+    UIFont *tagLineFont = [UIFont fontWithName:@"Poly" size:kTagLineFont];
     UIColor *tagLineColor = [[BCGlobalsManager globalsManager] blackTaglineColor];
     UILabel *tagLine = [[UILabel alloc] init];
     tagLine.font = tagLineFont;
     tagLine.textColor = tagLineColor;
-    tagLine.text = @"";
+    tagLine.text = @"Speak your mind";
     [tagLine sizeToFit];
 
     return tagLine;
@@ -225,6 +226,11 @@ static const float kEmailMargin = 30.0;
         if (status == 1) {
             // FIXME: turn this on when we decide on the teaser
             [_av updateEmail:persons withError:YES];
+        } else if (status == 2) {
+            // Not whitelisted
+            BCWaitingViewController *vc = [[BCWaitingViewController alloc] init];
+            vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+            [self presentViewController:vc animated:YES completion:^() {}];
         } else {
             NSString *udid = [[UIDevice currentDevice].identifierForVendor UUIDString];
             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];

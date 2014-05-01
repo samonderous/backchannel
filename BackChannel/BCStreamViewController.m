@@ -7,12 +7,15 @@
 //
 
 #import <QuartzCore/QuartzCore.h>
+#import <MessageUI/MessageUI.h>
+
 
 #import "UIScrollView+SVPullToRefresh.h"
 #import "UIScrollView+SVInfiniteScrolling.h"
 #import "MCSwipeTableViewCell.h"
 #import "TTTAttributedLabel.h"
 #import "Utils.h"
+
 
 #import "BCAppDelegate.h"
 #import "BCStreamViewController.h"
@@ -36,6 +39,60 @@ static const float kPUblishButtonCharCountLabelSpacing = 15.0;
 static const float kComposeTextViewFooterViewMargin = 0.0;
 static const float kComposeTextViewHeaderViewMargin = 30.0;
 static const float kVoteThresholdMargin = 20.0;
+static const int kOldPostsBatchSize = 10;
+
+
+@interface BCComposePublishTutorialView : UIView
+@property (strong, nonatomic) UILabel *label;
+@property (strong, nonatomic) UIImageView *arrow;
+@end
+
+@interface BCComposePublishTutorialView ()
+@end
+
+@implementation BCComposePublishTutorialView
+
+- (id)init
+{
+    self = [super initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth([UIScreen mainScreen].bounds), 60.0)];
+    _label = [[UILabel alloc] init];
+    _arrow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"arrow.png"]];
+    
+    [self addSubview:_label];
+    [self addSubview:_arrow];
+    
+    self.backgroundColor = [UIColor whiteColor];
+    self.alpha = 0.95;
+
+    return self;
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    NSString *publishTutorialString = @"Press and hold* to publish *to prevent accidental posts";
+    NSMutableAttributedString *publishTutorial  = [[NSMutableAttributedString alloc]
+                                                    initWithString:publishTutorialString];
+    
+    [publishTutorial addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] greenColor] range: NSMakeRange(0, 26)];
+    
+    [publishTutorial addAttribute: NSFontAttributeName value:[UIFont fontWithName:@"Poly" size:15.0] range: NSMakeRange(0, 26)];
+    
+    [publishTutorial addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] publishTutorialHintColor] range: NSMakeRange(27, publishTutorialString.length - 27)];
+    
+    [publishTutorial addAttribute: NSFontAttributeName value:[UIFont fontWithName:@"Poly" size:12.0] range:NSMakeRange(27, publishTutorialString.length - 27)];
+    
+    [_label setSize:(CGSize){180.0, CGFLOAT_MAX}];
+    _label.numberOfLines = 0;
+    _label.textAlignment = NSTextAlignmentCenter;
+    _label.attributedText = publishTutorial;
+    [_label sizeToFit];
+    [_label placeIn:self alignedAt:CENTER];
+    [_arrow placeIn:self alignedAt:CENTER_RIGTH withMargin:64.0];
+}
+
+@end
 
 
 @implementation BCCellContainerView
@@ -52,7 +109,7 @@ static const float kVoteThresholdMargin = 20.0;
     float width = CGRectGetWidth([UIScreen mainScreen].bounds);
     
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, height)];
-    
+
     _bar = bar;
     
     UIFont *textFont = [[BCGlobalsManager globalsManager] composeFont];
@@ -61,7 +118,7 @@ static const float kVoteThresholdMargin = 20.0;
                                                              CGRectGetWidth(cell.contentView.bounds),
                                                              height - kPublishBarHeight)];
     [[UITextView appearance] setTintColor:[[BCGlobalsManager globalsManager] blueColor]];
-    _textView.scrollEnabled = NO;
+    _textView.scrollEnabled = YES;
     //_textView.contentInset = UIEdgeInsetsMake(-14, -4, 0, 0); // Removes all padding top and left.
     _textView.contentInset = UIEdgeInsetsMake(11, -4, 0, 0); // To cancel out the textview top padding by default
     _textView.font = textFont;
@@ -83,6 +140,10 @@ static const float kVoteThresholdMargin = 20.0;
 {
     UIColor *fontColor = [[BCGlobalsManager globalsManager] fontColor];
     
+    if (count <= 0) {
+        return;
+    }
+    
     NSRange oldSelectedRange = _textView.selectedRange;
     NSMutableAttributedString *mutableAttributedString = [[NSMutableAttributedString alloc]
                                                           initWithString:_textView.text
@@ -96,6 +157,7 @@ static const float kVoteThresholdMargin = 20.0;
         fontColor = [UIColor blackColor];
         [mutableAttributedString addAttribute: NSForegroundColorAttributeName value: fontColor range: NSMakeRange(0, mutableAttributedString.length - 1)];
         _textView.attributedText = mutableAttributedString;
+
         [_textView setSelectedRange:oldSelectedRange];
     }
     
@@ -108,6 +170,7 @@ static const float kVoteThresholdMargin = 20.0;
 @interface BCComposeBarView ()
 @property (strong, nonatomic) TTTAttributedLabel *charCountLabel;
 @property (strong, nonatomic) UIView *publishMeter;
+@property (strong, nonatomic) BCComposePublishTutorialView *publishTutorialView;
 @end
 
 @implementation BCComposeBarView
@@ -127,12 +190,12 @@ static const float kVoteThresholdMargin = 20.0;
     [_nevermind setTitle:@"Nevermind" forState:UIControlStateNormal];
     [_nevermind setTitleColor:[[BCGlobalsManager globalsManager] creamColor] forState:UIControlStateNormal];
     _nevermind.backgroundColor = [[BCGlobalsManager globalsManager] creamBackgroundColor];
-    _nevermind.titleLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
+    _nevermind.titleLabel.font = [UIFont fontWithName:@"Poly" size:18.0];
     
     [_publish setTitle:@"Publish" forState:UIControlStateNormal];
     [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenColor] forState:UIControlStateNormal];
     _publish.backgroundColor = [[BCGlobalsManager globalsManager] greenBackgroundColor];
-    _publish.titleLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
+    _publish.titleLabel.font = [UIFont fontWithName:@"Poly" size:18.0];
     _publish.userInteractionEnabled = NO;
     _publish.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
     _publish.titleEdgeInsets = UIEdgeInsetsMake(0, 32, 0, 0);
@@ -141,7 +204,7 @@ static const float kVoteThresholdMargin = 20.0;
     [_publish addSubview:_charCountLabel];
     _charCountLabel.userInteractionEnabled = NO; // so touch event passes up hierarchy
 
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:15.0];
+    UIFont *font = [UIFont fontWithName:@"Poly" size:15.0];
     NSAttributedString *attributedText = [[NSMutableAttributedString alloc]
                                           initWithString:[NSString stringWithFormat:@"%d", kMaxCharCount]
                                           attributes:@{ NSFontAttributeName:font, NSForegroundColorAttributeName: fontColor}];
@@ -158,12 +221,17 @@ static const float kVoteThresholdMargin = 20.0;
     
     _publishMeter = [[UIView alloc] initWithFrame:CGRectMake(-width, -kPublishMeterHeight, width, kPublishMeterHeight)];
     _publishMeter.backgroundColor = [[BCGlobalsManager globalsManager] greenColor];
+
+    _publishTutorialView = [[BCComposePublishTutorialView alloc] init];
+    [self addSubview :_publishTutorialView];
+    UIView *cover = [[UIView alloc] initWithFrame:self.bounds];
+    cover.backgroundColor = [UIColor whiteColor];
+    [self addSubview:cover];
     
     [self addSubview:_nevermind];
     [self addSubview:_publish];
     [self addSubview:_publishMeter];
-
-    //[_charCountLabel debug];
+    
     
     self.backgroundColor = [UIColor whiteColor];
     self.clipsToBounds = NO;
@@ -176,6 +244,23 @@ static const float kVoteThresholdMargin = 20.0;
     [super layoutSubviews];
 }
 
+- (void)triggerPublishTutorial
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    BOOL isPublishTutorialShown = [[defaults objectForKey:kPublishTutorialKey] boolValue];
+    if (!isPublishTutorialShown) {
+        [UIView animateWithDuration:0.5 delay:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+            [_publishTutorialView setY:-CGRectGetHeight(_publishTutorialView.bounds)];
+        } completion:^(BOOL finished) {
+        }];
+    }
+}
+
+- (void)setPublishTutorialShown
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:[NSNumber numberWithBool:YES] forKey:kPublishTutorialKey];
+}
 
 - (void)setPublishPush
 {
@@ -190,7 +275,7 @@ static const float kVoteThresholdMargin = 20.0;
 - (void)updateBar:(int)count
 {
     UIColor *fontColor = [[BCGlobalsManager globalsManager] fontColor];
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:15.0];
+    UIFont *font = [UIFont fontWithName:@"Poly" size:15.0];
     
     if (count > kMaxCharCount) {
         fontColor = [[BCGlobalsManager globalsManager] redColor];
@@ -229,7 +314,7 @@ static const float kVoteThresholdMargin = 20.0;
     UILabel *textLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 250.0, kCellComposeHeight)];
     textLabel.text = @"Tap to add your thoughts...";
     textLabel.textColor = [[BCGlobalsManager globalsManager] emptyPostCellColor];
-    textLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];
+    textLabel.font = [UIFont fontWithName:@"Poly" size:18.0];
     [self addSubview:textLabel];
     return self;
 }
@@ -254,7 +339,7 @@ static const float kVoteThresholdMargin = 20.0;
     UILabel *textLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     [textLabel setWidth:width];
     textLabel.numberOfLines = 0;
-    textLabel.font = [UIFont fontWithName:@"Tisa Pro" size:18.0];;
+    textLabel.font = [UIFont fontWithName:@"Poly" size:18.0];;
     textLabel.text = model.text;
     [textLabel sizeToFit];
     [self addSubview:textLabel];
@@ -291,7 +376,7 @@ static const float kVoteThresholdMargin = 20.0;
 - (id)init:(BCSecretModel*)model withWidth:(float)width
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:15.0];
+    UIFont *font = [UIFont fontWithName:@"Poly" size:15.0];
     NSString *voteText = [NSString stringWithFormat:@"+%d / -%d", (int)model.agrees, (int)model.disagrees];
     NSRange range = [voteText rangeOfString:@"/"];
     NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc]
@@ -340,7 +425,7 @@ static const float kVoteThresholdMargin = 20.0;
 - (id)init:(NSString*)time withWidth:(float)width
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
-    UIFont *font = [UIFont fontWithName:@"Tisa Pro" size:15.0];
+    UIFont *font = [UIFont fontWithName:@"Poly" size:15.0];
     UILabel *timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
     timeLabel.font = font;
     timeLabel.textColor = [[BCGlobalsManager globalsManager] blackTaglineColor];
@@ -463,13 +548,13 @@ static BOOL isSwipeLocked = NO;
     
     
     UILabel *agreeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, _size.width, _size.height)];
-    agreeLabel.font = [UIFont fontWithName:@"Tisa Pro" size:36.0];
+    agreeLabel.font = [UIFont fontWithName:@"Poly" size:36.0];
     agreeLabel.text = @"1";
     agreeLabel.textColor = [[BCGlobalsManager globalsManager] greenColor];
     [agreeLabel sizeToFit];
     agreeLabel.clipsToBounds = NO;
     UILabel *plusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, _size.width, _size.height)];
-    plusLabel.font = [UIFont fontWithName:@"Tisa Pro" size:24.0];
+    plusLabel.font = [UIFont fontWithName:@"Poly" size:24.0];
     plusLabel.text = @"+";
     plusLabel.textColor = [[BCGlobalsManager globalsManager] greenColor];
     [plusLabel sizeToFit];
@@ -483,13 +568,13 @@ static BOOL isSwipeLocked = NO;
     [agreeLabel placeIn:_agreeContainer alignedAt:CENTER_RIGTH];
     
     UILabel *disagreeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, _size.width, _size.height)];
-    disagreeLabel.font = [UIFont fontWithName:@"Tisa Pro" size:36.0];
+    disagreeLabel.font = [UIFont fontWithName:@"Poly" size:36.0];
     disagreeLabel.text = @"1";
     disagreeLabel.textColor = [[BCGlobalsManager globalsManager] redColor];
     [disagreeLabel sizeToFit];
     disagreeLabel.clipsToBounds = NO;
     UILabel *minusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, _size.width, _size.height)];
-    minusLabel.font = [UIFont fontWithName:@"Tisa Pro" size:24.0];
+    minusLabel.font = [UIFont fontWithName:@"Poly" size:24.0];
     minusLabel.text = @"-";
     minusLabel.textColor = [[BCGlobalsManager globalsManager] redColor];
     [minusLabel sizeToFit];
@@ -670,7 +755,7 @@ static BOOL isSwipeLocked = NO;
 
 
 
-@interface BCStreamViewController ()<BCCellTopLayerContainerViewDelegate>
+@interface BCStreamViewController ()<BCCellTopLayerContainerViewDelegate, MFMailComposeViewControllerDelegate>
 
 @property (assign) int contentWidth;
 @property (strong, nonatomic) UICollectionView *messageTable;
@@ -678,6 +763,7 @@ static BOOL isSwipeLocked = NO;
 @property (assign) BOOL isSwipeLock;
 @property (assign) BOOL isComposeMode;
 @property (strong, nonatomic) UIRefreshControl *refreshControl;
+@property (strong, nonatomic) UIImageView *tutorialAsset;
 @end
 
 @implementation BCStreamViewController
@@ -740,7 +826,7 @@ static BOOL isSwipeLocked = NO;
     self.navigationController.navigationBar.translucent = NO;
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
     [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor],
-                                                                      NSFontAttributeName: [UIFont fontWithName:@"Tisa Pro" size:18.0]}];
+                                                                      NSFontAttributeName: [UIFont fontWithName:@"Poly" size:18.0]}];
 }
 
 - (void)setupComposeBar
@@ -748,13 +834,13 @@ static BOOL isSwipeLocked = NO;
     self.navigationController.navigationBar.barStyle = UIBarStyleDefault;
     self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
     [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [[BCGlobalsManager globalsManager] blueColor],
-                                                                      NSFontAttributeName: [UIFont fontWithName:@"Tisa Pro" size:18.0]}];
+                                                                      NSFontAttributeName: [UIFont fontWithName:@"Poly" size:18.0]}];
 }
 
-- (void)getLatestSecrets
+- (void)getLatestPosts:(void (^)(void))callback
 {
     void (^success)(NSMutableArray*) = ^(NSMutableArray *newSecrets) {
-        NSLog(@"Get new secrets");
+        NSLog(@"Get new posts");
 
         NSMutableArray *secretIndexPaths = [NSMutableArray array];
         for (int i=0; i < newSecrets.count; i++) {
@@ -771,37 +857,106 @@ static BOOL isSwipeLocked = NO;
         }];
 
         [_refreshControl endRefreshing];
+        
+        if (callback) {
+            callback();
+        }
+        
+        if (_messages.count >= kOldPostsBatchSize) {
+            _messageTable.infiniteScrollingView.enabled = YES;
+        }
     };
 
     FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"Error in get stream: %@", error);
         NSLog(@"error code %d", (int)operation.response.statusCode);
         [_refreshControl endRefreshing];
+    };
+
+    int topSid = 0;
+    if (_messages.count) {
+        topSid = (int)((BCSecretModel*)[_messages objectAtIndex:0]).sid;
+    }
+    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withTopSid:topSid];
+}
+
+- (void)getLatestNoscrollPosts
+{
+    void (^success)(NSMutableArray*) = ^(NSMutableArray *newSecrets) {
+        NSLog(@"Get new posts and keep offset");
+        
+        NSMutableArray *secretIndexPaths = [NSMutableArray array];
+        for (int i=0; i < newSecrets.count; i++) {
+            [secretIndexPaths addObject:[NSIndexPath indexPathForItem:i+1 inSection:0]];
+        }
+        NSMutableArray *newMessages = [NSMutableArray arrayWithArray:[newSecrets copy]];
+        [newMessages addObjectsFromArray:[_messages copy]];
+        _messages = newMessages;
+        
+        CGFloat oldOffset = _messageTable.contentOffset.y;
+        //NSLog(@"The old offset = %f", oldOffset);
+        
+        // Set content offset first before insert. This avoids the ui layout update back to the offset.
+        [_messageTable setContentOffset:(CGPoint){_messageTable.contentOffset.x, oldOffset + kCellHeight * newSecrets.count} animated:NO];
+        [_messageTable insertItemsAtIndexPaths:secretIndexPaths];
+
+        [_refreshControl endRefreshing];
+    };
+    
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error in get stream: %@", error);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
+        [_messageTable.pullToRefreshView stopAnimating];
     };
     
     int topSid = 0;
     if (_messages.count) {
         topSid = (int)((BCSecretModel*)[_messages objectAtIndex:0]).sid;
     }
-    [[BCAPIClient sharedClient] getLatestSecrets:success failure:failure withTopSid:topSid];
+    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withTopSid:topSid];
 }
 
-- (void)getSecrets
+- (void)getOlderPosts
 {
-    void (^success)(NSMutableArray*) = ^(NSMutableArray *secrets) {
-        NSLog(@"Get stream success");
-        _messages = secrets;
-        [_messageTable reloadData];
-        [_refreshControl endRefreshing];
+    NSLog(@"Entered getOlderPosts");
+    
+    if (_messages.count <= 0) {
+        [_messageTable.infiniteScrollingView stopAnimating];
+        return;
+    }
+    
+    void (^success)(NSMutableArray*) = ^(NSMutableArray *newSecrets) {
+        NSLog(@"Get older secrets");
+        
+        NSMutableArray *postIndexPaths = [NSMutableArray array];
+        for (int i=0; i < newSecrets.count; i++) {
+            [postIndexPaths addObject:[NSIndexPath indexPathForItem:(int)_messages.count + i inSection:0]];
+        }
+        
+        [_messages addObjectsFromArray:[newSecrets copy]];
+        
+        [_messageTable performBatchUpdates:^{
+            [_messageTable insertItemsAtIndexPaths:postIndexPaths];
+        } completion:^(BOOL finished) {
+        }];
+        
+        [_messageTable.infiniteScrollingView stopAnimating];
     };
     
     FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"Error in get stream: %@", error);
         NSLog(@"error code %d", (int)operation.response.statusCode);
-        [_refreshControl endRefreshing];
+        [_messageTable.infiniteScrollingView stopAnimating];
     };
-    
-    [[BCAPIClient sharedClient] getStream:success failure:failure];
+
+    int lastSid = (int)((BCSecretModel*)[_messages objectAtIndex:_messages.count - 1]).sid;
+    NSLog(@"the last sid = %d", lastSid);
+    [[BCAPIClient sharedClient] getOlderPosts:success failure:failure withLastSid:lastSid];
+}
+
+- (void)getLatestPostsOnInit
+{
+    [self getLatestPosts:nil];
 }
 
 - (void)viewDidLoad
@@ -819,29 +974,131 @@ static BOOL isSwipeLocked = NO;
     [_messageTable setShowsHorizontalScrollIndicator:NO];
     [_messageTable setShowsVerticalScrollIndicator:NO];
     _messageTable.backgroundColor = [UIColor whiteColor];
+    _messageTable.alwaysBounceVertical = YES;
 
     [BCCellTopLayerContainerView setSwipeLocked:NO];
 
+    // Handle pull to refresh
     _refreshControl = [[UIRefreshControl alloc] init];
-    [_refreshControl addTarget:self action:@selector(getLatestSecrets)
-             forControlEvents:UIControlEventValueChanged];
-
+    [_refreshControl addTarget:self action:@selector(getLatestPostsOnInit)
+              forControlEvents:UIControlEventValueChanged];
     [_messageTable addSubview:_refreshControl];
-    _messageTable.alwaysBounceVertical = YES;
     
+    // Handle infinite scroll
+    __weak typeof(self) self_ = self;
+    [_messageTable addInfiniteScrollingWithActionHandler:^{
+        [self_ getOlderPosts];
+    }];
+    _messageTable.infiniteScrollingView.enabled = NO;
+    
+    // Handle share logic
+    UIBarButtonItem *shareItem = [[UIBarButtonItem alloc] initWithTitle:@"Share"
+                                                                  style:UIBarButtonItemStylePlain
+                                                                 target:self
+                                                                 action:@selector(shareButtonTap)];
+    [shareItem setTitleTextAttributes:@{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:16.0],
+                                         NSForegroundColorAttributeName: [UIColor whiteColor]}
+                             forState:UIControlStateNormal];
+    
+    NSArray *actionButtonItems = @[shareItem];
+    self.navigationItem.rightBarButtonItems = actionButtonItems;
+
     [self setupStreamBar];
+}
+
+- (void)shareButtonTap
+{
+    NSLog(@"share button tapped");
+    
+    if (![MFMailComposeViewController canSendMail]) {
+        return;
+    }
+    
+    MFMailComposeViewController *picker = [[MFMailComposeViewController alloc] init];
+    picker.mailComposeDelegate = self;
+    
+    NSString *subject = [NSString stringWithFormat:@"Sharing this on the %@ Backchannel", [[BCGlobalsManager globalsManager] orgModel].name];
+    [picker setSubject:subject];
+    
+    // Attach an image to the email
+    /*NSString *path = [[NSBundle mainBundle] pathForResource:@"rainy" ofType:@"jpg"];
+    NSData *myData = [NSData dataWithContentsOfFile:path];
+    [picker addAttachmentData:myData mimeType:@"image/jpeg" fileName:@"rainy"];
+     */
+    
+    // Fill out the email body text
+    NSString *emailBody = @"There's an app called Backchannel where you can read and share thoughts anonymously with (and only with) other fellow employees. Check it out: <app store url>";
+    [picker setMessageBody:emailBody isHTML:NO];
+    
+    [self presentViewController:picker animated:YES completion:NULL];
+}
+
+- (void)streamButtonTap:(UITapGestureRecognizer*)gesture
+{
+    CGPoint touchLocation = [gesture locationInView:self.view];
+    if (touchLocation.y > CGRectGetMaxY(self.view.bounds) - 60.0) {
+        [self unsetupStreamTutorial];
+    }
+}
+
+- (void)showStreamTutorial
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    BOOL isShowStreamTutorial = [[defaults objectForKey:kStreamTutorialKey] boolValue];
+    if (isShowStreamTutorial) {
+        return;
+    }
+        
+    [UIView animateWithDuration:0.5 animations:^{
+        _tutorialAsset.alpha = 1.0;
+    } completion:^(BOOL finished) {
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(streamButtonTap:)];
+        [_tutorialAsset addGestureRecognizer:tap];
+        _tutorialAsset.userInteractionEnabled = YES;
+    }];
+}
+
+- (void)setupStreamTutorial
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    BOOL isShowStreamTutorial = [[defaults objectForKey:kStreamTutorialKey] boolValue];
+    if (!isShowStreamTutorial) {
+        if (IS_IPHONE_5) {
+            _tutorialAsset = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h@2x.png"]];
+        } else {
+            _tutorialAsset = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay.png"]];
+        }
+        [self.view.window addSubview:_tutorialAsset];
+        _tutorialAsset.frame = self.view.window.bounds;
+        _tutorialAsset.alpha = 0.0;
+    }
+}
+
+- (void)unsetupStreamTutorial
+{
+    [UIView animateWithDuration:0.5 animations:^{
+        _tutorialAsset.alpha = 0.0;
+    } completion:^(BOOL finished) {
+        [_tutorialAsset removeFromSuperview];
+        _tutorialAsset = nil;
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        [defaults setObject:[NSNumber numberWithBool:YES] forKey:kStreamTutorialKey];
+    }];
 }
 
 - (void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
     _messageTable.frame = self.view.bounds;
+    [self setupStreamTutorial];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [self getSecrets];
+    [self getLatestPosts:^{
+        [self showStreamTutorial];
+    }];
 }
 
 - (void)didReceiveMemoryWarning
@@ -943,6 +1200,11 @@ static BOOL isSwipeLocked = NO;
     if (_messageTable.contentOffset.y > 0.0) {
         [BCCellTopLayerContainerView setSwipeLocked:YES];
     }
+    
+    
+
+    //NSLog(@"The size of the content = %f", _messageTable.contentSize.height);
+    //NSLog(@"The content offset = %f", _messageTable.contentOffset.y);
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
@@ -959,8 +1221,10 @@ static BOOL isSwipeLocked = NO;
 
 - (float)getComposeWindowHeight
 {
-    //float temp =  CGRectGetHeight([UIScreen mainScreen].bounds) - kKeyboardHeight - CGRectGetHeight(self.navigationController.navigationBar.bounds) - [UIApplication sharedApplication].statusBarFrame.size.height;
-    return kCellHeight;
+    return CGRectGetHeight([UIScreen mainScreen].bounds) -
+            kKeyboardHeight -
+            CGRectGetHeight(self.navigationController.navigationBar.bounds) -
+            [UIApplication sharedApplication].statusBarFrame.size.height;
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -1088,6 +1352,7 @@ static BOOL isSwipeLocked = NO;
     } completion:^(BOOL finished) {
         if (finished) {
             ccv.bar.publishMeter.hidden = YES;
+            [ccv.bar setPublishTutorialShown];
             [self addNewSecretToStream];
             
             NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"state", @"finished", nil];
@@ -1095,6 +1360,8 @@ static BOOL isSwipeLocked = NO;
         } else {
             NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"state", @"unfinished", nil];
             [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:@"tap_publish" withParams:params];
+            
+            [ccv.bar triggerPublishTutorial];
         }
     }];
 }
@@ -1260,6 +1527,33 @@ static BOOL isSwipeLocked = NO;
     [containerView updateVoteView];
 }
 
-
+# pragma MFMail Compose Delegate
+- (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
+{
+    // Notifies users about errors associated with the interface
+    switch (result)
+    {
+        case MFMailComposeResultCancelled:
+            NSLog(@"Mail sending canceled");
+            [[BCGlobalsManager globalsManager] logFlurryEvent:@"share_cancel" withParams:nil];
+            break;
+        case MFMailComposeResultSaved:
+            NSLog(@"Mail sending saved");
+            [[BCGlobalsManager globalsManager] logFlurryEvent:@"share_saved" withParams:nil];
+            break;
+        case MFMailComposeResultSent:
+            NSLog(@"Mail sending sent");
+            [[BCGlobalsManager globalsManager] logFlurryEvent:@"share_sent" withParams:nil];
+            break;
+        case MFMailComposeResultFailed:
+            NSLog(@"Mail sending failed");
+            [[BCGlobalsManager globalsManager] logFlurryEvent:@"share_failed" withParams:nil];
+            break;
+        default:
+            break;
+    }
+    
+    [self dismissViewControllerAnimated:YES completion:NULL];
+}
 
 @end

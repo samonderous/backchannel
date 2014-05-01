@@ -28,3 +28,11 @@ typedef enum Vote {
 - (id)init:(NSString*)text withSid:(NSUInteger)sid withTime:(NSInteger)time withTimeStr:(NSString*)timeStr withAgrees:(NSInteger)agrees withDisagree:(NSInteger)disagrees withVote:(Vote)vote;
 
 @end
+
+@interface BCOrgModel : NSObject
+
+@property (strong, nonatomic) NSString *name;
+@property (strong, nonatomic) NSString *domain;
+
+- (id)init:(NSString*)name withDomain:(NSString*)domain;
+@end

@@ -16,7 +16,8 @@ static NSString *kStreamPath = @"backend/stream/";
 static NSString *kResendemailPath = @"backend/resendemail/";
 static NSString *kCreatePostPath = @"backend/createsecret/";
 static NSString *kVerificationPath = @"backend/verify/";
-static NSString *kLatestSecretsPath = @"backend/getlatestsecrets/";
+static NSString *kLatestPostsPath = @"backend/getlatestposts/";
+static NSString *kOlderPostsPath = @"backend/getolderposts/";
 
 @implementation BCAPIClient
 
@@ -81,11 +82,18 @@ static NSString *kLatestSecretsPath = @"backend/getlatestsecrets/";
     [self fetchSecrets:kStreamPath success:success failure:failure withParams:params];
 }
 
-- (void)getLatestSecrets:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withTopSid:(int)topSid
+- (void)getLatestPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withTopSid:(int)topSid
 {
     NSDictionary *params = @{@"udid": [[UIDevice currentDevice].identifierForVendor UUIDString],
                              @"tsid": [NSString stringWithFormat:@"%d", topSid]};
-    [self fetchSecrets:kLatestSecretsPath success:success failure:failure withParams:params];
+    [self fetchSecrets:kLatestPostsPath success:success failure:failure withParams:params];
+}
+
+- (void)getOlderPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withLastSid:(int)lastSid
+{
+    NSDictionary *params = @{@"udid": [[UIDevice currentDevice].identifierForVendor UUIDString],
+                             @"lsid": [NSString stringWithFormat:@"%d", lastSid]};
+    [self fetchSecrets:kOlderPostsPath success:success failure:failure withParams:params];
 }
 
 - (void)setVote:(BCSecretModel*)model withVote:(Vote)vote success:(SuccessCallback)success failure:(FailureCallback)failure

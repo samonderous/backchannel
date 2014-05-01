@@ -31,6 +31,15 @@
 		C1316E2918B57318005A85B8 /* TTTAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C1316E2818B57318005A85B8 /* TTTAttributedLabel.m */; };
 		C1316E3018B5760A005A85B8 /* UIScrollView+SVInfiniteScrolling.m in Sources */ = {isa = PBXBuildFile; fileRef = C1316E2D18B5760A005A85B8 /* UIScrollView+SVInfiniteScrolling.m */; };
 		C1316E3118B5760A005A85B8 /* UIScrollView+SVPullToRefresh.m in Sources */ = {isa = PBXBuildFile; fileRef = C1316E2F18B5760A005A85B8 /* UIScrollView+SVPullToRefresh.m */; };
+		C13708B21905DE2D00DC7175 /* arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = C13708B01905DE2D00DC7175 /* arrow.png */; };
+		C13708B31905DE2D00DC7175 /* arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C13708B11905DE2D00DC7175 /* arrow@2x.png */; };
+		C13708B6190F647400DC7175 /* waitlistedorg.png in Resources */ = {isa = PBXBuildFile; fileRef = C13708B5190F647400DC7175 /* waitlistedorg.png */; };
+		C13708B8190F647B00DC7175 /* waitlistedorg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C13708B7190F647B00DC7175 /* waitlistedorg@2x.png */; };
+		C13708BC190F649E00DC7175 /* swipeoverlay-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C13708B9190F649E00DC7175 /* swipeoverlay-568h@2x.png */; };
+		C13708BD190F649E00DC7175 /* swipeoverlay.png in Resources */ = {isa = PBXBuildFile; fileRef = C13708BA190F649E00DC7175 /* swipeoverlay.png */; };
+		C13708BE190F649E00DC7175 /* swipeoverlay@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C13708BB190F649E00DC7175 /* swipeoverlay@2x.png */; };
+		C13708C119100F4600DC7175 /* BCWaitingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13708C019100F4600DC7175 /* BCWaitingViewController.m */; };
+		C13708C319109FC400DC7175 /* Poly-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C13708C219109FC400DC7175 /* Poly-Regular.ttf */; };
 		C14C9D6118CF8EF300A79BFD /* verify_asset.png in Resources */ = {isa = PBXBuildFile; fileRef = C14C9D6018CF8EF300A79BFD /* verify_asset.png */; };
 		C14C9D7718CFC92F00A79BFD /* AFHTTPRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = C14C9D6518CFC92F00A79BFD /* AFHTTPRequestOperation.m */; };
 		C14C9D7818CFC92F00A79BFD /* AFHTTPRequestOperationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C14C9D6718CFC92F00A79BFD /* AFHTTPRequestOperationManager.m */; };
@@ -114,6 +123,17 @@
 		C1316E2D18B5760A005A85B8 /* UIScrollView+SVInfiniteScrolling.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+SVInfiniteScrolling.m"; sourceTree = "<group>"; };
 		C1316E2E18B5760A005A85B8 /* UIScrollView+SVPullToRefresh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIScrollView+SVPullToRefresh.h"; sourceTree = "<group>"; };
 		C1316E2F18B5760A005A85B8 /* UIScrollView+SVPullToRefresh.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+SVPullToRefresh.m"; sourceTree = "<group>"; };
+		C13708B01905DE2D00DC7175 /* arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow.png; sourceTree = "<group>"; };
+		C13708B11905DE2D00DC7175 /* arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow@2x.png"; sourceTree = "<group>"; };
+		C13708B4190F613B00DC7175 /* Poly-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poly-Regular.ttf"; sourceTree = "<group>"; };
+		C13708B5190F647400DC7175 /* waitlistedorg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = waitlistedorg.png; sourceTree = "<group>"; };
+		C13708B7190F647B00DC7175 /* waitlistedorg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "waitlistedorg@2x.png"; sourceTree = "<group>"; };
+		C13708B9190F649E00DC7175 /* swipeoverlay-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-568h@2x.png"; sourceTree = "<group>"; };
+		C13708BA190F649E00DC7175 /* swipeoverlay.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = swipeoverlay.png; sourceTree = "<group>"; };
+		C13708BB190F649E00DC7175 /* swipeoverlay@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay@2x.png"; sourceTree = "<group>"; };
+		C13708BF19100F4600DC7175 /* BCWaitingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BCWaitingViewController.h; sourceTree = "<group>"; };
+		C13708C019100F4600DC7175 /* BCWaitingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BCWaitingViewController.m; sourceTree = "<group>"; };
+		C13708C219109FC400DC7175 /* Poly-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poly-Regular.ttf"; path = "BackChannel/Poly-Regular.ttf"; sourceTree = "<group>"; };
 		C14C9D6018CF8EF300A79BFD /* verify_asset.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = verify_asset.png; sourceTree = "<group>"; };
 		C14C9D6418CFC92F00A79BFD /* AFHTTPRequestOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPRequestOperation.h; sourceTree = "<group>"; };
 		C14C9D6518CFC92F00A79BFD /* AFHTTPRequestOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFHTTPRequestOperation.m; sourceTree = "<group>"; };
@@ -202,10 +222,18 @@
 		C100166E18BD4D4000347A31 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C13708B4190F613B00DC7175 /* Poly-Regular.ttf */,
+				C13708B01905DE2D00DC7175 /* arrow.png */,
+				C13708B11905DE2D00DC7175 /* arrow@2x.png */,
 				C14C9DAB18D3CD5500A79BFD /* envelope.png */,
 				C14C9DAC18D3CD5500A79BFD /* envelope@2x.png */,
 				C14C9D6018CF8EF300A79BFD /* verify_asset.png */,
 				C100166F18BD4D4C00347A31 /* TisaPro.otf */,
+				C13708B5190F647400DC7175 /* waitlistedorg.png */,
+				C13708B7190F647B00DC7175 /* waitlistedorg@2x.png */,
+				C13708B9190F649E00DC7175 /* swipeoverlay-568h@2x.png */,
+				C13708BA190F649E00DC7175 /* swipeoverlay.png */,
+				C13708BB190F649E00DC7175 /* swipeoverlay@2x.png */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -226,6 +254,7 @@
 		C1316DCF18B3F741005A85B8 = {
 			isa = PBXGroup;
 			children = (
+				C13708C219109FC400DC7175 /* Poly-Regular.ttf */,
 				C1316DE118B3F741005A85B8 /* BackChannel */,
 				C1316E0318B3F741005A85B8 /* BackChannelTests */,
 				C1316DDA18B3F741005A85B8 /* Frameworks */,
@@ -270,6 +299,8 @@
 				C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */,
 				C1316E1D18B56D3F005A85B8 /* BCViewController.h */,
 				C1316E1E18B56D3F005A85B8 /* BCViewController.m */,
+				C13708BF19100F4600DC7175 /* BCWaitingViewController.h */,
+				C13708C019100F4600DC7175 /* BCWaitingViewController.m */,
 				C1F5B73F18CBC6E600D3FD32 /* BCAuthViewController.h */,
 				C1F5B74018CBC6E600D3FD32 /* BCAuthViewController.m */,
 				C1F5B74218CBC6FE00D3FD32 /* BCVerificationViewController.h */,
@@ -501,11 +532,19 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C13708C319109FC400DC7175 /* Poly-Regular.ttf in Resources */,
+				C13708BC190F649E00DC7175 /* swipeoverlay-568h@2x.png in Resources */,
 				C1F6D21418C6B94200498506 /* TisaPro.otf in Resources */,
+				C13708B6190F647400DC7175 /* waitlistedorg.png in Resources */,
+				C13708BD190F649E00DC7175 /* swipeoverlay.png in Resources */,
 				C14C9D6118CF8EF300A79BFD /* verify_asset.png in Resources */,
+				C13708B8190F647B00DC7175 /* waitlistedorg@2x.png in Resources */,
 				C14C9DAE18D3CD5500A79BFD /* envelope@2x.png in Resources */,
 				C1316DF218B3F741005A85B8 /* Main_iPad.storyboard in Resources */,
+				C13708B21905DE2D00DC7175 /* arrow.png in Resources */,
 				C1316DF718B3F741005A85B8 /* Images.xcassets in Resources */,
+				C13708B31905DE2D00DC7175 /* arrow@2x.png in Resources */,
+				C13708BE190F649E00DC7175 /* swipeoverlay@2x.png in Resources */,
 				C1316DEF18B3F741005A85B8 /* Main_iPhone.storyboard in Resources */,
 				C14C9DAD18D3CD5500A79BFD /* envelope.png in Resources */,
 				C1316DE618B3F741005A85B8 /* InfoPlist.strings in Resources */,
@@ -541,6 +580,7 @@
 				C14C9D7A18CFC92F00A79BFD /* AFNetworkReachabilityManager.m in Sources */,
 				C14C9D7718CFC92F00A79BFD /* AFHTTPRequestOperation.m in Sources */,
 				C14C9D7D18CFC92F00A79BFD /* AFURLRequestSerialization.m in Sources */,
+				C13708C119100F4600DC7175 /* BCWaitingViewController.m in Sources */,
 				C14C9D7C18CFC92F00A79BFD /* AFURLConnectionOperation.m in Sources */,
 				C14C9D7F18CFC92F00A79BFD /* AFURLSessionManager.m in Sources */,
 				C100167918BD75A900347A31 /* BCStreamViewController.m in Sources */,
