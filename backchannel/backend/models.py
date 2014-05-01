@@ -57,20 +57,30 @@ class UserSecret(models.Model):
     def __unicode__(self):
         return "user=%s, secret=%s" % (self.user, self.secret)
 
+class TrackClick(models.Model):
+
+    invite_code = models.IntegerField()
+    email = models.CharField(max_length=500)
+    clicked = models.IntegerField()
+
+    class Meta:
+        db_table = 'track_click'
+
+    def __unicode__(self):
+        return self.email
+
+
 
 SEED_SECRETS = [
     "Today is going to be a good day :)",
-    "Wish we had better food around here.",
-    "David is a genius! Enuf said...",
+    #"Wish we had better food around here.",
     "Gah, I wish my manager listened to me more",
-    "Please don't stop the music, music, music",
     "Its now or never",
     "I did something awesome at work today that I really want to tell everyone about",
-    "We need no meeting days. Meeting tend to get way too long. Can't stand them.",
-    "Guy next to me must not be getting any sleep",
-    "Anybody else find it uncomfortable going to the bathroom at work?",
-    "I'm going commando to work today",
-    "Uhhh, so Backchannel is a Yammer meets Secret. Hrm.",
+    "We need no meeting days. Meetings tend to get way too long. Can't stand them.",
+    #"Guy next to me must not be getting any sleep",
+    #"Anybody else find it uncomfortable going to the bathroom at work?",
+    "So Backchannel is a Yammer meets memelike posts",
 ]
 
 
@@ -102,8 +112,11 @@ class SecretAdmin(admin.ModelAdmin):
 class UserSecretAdmin(admin.ModelAdmin):
     pass
 
+class TrackClickAdmin(admin.ModelAdmin):
+    pass
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Org, OrgAdmin)
 admin.site.register(Secret, SecretAdmin)
 admin.site.register(UserSecret, UserSecretAdmin)
-
+admin.site.register(TrackClick, TrackClickAdmin)

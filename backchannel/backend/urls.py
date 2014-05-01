@@ -15,7 +15,10 @@ urlpatterns = patterns('',
     url(r'^stream/', views.stream, name='stream'),
     url(r'^resendemail/', views.resendemail, name='resendemail'),
     url(r'^createsecret/', views.createsecret, name='createsecret'),
-    url(r'^getlatestsecrets/', views.getlatestsecrets, name='getlatestsecrets'),
+    url(r'^getlatestsecrets/', views.getlatestposts, name='getlatestposts'),
+    url(r'^getlatestposts/', views.getlatestposts, name='getlatestposts'),
+    url(r'^getolderposts/', views.getolderposts, name='getolderposts'),
+    url(r'^signup/', views.signup, name='signup'),
 )
 
 urlpatterns += staticfiles_urlpatterns()
