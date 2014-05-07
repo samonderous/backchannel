@@ -112,7 +112,7 @@ static const float kGreatLabelMargin = 40.0;
     [greatLabel sizeToFit];
     [greatLabel placeIn:self alignedAt:CENTER];
     [greatLabel setY:CGRectGetMaxY(_verifyView.frame) + kGreatLabelMargin];
-    
+
     self.backgroundColor = [UIColor whiteColor];
     
     return self;

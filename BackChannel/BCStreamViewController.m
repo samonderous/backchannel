@@ -141,6 +141,7 @@ static const int kOldPostsBatchSize = 10;
     UIColor *fontColor = [[BCGlobalsManager globalsManager] fontColor];
     
     if (count <= 0) {
+        [_bar updateBar:count];
         return;
     }
     
@@ -388,10 +389,10 @@ static const int kOldPostsBatchSize = 10;
     [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] blackTaglineColor]
                            range: NSMakeRange(range.location, range.location)];
     
-    if (model.vote == VOTE_AGREE) {
+    if (model.agrees > model.disagrees) {
         [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] greenColor]
                                range: NSMakeRange(0, range.location - 1)];
-    } else if (model.vote == VOTE_DISAGREE) {
+    } else if (model.agrees < model.disagrees) {
         [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] redColor]
                                range: NSMakeRange(range.location + 1, voteText.length - 1 - range.location)];
     }
@@ -764,6 +765,7 @@ static BOOL isSwipeLocked = NO;
 @property (assign) BOOL isComposeMode;
 @property (strong, nonatomic) UIRefreshControl *refreshControl;
 @property (strong, nonatomic) UIImageView *tutorialAsset;
+@property (strong, nonatomic) UIBarButtonItem *shareItem;
 @end
 
 @implementation BCStreamViewController
@@ -992,15 +994,15 @@ static BOOL isSwipeLocked = NO;
     _messageTable.infiniteScrollingView.enabled = NO;
     
     // Handle share logic
-    UIBarButtonItem *shareItem = [[UIBarButtonItem alloc] initWithTitle:@"Share"
-                                                                  style:UIBarButtonItemStylePlain
-                                                                 target:self
-                                                                 action:@selector(shareButtonTap)];
-    [shareItem setTitleTextAttributes:@{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:16.0],
+    _shareItem = [[UIBarButtonItem alloc] initWithTitle:@"Share"
+                                                  style:UIBarButtonItemStylePlain
+                                                 target:self
+                                                 action:@selector(shareButtonTap)];
+    [_shareItem setTitleTextAttributes:@{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:16.0],
                                          NSForegroundColorAttributeName: [UIColor whiteColor]}
                              forState:UIControlStateNormal];
     
-    NSArray *actionButtonItems = @[shareItem];
+    NSArray *actionButtonItems = @[_shareItem];
     self.navigationItem.rightBarButtonItems = actionButtonItems;
 
     [self setupStreamBar];
@@ -1008,8 +1010,6 @@ static BOOL isSwipeLocked = NO;
 
 - (void)shareButtonTap
 {
-    NSLog(@"share button tapped");
-    
     if (![MFMailComposeViewController canSendMail]) {
         return;
     }
@@ -1022,13 +1022,16 @@ static BOOL isSwipeLocked = NO;
     [picker setSubject:subject];
     
     // Attach an image to the email
-    /*NSString *path = [[NSBundle mainBundle] pathForResource:@"rainy" ofType:@"jpg"];
-    NSData *myData = [NSData dataWithContentsOfFile:path];
-    [picker addAttachmentData:myData mimeType:@"image/jpeg" fileName:@"rainy"];
-     */
+    UIGraphicsBeginImageContextWithOptions(self.view.window.bounds.size, NO, 1.5);
+    [self.view.window.layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    NSData *data = UIImagePNGRepresentation(image);
+    [picker addAttachmentData:data mimeType:@"image/jpeg" fileName:@"backchannel"];
     
     // Fill out the email body text
-    NSString *emailBody = @"There's an app called Backchannel where you can read and share thoughts anonymously with (and only with) other fellow employees. Check out <a href='itms://itunes.com/apps/backchannel'>Backchannel</a>.";
+    NSString *emailBody = @"There's an app called Backchannel where you can read and share thoughts anonymously with (and only with) other fellow employees.<br/><br/><a href='http://itunes.com/apps/backchannel'>Check out our %@ Backchannel</a>.";
+    emailBody = [NSString stringWithFormat:emailBody, [defaults objectForKey:kOrgNameKey]];
     [picker setMessageBody:emailBody isHTML:YES];
     
     [self presentViewController:picker animated:YES completion:NULL];
@@ -1050,7 +1053,7 @@ static BOOL isSwipeLocked = NO;
         return;
     }
         
-    [UIView animateWithDuration:0.5 animations:^{
+    [UIView animateWithDuration:0.7 animations:^{
         _tutorialAsset.alpha = 1.0;
     } completion:^(BOOL finished) {
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(streamButtonTap:)];
@@ -1439,8 +1442,8 @@ static BOOL isSwipeLocked = NO;
 {
     NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
-    BCCellComposeView *cv = (BCCellComposeView*)cell.cv;
     
+    self.navigationItem.rightBarButtonItems = @[];
     float duration = (kCellHeight - kPublishBarHeight) / 864.0; // nasty calc off keboard rate 216pt / 0.25s
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
                      animations:^{
@@ -1458,6 +1461,8 @@ static BOOL isSwipeLocked = NO;
     NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCCellComposeView *cv = (BCCellComposeView*)cell.cv;
+    
+    self.navigationItem.rightBarButtonItems = @[_shareItem];
     
     float duration = (kCellHeight - kPublishBarHeight) / 864.0;
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
