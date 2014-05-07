@@ -44,7 +44,7 @@ def auth(request):
     except Exception, e:
         response['status'] = 2
         waitlistorg = WaitlistOrg()
-        waitlistorg.email = domain
+        waitlistorg.email = email
         waitlistorg.save()
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
