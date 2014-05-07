@@ -1131,20 +1131,12 @@ static BOOL isSwipeLocked = NO;
 
 - (void)setSeparator:(BCStreamCollectionViewCell*)cell indexPath:(NSIndexPath*)indexPath
 {
+    static const float separatorLineWidth = 80.0;
     UIView *separatorLine = [[UIView alloc] init];
-    if (indexPath.item == 0) {
-        separatorLine.frame = CGRectMake((CGRectGetWidth(cell.contentView.bounds) - kTopDividerLineWidth) / 2.0,
-                                         CGRectGetMaxY(cell.contentView.bounds) - 1.0,
-                                         kTopDividerLineWidth,
-                                         1.0);
-        
-    } else {
-        static const float separatorLineWidth = 80.0;
-        separatorLine.frame = CGRectMake(CGRectGetMidX(cell.contentView.bounds) - (separatorLineWidth / 2.0),
-                                         CGRectGetMaxY(cell.contentView.bounds) - 1.0,
-                                         separatorLineWidth,
-                                         1.0);
-    }
+    separatorLine.frame = CGRectMake(CGRectGetMidX(cell.contentView.bounds) - (separatorLineWidth / 2.0),
+                                     CGRectGetMaxY(cell.contentView.bounds) - 1.0,
+                                     separatorLineWidth,
+                                     1.0);
     [cell.contentView addSubview:separatorLine];
     separatorLine.backgroundColor = [[BCGlobalsManager globalsManager] blackDividerColor];
     
