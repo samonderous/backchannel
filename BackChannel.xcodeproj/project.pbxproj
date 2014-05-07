@@ -63,6 +63,8 @@
 		C14C9DAD18D3CD5500A79BFD /* envelope.png in Resources */ = {isa = PBXBuildFile; fileRef = C14C9DAB18D3CD5500A79BFD /* envelope.png */; };
 		C14C9DAE18D3CD5500A79BFD /* envelope@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C14C9DAC18D3CD5500A79BFD /* envelope@2x.png */; };
 		C16D092318EA358400BB88FB /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C16D092218EA358400BB88FB /* Crashlytics.framework */; };
+		C182A7E7191A25ED007037F2 /* Poly-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C13708B4190F613B00DC7175 /* Poly-Regular.ttf */; };
+		C182A7E8191A2614007037F2 /* Poly-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C13708B4190F613B00DC7175 /* Poly-Regular.ttf */; };
 		C1E6D95018EB901F0007BF21 /* libFlurry_4.4.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E6D94F18EB901F0007BF21 /* libFlurry_4.4.0.a */; };
 		C1E6D95218EB90510007BF21 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E6D95118EB90510007BF21 /* SystemConfiguration.framework */; };
 		C1F0C31218C51C5500009BDD /* BCGlobalsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */; };
@@ -529,6 +531,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C182A7E8191A2614007037F2 /* Poly-Regular.ttf in Resources */,
 				C13708BC190F649E00DC7175 /* swipeoverlay-568h@2x.png in Resources */,
 				C1F6D21418C6B94200498506 /* TisaPro.otf in Resources */,
 				C13708B6190F647400DC7175 /* waitlistedorg.png in Resources */,
@@ -552,6 +555,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C1316E0818B3F741005A85B8 /* InfoPlist.strings in Resources */,
+				C182A7E7191A25ED007037F2 /* Poly-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -746,6 +750,7 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -770,6 +775,7 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

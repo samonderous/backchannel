@@ -8,7 +8,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import <MessageUI/MessageUI.h>
-
+//#import <QuartzCore/QuartzCore.h>
 
 #import "UIScrollView+SVPullToRefresh.h"
 #import "UIScrollView+SVInfiniteScrolling.h"
@@ -32,7 +32,6 @@ static const float kPublishBarHeight = 60.0;
 static const int kMaxCharCount = 140;
 static const int kCellEdgeInset = 30.0;
 static const float kPublishPushDuration = 0.5;
-static const int kTopDividerLineWidth = 50;
 static const float kNewPostStartPositionY = 25.0;
 static const float kPublishMeterHeight = 2.0;
 static const float kPUblishButtonCharCountLabelSpacing = 15.0;
@@ -1030,7 +1029,7 @@ static BOOL isSwipeLocked = NO;
     [picker addAttachmentData:data mimeType:@"image/jpeg" fileName:@"backchannel"];
     
     // Fill out the email body text
-    NSString *emailBody = @"There's an app called Backchannel where you can read and share thoughts anonymously with (and only with) other fellow employees.<br/><br/><a href='http://itunes.com/apps/backchannel'>Check out our %@ Backchannel</a>.";
+    NSString *emailBody = @"There's an app called Backchannel where you can read and share thoughts anonymously with (and only with) other fellow employees.<br/><br/><a href='https://bckchannelapp.com/backend/share/'>Check out our %@ Backchannel</a>.";
     emailBody = [NSString stringWithFormat:emailBody, [defaults objectForKey:kOrgNameKey]];
     [picker setMessageBody:emailBody isHTML:YES];
     
@@ -1131,20 +1130,12 @@ static BOOL isSwipeLocked = NO;
 
 - (void)setSeparator:(BCStreamCollectionViewCell*)cell indexPath:(NSIndexPath*)indexPath
 {
+    static const float separatorLineWidth = 80.0;
     UIView *separatorLine = [[UIView alloc] init];
-    if (indexPath.item == 0) {
-        separatorLine.frame = CGRectMake((CGRectGetWidth(cell.contentView.bounds) - kTopDividerLineWidth) / 2.0,
-                                         CGRectGetMaxY(cell.contentView.bounds) - 1.0,
-                                         kTopDividerLineWidth,
-                                         1.0);
-        
-    } else {
-        static const float separatorLineWidth = 80.0;
-        separatorLine.frame = CGRectMake(CGRectGetMidX(cell.contentView.bounds) - (separatorLineWidth / 2.0),
-                                         CGRectGetMaxY(cell.contentView.bounds) - 1.0,
-                                         separatorLineWidth,
-                                         1.0);
-    }
+    separatorLine.frame = CGRectMake(CGRectGetMidX(cell.contentView.bounds) - (separatorLineWidth / 2.0),
+                                     CGRectGetMaxY(cell.contentView.bounds) - 1.0,
+                                     separatorLineWidth,
+                                     1.0);
     [cell.contentView addSubview:separatorLine];
     separatorLine.backgroundColor = [[BCGlobalsManager globalsManager] blackDividerColor];
     
