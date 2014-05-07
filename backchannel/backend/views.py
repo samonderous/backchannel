@@ -282,3 +282,25 @@ def signup(request):
         pass
 
     return redirect('http://signup.backchannel.it')
+
+
+def share(request):
+    try:
+        ts = TrackShare.objects.get(id=1)
+        ts.clicked += 1
+        ts.save()
+    except Exception, e:
+        pass
+
+    return redirect('http://itunes.com/apps/thebackchannel')
+
+
+def invite(request):
+    try:
+        ti = TrackInvite.objects.get(id=1)
+        ti.clicked += 1
+        ti.save()
+    except Exception, e:
+        pass
+
+    return redirect('http://itunes.com/apps/thebackchannel')
