@@ -32,20 +32,27 @@ extern NSString *kOrgDomainKey;
 
 @property (strong, nonatomic) UIColor *blueColor;
 @property (strong, nonatomic) UIColor *blueBackgroundColor;
+@property (strong, nonatomic) UIColor *bluePublishColor;
+
 @property (strong, nonatomic) UIColor *blackPublishFontColor;
 @property (strong, nonatomic) UIColor *blackPublishBackgroundColor;
-@property (strong, nonatomic) UIColor *greenColor;
-@property (strong, nonatomic) UIColor *creamColor;
-@property (strong, nonatomic) UIColor *creamBackgroundColor;
-@property (strong, nonatomic) UIColor *greenBackgroundColor;
-@property (strong, nonatomic) UIColor *fontColor;
-@property (strong, nonatomic) UIColor *greenPublishColor;
-@property (strong, nonatomic) UIColor *redColor;
-@property (strong, nonatomic) UIFont *composeFont;
-@property (strong, nonatomic) UIColor *emptyPostCellColor;
 @property (strong, nonatomic) UIColor *blackDividerColor;
 @property (strong, nonatomic) UIColor *blackTimestampColor;
 @property (strong, nonatomic) UIColor *blackTaglineColor;
+
+@property (strong, nonatomic) UIColor *greenColor;
+@property (strong, nonatomic) UIColor *greenBackgroundColor;
+@property (strong, nonatomic) UIColor *greenPublishColor;
+
+@property (strong, nonatomic) UIColor *creamColor;
+@property (strong, nonatomic) UIColor *creamBackgroundColor;
+@property (strong, nonatomic) UIColor *creamPublishColor;
+
+@property (strong, nonatomic) UIColor *fontColor;
+@property (strong, nonatomic) UIColor *redColor;
+@property (strong, nonatomic) UIFont *composeFont;
+@property (strong, nonatomic) UIColor *emptyPostCellColor;
+
 @property (strong, nonatomic) UIColor *publishTutorialHintColor;
 
 + (id)globalsManager;

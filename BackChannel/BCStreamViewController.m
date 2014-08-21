@@ -8,14 +8,12 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import <MessageUI/MessageUI.h>
-//#import <QuartzCore/QuartzCore.h>
 
 #import "UIScrollView+SVPullToRefresh.h"
 #import "UIScrollView+SVInfiniteScrolling.h"
 #import "MCSwipeTableViewCell.h"
 #import "TTTAttributedLabel.h"
 #import "Utils.h"
-
 
 #import "BCAppDelegate.h"
 #import "BCStreamViewController.h"
@@ -189,11 +187,14 @@ static const int kOldPostsBatchSize = 10;
     
     [_nevermind setTitle:@"Nevermind" forState:UIControlStateNormal];
     [_nevermind setTitleColor:[[BCGlobalsManager globalsManager] creamColor] forState:UIControlStateNormal];
+    [_nevermind setTitleColor:[[BCGlobalsManager globalsManager] creamPublishColor] forState:UIControlStateHighlighted];
+
     _nevermind.backgroundColor = [[BCGlobalsManager globalsManager] creamBackgroundColor];
     _nevermind.titleLabel.font = [UIFont fontWithName:@"Poly" size:18.0];
     
     [_publish setTitle:@"Publish" forState:UIControlStateNormal];
     [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenColor] forState:UIControlStateNormal];
+    [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenPublishColor] forState:UIControlStateHighlighted];
     _publish.backgroundColor = [[BCGlobalsManager globalsManager] greenBackgroundColor];
     _publish.titleLabel.font = [UIFont fontWithName:@"Poly" size:18.0];
     _publish.userInteractionEnabled = NO;
@@ -260,16 +261,6 @@ static const int kOldPostsBatchSize = 10;
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:[NSNumber numberWithBool:YES] forKey:kPublishTutorialKey];
-}
-
-- (void)setPublishPush
-{
-    [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenPublishColor] forState:UIControlStateNormal];
-}
-
-- (void)unsetPublishPush
-{
-    [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenColor] forState:UIControlStateNormal];
 }
 
 - (void)updateBar:(int)count
@@ -1325,10 +1316,10 @@ static BOOL isSwipeLocked = NO;
     }];
 }
 
-- (void)nevermindTap
+- (void)nevermindTap:(id)sender
 {
     _isComposeMode = NO;
-    
+
     // NOTE: I need a performBatchUpdates here because the _isComposeMode = NO makes the delegates
     // return a new height for the compose cell, so performBatchUpdates will do the necessary
     // animations to bring the first cell back to its original spot.
@@ -1337,16 +1328,22 @@ static BOOL isSwipeLocked = NO;
     } completion:^(BOOL finished) {
     }];
     
+    [UIView transitionWithView:(UIButton*)sender
+                      duration:0.4
+                       options:UIViewAnimationOptionTransitionCrossDissolve
+                    animations:^{ ((UIButton*)sender).highlighted = YES; }
+                    completion:nil];
+    
     [[BCGlobalsManager globalsManager] logFlurryEvent:@"tap_nevermind" withParams:nil];
 }
 
-- (void)publishHoldDown
+- (void)publishHoldDown:(id)sender
 {
     NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = cell.ccv;
     [ccv.bar.publishMeter.layer removeAllAnimations];
-    [ccv.bar setPublishPush];
+    //[ccv.bar setPublishPush];
 
     [[BCGlobalsManager globalsManager] logFlurryEventTimed:@"tap_publish" withParams:nil];
 
@@ -1357,25 +1354,23 @@ static BOOL isSwipeLocked = NO;
             ccv.bar.publishMeter.hidden = YES;
             [ccv.bar setPublishTutorialShown];
             [self addNewSecretToStream];
-            
             NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"state", @"finished", nil];
             [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:@"tap_publish" withParams:params];
         } else {
             NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"state", @"unfinished", nil];
             [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:@"tap_publish" withParams:params];
-            
             [ccv.bar triggerPublishTutorial];
         }
     }];
 }
 
-- (void)publishHoldRelease
+- (void)publishHoldRelease:(id)sender
 {
 
     NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = cell.ccv;
-    
+
     CALayer *layer = ccv.bar.publishMeter.layer.presentationLayer; // not entirely sure why I need to pick x out of this layer
     float maxX = CGRectGetMaxX(layer.frame);
     CGRect layerFrame = ccv.bar.publishMeter.layer.frame;
@@ -1389,7 +1384,12 @@ static BOOL isSwipeLocked = NO;
         [ccv.bar.publishMeter setX:-CGRectGetWidth([UIScreen mainScreen].bounds)];
     } completion:^(BOOL finished) {
     }];
-    [ccv.bar unsetPublishPush];
+
+    [UIView transitionWithView:(UIButton*)sender
+                      duration:0.4
+                       options:UIViewAnimationOptionTransitionCrossDissolve
+                    animations:^{ ((UIButton*)sender).highlighted = YES; }
+                    completion:nil];
 }
 
 - (void)removeCompose
@@ -1421,9 +1421,9 @@ static BOOL isSwipeLocked = NO;
     UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout*)collectionView.collectionViewLayout;
     [ccv setX:-flowLayout.sectionInset.left];
     
-    [cbv.nevermind addTarget:self action:@selector(nevermindTap) forControlEvents:UIControlEventTouchUpInside];
-    [cbv.publish addTarget:self action:@selector(publishHoldDown) forControlEvents:UIControlEventTouchDown];
-    [cbv.publish addTarget:self action:@selector(publishHoldRelease) forControlEvents:UIControlEventTouchUpInside];
+    [cbv.nevermind addTarget:self action:@selector(nevermindTap:) forControlEvents:UIControlEventTouchUpInside];
+    [cbv.publish addTarget:self action:@selector(publishHoldDown:) forControlEvents:UIControlEventTouchDown];
+    [cbv.publish addTarget:self action:@selector(publishHoldRelease:) forControlEvents:UIControlEventTouchUpInside];
     
     ccv.textView.delegate = self;
     

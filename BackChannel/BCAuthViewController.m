@@ -26,6 +26,7 @@ static const float kEmailMargin = 30.0;
 
 @interface BCAuthView ()
 @property (strong, nonatomic) UILabel *title;
+@property (strong, nonatomic) UILabel *tagLine;
 @property (strong, nonatomic, getter = getEmail) UITextField *email;
 @property (strong, nonatomic) UIView *divider;
 @property (strong, nonatomic) TTTAttributedLabel *errorText;
@@ -33,8 +34,11 @@ static const float kEmailMargin = 30.0;
 @property (strong, nonatomic) TTTAttributedLabel *joinLabel;
 @property (assign, getter = hasErrors) BOOL hasErrors;
 @property (strong, nonatomic) BCAuthViewController *viewController;
+@property (strong, nonatomic) UIActivityIndicatorView *loadingIndicator;
 
 - (void)fadeJoinButtonIn;
+- (void)addActivityIndicator;
+- (void)removeActivityIndicator;
 
 @end
 
@@ -53,6 +57,12 @@ static const float kEmailMargin = 30.0;
     [_title placeIn:self alignedAt:CENTER];
     [_title setY:kTitleTopMargin];
     
+    _tagLine = [BCAuthView getTagline];
+    [self addSubview:_tagLine];
+    [_tagLine placeIn:self alignedAt:CENTER];
+    [_tagLine setY:CGRectGetMaxY(_title.frame) + kTitleTaglineSpacing];
+    
+    /*
     BCHowItWorks *tagLine = [[[NSBundle mainBundle] loadNibNamed:@"BCHowItWorks" owner:self options:nil] objectAtIndex:0];
     [self addSubview:tagLine];
     [tagLine placeIn:self alignedAt:CENTER];
@@ -62,7 +72,7 @@ static const float kEmailMargin = 30.0;
     tagLine.howItWorksText.font = [UIFont fontWithName:@"Poly" size:kTagLineFont];
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleHowItWorksTap:)];
     [tagLine addGestureRecognizer:tapGesture];
-    
+    */
     
     UIFont *emailFont = [UIFont fontWithName:@"Poly" size:18.0];
     NSMutableAttributedString *emailAttributedString = [[NSMutableAttributedString alloc]
@@ -122,12 +132,11 @@ static const float kEmailMargin = 30.0;
     [_joinBar setY:CGRectGetMaxY(self.bounds) - CGRectGetHeight(_joinBar.bounds)];
     [_joinBar addTarget:self action:@selector(joinTapped:) forControlEvents:UIControlEventTouchUpInside];
     [_joinBar setTitleColor:[[BCGlobalsManager globalsManager] greenPublishColor] forState:UIControlStateHighlighted];
-    
-    UIActivityIndicatorView *loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    [_joinBar addSubview:loadingIndicator];
-    [loadingIndicator placeIn:_joinBar alignedAt:CENTER];
-    NSLog(NSStringFromCGRect(loadingIndicator.frame));
-    
+
+    _loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    [_joinBar addSubview:_loadingIndicator];
+    [_loadingIndicator placeIn:_joinBar alignedAt:CENTER];
+
     self.backgroundColor = [UIColor whiteColor];
 
     return self;
@@ -198,7 +207,7 @@ static const float kEmailMargin = 30.0;
     UILabel *tagLine = [[UILabel alloc] init];
     tagLine.font = tagLineFont;
     tagLine.textColor = tagLineColor;
-    tagLine.text = @"Share thoughts anonymously";
+    tagLine.text = @"Anonymous workplace sharing";
     [tagLine sizeToFit];
 
     return tagLine;
@@ -211,10 +220,7 @@ static const float kEmailMargin = 30.0;
 
 - (void)joinTapped:(id)sender
 {
-    NSLog(@"Join button tapped");
-
     [_viewController joinTapped];
-    [self fadeJoinButtonIn];
 }
 
 - (void)fadeJoinButtonIn
@@ -224,6 +230,21 @@ static const float kEmailMargin = 30.0;
                        options:UIViewAnimationOptionTransitionCrossDissolve
                     animations:^{ _joinBar.highlighted = YES; }
                     completion:nil];
+}
+
+- (void)addActivityIndicator
+{
+    [_joinBar setTitle:@"" forState:UIControlStateNormal];
+    [_joinBar setTitle:@"" forState:UIControlStateHighlighted];
+
+    [_loadingIndicator startAnimating];
+}
+
+- (void)removeActivityIndicator
+{
+    [_joinBar setTitle:@"Join" forState:UIControlStateNormal];
+    [_joinBar setTitle:@"Join" forState:UIControlStateHighlighted];
+    [_loadingIndicator stopAnimating];
 }
 
 @end
@@ -258,8 +279,12 @@ static const float kEmailMargin = 30.0;
     int persons = 18;
     NSString *udid = [[UIDevice currentDevice].identifierForVendor UUIDString];
 
+    [_av addActivityIndicator];
+    
     SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
         int status = (int)[responseObject[@"status"] integerValue];
+
+        [_av removeActivityIndicator];
 
         // ERROR CASE
         if (status == 1) {
@@ -293,9 +318,11 @@ static const float kEmailMargin = 30.0;
     FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"Error: %@", error);
         NSLog(@"error code %d", (int)operation.response.statusCode);
+        [_av removeActivityIndicator];
     };
     
     [[BCAPIClient sharedClient] sendAuth:_av.email.text success:success failure:failure];
+
     NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"email_entered", _av.email.text, nil];
     [[BCGlobalsManager globalsManager] logFlurryEvent:@"join_tap" withParams:params];
 }

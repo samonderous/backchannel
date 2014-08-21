@@ -26,8 +26,7 @@ static const float kGreatLabelMargin = 40.0;
 @property (strong, nonatomic) UIImageView *verifyView;
 @property (strong, nonatomic) UILabel *title;
 @property (strong, nonatomic) UILabel *tagLine;
-@property (strong, nonatomic, getter = getOpenMailButton) UIView *openMailButton;
-@property (strong, nonatomic, getter = getResendEmailButton) UIView *resendEmailButton;
+@property (strong, nonatomic, getter = getResendEmailButton) UIButton *resendEmailButton;
 @end
 
 @implementation BCVerificationView
@@ -47,56 +46,16 @@ static const float kGreatLabelMargin = 40.0;
     [_tagLine placeIn:self alignedAt:CENTER];
     [_tagLine setY:CGRectGetMaxY(_title.frame) + kTitleTaglineSpacing];
     
-    _openMailButton = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth(self.bounds), kButtonHeight)];
-    _resendEmailButton = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth(self.bounds), kButtonHeight)];
-    
-    //[self addSubview:_openMailButton];
-    [self addSubview:_resendEmailButton];
-    
-
-    _openMailButton.backgroundColor = [[BCGlobalsManager globalsManager] blueBackgroundColor];
-    //_resendEmailButton.backgroundColor = [[BCGlobalsManager globalsManager] creamBackgroundColor];
-    _resendEmailButton.backgroundColor = [[BCGlobalsManager globalsManager] blueBackgroundColor];
-
-    UIFont *openFont = [UIFont fontWithName:@"Poly" size:18.0];
-    UIColor *openFontColor = [[BCGlobalsManager globalsManager] blueColor];
-    NSMutableAttributedString *openAttributedString = [[NSMutableAttributedString alloc]
-                                                       initWithString:@"Open Mail"
-                                                       attributes:@{ NSFontAttributeName: openFont,
-                                                                     NSForegroundColorAttributeName: openFontColor}];
-    CGRect openRect = [openAttributedString boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX}
-                                                         options:NSStringDrawingUsesLineFragmentOrigin
-                                                         context:nil];
-    TTTAttributedLabel *openLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0,
-                                                                                         0.0,
-                                                                                         openRect.size.width,
-                                                                                         openRect.size.height)];
-    openLabel.attributedText = openAttributedString;
-    
-    [_openMailButton addSubview:openLabel];
-    
     UIFont *resendFont = [UIFont fontWithName:@"Poly" size:18.0];
-    UIColor *resendFontColor = [[BCGlobalsManager globalsManager] creamColor];
-    NSMutableAttributedString *resendAttributedString = [[NSMutableAttributedString alloc]
-                                                         initWithString:@"Resend email"
-                                                         attributes:@{ NSFontAttributeName: resendFont,
-                                                                       NSForegroundColorAttributeName: openFontColor}];
-    CGRect resendRect = [resendAttributedString boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX}
-                                                         options:NSStringDrawingUsesLineFragmentOrigin
-                                                         context:nil];
-    TTTAttributedLabel *resendLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0,
-                                                                                           0.0,
-                                                                                           resendRect.size.width,
-                                                                                           resendRect.size.height)];
-    resendLabel.attributedText = resendAttributedString;
-    
-    [_resendEmailButton addSubview:resendLabel];
- 
-    [openLabel placeIn:_openMailButton alignedAt:CENTER];
-    [resendLabel placeIn:_resendEmailButton alignedAt:CENTER];
-    
+    _resendEmailButton = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth(self.bounds), kButtonHeight)];
+    [self addSubview:_resendEmailButton];
+    [_resendEmailButton setTitle:@"Resend email" forState:UIControlStateNormal];
+    [_resendEmailButton setTitleColor:[[BCGlobalsManager globalsManager] blueColor] forState:UIControlStateNormal];
+    _resendEmailButton.titleLabel.font = resendFont;
+    [_resendEmailButton addTarget:self action:@selector(resendTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [_resendEmailButton setTitleColor:[[BCGlobalsManager globalsManager] bluePublishColor] forState:UIControlStateHighlighted];
+    _resendEmailButton.backgroundColor = [[BCGlobalsManager globalsManager] blueBackgroundColor];
     [_resendEmailButton placeIn:self alignedAt:BOTTOM];
-    [_openMailButton setY:CGRectGetMinY(_resendEmailButton.frame) - kButtonHeight];
     
     UIImage *image = [UIImage imageNamed:@"envelope.png"];
     _verifyView = [[UIImageView alloc] initWithImage:image];
@@ -116,7 +75,6 @@ static const float kGreatLabelMargin = 40.0;
     [greatLabel placeIn:self alignedAt:CENTER];
     [greatLabel setY:CGRectGetMaxY(_verifyView.frame) + kGreatLabelMargin];
 
-    
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *email = (NSString*)[defaults objectForKey:kEmailKey];
     UILabel *emailLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, 23.0)];
@@ -147,9 +105,19 @@ static const float kGreatLabelMargin = 40.0;
     return self;
 }
 
-- (void)handleBackButtonTap:(id)sender {
-    
+- (void)handleBackButtonTap:(id)sender
+{
     [_viewController handleBackButtonTap];
+}
+
+- (void)resendTapped:(id)sender
+{
+    [_viewController resendTapped];
+    [UIView transitionWithView:_resendEmailButton
+                      duration:0.4
+                       options:UIViewAnimationOptionTransitionCrossDissolve
+                    animations:^{ _resendEmailButton.highlighted = YES; }
+                    completion:nil];
 }
 
 @end
@@ -202,8 +170,19 @@ static const float kGreatLabelMargin = 40.0;
     [[BCGlobalsManager globalsManager] logFlurryEvent:@"openmail_tap" withParams:nil];
 }
 
-- (void)resendEmailTap:(UITapGestureRecognizer*)gesture
+- (void)resendTapped
 {
+    #if TARGET_IPHONE_SIMULATOR
+    
+    BCStreamViewController *vc = [[BCStreamViewController alloc] init];
+    vc.title = @"Backchannel";
+    UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
+    [[BCGlobalsManager globalsManager] logFlurryAllPageViews:nc];
+    vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    [self presentViewController:nc animated:YES completion:^() {}];
+    
+    #else
+
     SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"Resending email verification success");
     };
@@ -216,6 +195,8 @@ static const float kGreatLabelMargin = 40.0;
     [[BCAPIClient sharedClient] sendVerificationEmail:success failure:failure];
     
     [[BCGlobalsManager globalsManager] logFlurryEvent:@"resendmail_tap" withParams:nil];
+    
+    #endif
 }
 
 - (void)viewDidLoad
@@ -224,14 +205,6 @@ static const float kGreatLabelMargin = 40.0;
 
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    
-    UIView *omb = _vc.getOpenMailButton;
-    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openMailTap:)];
-    [omb addGestureRecognizer:tapGesture];
-    
-    UIView *reb = _vc.getResendEmailButton;
-    tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(resendEmailTap:)];
-    [reb addGestureRecognizer:tapGesture];
 }
 
 - (void)viewWillAppear:(BOOL)animated
