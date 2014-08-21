@@ -10,4 +10,6 @@
 
 @interface BCWaitingViewController : UIViewController
 
+- (void)handleBackButtonTap;
+
 @end

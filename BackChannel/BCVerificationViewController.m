@@ -22,6 +22,7 @@ static const float kGreatLabelMargin = 40.0;
 @end
 
 @interface BCVerificationView ()
+@property (strong, nonatomic) BCVerificationViewController *viewController;
 @property (strong, nonatomic) UIImageView *verifyView;
 @property (strong, nonatomic) UILabel *title;
 @property (strong, nonatomic) UILabel *tagLine;
@@ -31,10 +32,11 @@ static const float kGreatLabelMargin = 40.0;
 
 @implementation BCVerificationView
 
-- (id)init
+- (id)init:(BCVerificationViewController*)viewController
 {
     self = [super initWithFrame:[UIScreen mainScreen].applicationFrame];
     
+    _viewController = viewController;
     _title = [BCAuthView getTitle];
     [self addSubview:_title];
     [_title placeIn:self alignedAt:CENTER];
@@ -48,13 +50,14 @@ static const float kGreatLabelMargin = 40.0;
     _openMailButton = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth(self.bounds), kButtonHeight)];
     _resendEmailButton = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth(self.bounds), kButtonHeight)];
     
-    [self addSubview:_openMailButton];
+    //[self addSubview:_openMailButton];
     [self addSubview:_resendEmailButton];
     
 
     _openMailButton.backgroundColor = [[BCGlobalsManager globalsManager] blueBackgroundColor];
-    _resendEmailButton.backgroundColor = [[BCGlobalsManager globalsManager] creamBackgroundColor];
-    
+    //_resendEmailButton.backgroundColor = [[BCGlobalsManager globalsManager] creamBackgroundColor];
+    _resendEmailButton.backgroundColor = [[BCGlobalsManager globalsManager] blueBackgroundColor];
+
     UIFont *openFont = [UIFont fontWithName:@"Poly" size:18.0];
     UIColor *openFontColor = [[BCGlobalsManager globalsManager] blueColor];
     NSMutableAttributedString *openAttributedString = [[NSMutableAttributedString alloc]
@@ -77,7 +80,7 @@ static const float kGreatLabelMargin = 40.0;
     NSMutableAttributedString *resendAttributedString = [[NSMutableAttributedString alloc]
                                                          initWithString:@"Resend email"
                                                          attributes:@{ NSFontAttributeName: resendFont,
-                                                                       NSForegroundColorAttributeName: resendFontColor}];
+                                                                       NSForegroundColorAttributeName: openFontColor}];
     CGRect resendRect = [resendAttributedString boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX}
                                                          options:NSStringDrawingUsesLineFragmentOrigin
                                                          context:nil];
@@ -101,7 +104,7 @@ static const float kGreatLabelMargin = 40.0;
     [_verifyView placeIn:self alignedAt:CENTER];
     [_verifyView setY:kAssetTopMargin];
 
-    NSString *greatLabelString = @"Great! Check your email for an access link.";
+    NSString *greatLabelString = @"Great! Check your email. We sent an email to";
     TTTAttributedLabel *greatLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, CGFLOAT_MAX)];
     [self addSubview:greatLabel];
 
@@ -113,9 +116,40 @@ static const float kGreatLabelMargin = 40.0;
     [greatLabel placeIn:self alignedAt:CENTER];
     [greatLabel setY:CGRectGetMaxY(_verifyView.frame) + kGreatLabelMargin];
 
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *email = (NSString*)[defaults objectForKey:kEmailKey];
+    UILabel *emailLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, 23.0)];
+    [self addSubview:emailLabel];
+    emailLabel.font = [UIFont fontWithName:@"Poly" size:18.0];
+    emailLabel.numberOfLines = 1;
+    emailLabel.textAlignment = NSTextAlignmentCenter;
+    emailLabel.text = email;
+    emailLabel.lineBreakMode = NSLineBreakByTruncatingTail | NSLineBreakByClipping;
+    emailLabel.adjustsFontSizeToFitWidth = YES;
+    //[emailLabel sizeToFit];
+    [emailLabel placeIn:self alignedAt:CENTER];
+    [emailLabel setY:CGRectGetMaxY(greatLabel.frame)];
+    emailLabel.textColor = [[BCGlobalsManager globalsManager] greenColor];
+    
+    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [self addSubview:backButton];
+    [backButton setTitle:@"←" forState:UIControlStateNormal];
+    [backButton setContentEdgeInsets:UIEdgeInsetsMake(2, 2, 2, 2)];
+    [backButton sizeToFit];
+    [backButton placeIn:self alignedAt:TOP_LEFT withMargin:15.0];
+    backButton.titleLabel.font = [UIFont fontWithName:@"Poly" size:24.0];
+    [backButton setTitleColor:[[BCGlobalsManager globalsManager] blueColor] forState:UIControlStateNormal];
+    [backButton addTarget:self action:@selector(handleBackButtonTap:) forControlEvents:UIControlEventTouchUpInside];
+    
     self.backgroundColor = [UIColor whiteColor];
     
     return self;
+}
+
+- (void)handleBackButtonTap:(id)sender {
+    
+    [_viewController handleBackButtonTap];
 }
 
 @end
@@ -124,6 +158,7 @@ static const float kGreatLabelMargin = 40.0;
 
 @interface BCVerificationViewController ()
 @property (strong, nonatomic) BCVerificationView *vc;
+
 @end
 
 @implementation BCVerificationViewController
@@ -140,7 +175,7 @@ static const float kGreatLabelMargin = 40.0;
 - (void)loadView
 {
     [super loadView];
-    _vc = [[BCVerificationView alloc] init];
+    _vc = [[BCVerificationView alloc] init:self];
     [self.view addSubview:_vc];
     self.view.backgroundColor = [UIColor whiteColor];
 }
@@ -210,5 +245,14 @@ static const float kGreatLabelMargin = 40.0;
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+
+- (void)handleBackButtonTap {
+    NSLog(@"Got a tap");
+    BCAuthViewController *vc = [[BCAuthViewController alloc] init];
+    vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    [self presentViewController:vc animated:YES completion:^() {}];
+}
+
 
 @end

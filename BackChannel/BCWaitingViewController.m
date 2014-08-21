@@ -18,6 +18,7 @@ static const float kButtonHeight = 60.0;
 static const float kAssetTextSpacing = 30.0;
 
 @interface BCWaitingView : UIView
+@property (strong, nonatomic) BCWaitingViewController *viewController;
 @property (strong, nonatomic) UILabel *title;
 @property (strong, nonatomic) UILabel *tagLine;
 @property (strong, nonatomic) UIImageView *asset;
@@ -27,9 +28,12 @@ static const float kAssetTextSpacing = 30.0;
 
 @implementation BCWaitingView
 
-- (id)init
+- (id)init:(BCWaitingViewController*)viewController
 {
     self = [super initWithFrame:[UIScreen mainScreen].applicationFrame];
+    
+    _viewController = viewController;
+    
     _title = [BCAuthView getTitle];
     [self addSubview:_title];
     
@@ -67,6 +71,16 @@ static const float kAssetTextSpacing = 30.0;
     [inviteLabel placeIn:_inviteButton alignedAt:CENTER];
     [_inviteButton addSubview:inviteLabel];
     
+    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [self addSubview:backButton];
+    [backButton setTitle:@"←" forState:UIControlStateNormal];
+    [backButton setContentEdgeInsets:UIEdgeInsetsMake(2, 2, 2, 2)];
+    [backButton sizeToFit];
+    [backButton placeIn:self alignedAt:TOP_LEFT withMargin:15.0];
+    backButton.titleLabel.font = [UIFont fontWithName:@"Poly" size:24.0];
+    [backButton setTitleColor:[[BCGlobalsManager globalsManager] blueColor] forState:UIControlStateNormal];
+    [backButton addTarget:self action:@selector(handleBackButtonTap:) forControlEvents:UIControlEventTouchUpInside];
+    
     return self;
 }
 
@@ -93,6 +107,11 @@ static const float kAssetTextSpacing = 30.0;
     [_inviteButton placeIn:self alignedAt:BOTTOM];
 }
 
+- (void)handleBackButtonTap:(id)sender {
+    
+    [_viewController handleBackButtonTap];
+}
+
 @end
 
 
@@ -115,14 +134,13 @@ static const float kAssetTextSpacing = 30.0;
 - (void)loadView
 {
     [super loadView];
-    _wv = [[BCWaitingView alloc] init];
+    _wv = [[BCWaitingView alloc] init:self];
     [self.view addSubview:_wv];
     self.view.backgroundColor = [UIColor whiteColor];
 }
 
 - (void)inviteButtonTap:(UITapGestureRecognizer*)gesture
 {
-    NSLog(@"Got a tap");
     if (![MFMailComposeViewController canSendMail]) {
         return;
     }
@@ -189,5 +207,12 @@ static const float kAssetTextSpacing = 30.0;
     
     [self dismissViewControllerAnimated:YES completion:NULL];
 }
+
+- (void)handleBackButtonTap {
+    BCAuthViewController *vc = [[BCAuthViewController alloc] init];
+    vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    [self presentViewController:vc animated:YES completion:^() {}];
+}
+
 
 @end

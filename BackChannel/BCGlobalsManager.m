@@ -60,9 +60,13 @@ NSString *kOrgDomainKey = @"orgDomain";
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *email = [defaults objectForKey:kEmailKey];
-    NSDictionary *defaultparams = [NSDictionary dictionaryWithObjectsAndKeys:
-                            @"User", email ? email : @"", nil];
+    NSString *udid = [[UIDevice currentDevice].identifierForVendor UUIDString];
+    NSMutableDictionary *defaultparams = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                            @"User", email ? email : @"", @"Udid", udid, nil];
     
+    if (params) {
+        [defaultparams addEntriesFromDictionary:params];
+    }
     [Flurry logEvent:eventName withParameters:defaultparams];
 }
 
@@ -70,8 +74,12 @@ NSString *kOrgDomainKey = @"orgDomain";
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *email = [defaults objectForKey:kEmailKey];
-    NSDictionary *defaultparams = [NSDictionary dictionaryWithObjectsAndKeys:
-                                   @"User", email ? email : @"", nil];
+    NSString *udid = [[UIDevice currentDevice].identifierForVendor UUIDString];
+    NSMutableDictionary *defaultparams = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   @"User", email ? email : @"", @"Udid", udid, nil];
+    if (params) {
+        [defaultparams addEntriesFromDictionary:params];
+    }
     
     [Flurry logEvent:eventName withParameters:defaultparams timed:YES];
 }

@@ -1041,6 +1041,7 @@ static BOOL isSwipeLocked = NO;
     CGPoint touchLocation = [gesture locationInView:self.view];
     if (touchLocation.y > CGRectGetMaxY(self.view.bounds) - 60.0) {
         [self unsetupStreamTutorial];
+        [[BCGlobalsManager globalsManager] logFlurryEvent:@"got_it_tapped" withParams:nil];
     }
 }
 
@@ -1086,6 +1087,7 @@ static BOOL isSwipeLocked = NO;
         _tutorialAsset = nil;
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         [defaults setObject:[NSNumber numberWithBool:YES] forKey:kStreamTutorialKey];
+        [[BCGlobalsManager globalsManager] logFlurryEventTimed:@"entered_stream_view" withParams:nil];
     }];
 }
 
@@ -1102,6 +1104,12 @@ static BOOL isSwipeLocked = NO;
     [self getLatestPosts:^{
         [self showStreamTutorial];
     }];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:@"entered_stream_view" withParams:nil];
 }
 
 - (void)didReceiveMemoryWarning

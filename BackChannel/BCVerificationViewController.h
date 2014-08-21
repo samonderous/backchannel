@@ -10,4 +10,6 @@
 
 @interface BCVerificationViewController : UIViewController
 
+- (void)handleBackButtonTap;
+
 @end

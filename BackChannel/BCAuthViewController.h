@@ -16,4 +16,12 @@
 
 @interface BCAuthViewController : UIViewController
 
+- (void)handleHowItWorksTap;
+- (void)joinTapped;
+
+@end
+
+@interface BCHowItWorks : UIView
+@property (weak, nonatomic) IBOutlet UILabel *howItWorksText;
+
 @end

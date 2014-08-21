@@ -17,36 +17,52 @@
 static const float kJoinBarHeight = 60.0;
 static const float kEmailMargin = 30.0;
 
+
+@interface BCHowItWorks ()
+@end
+
+@implementation BCHowItWorks
+@end
+
 @interface BCAuthView ()
 @property (strong, nonatomic) UILabel *title;
 @property (strong, nonatomic, getter = getEmail) UITextField *email;
 @property (strong, nonatomic) UIView *divider;
 @property (strong, nonatomic) TTTAttributedLabel *errorText;
-@property (strong, nonatomic, getter = getJoinBar) UIView *joinBar;
+@property (strong, nonatomic, getter = getJoinBar) UIButton *joinBar;
 @property (strong, nonatomic) TTTAttributedLabel *joinLabel;
 @property (assign, getter = hasErrors) BOOL hasErrors;
-@property (strong, nonatomic) UILabel *tagLine;
+@property (strong, nonatomic) BCAuthViewController *viewController;
+
+- (void)fadeJoinButtonIn;
+
 @end
 
 @implementation BCAuthView
 
-- (id)init
+- (id)init:(BCAuthViewController*)viewController
 {
     self = [super initWithFrame:CGRectMake(0.0,
                                            CGRectGetMinY([UIScreen mainScreen].applicationFrame),
                                            CGRectGetWidth([UIScreen mainScreen].bounds),
                                            CGRectGetHeight([UIScreen mainScreen].applicationFrame) - kKeyboardHeight)];
+    _viewController = viewController;
     
     _title = [BCAuthView getTitle];
     [self addSubview:_title];
     [_title placeIn:self alignedAt:CENTER];
     [_title setY:kTitleTopMargin];
-
     
-    _tagLine = [BCAuthView getTagline];
-    [self addSubview:_tagLine];
-    [_tagLine placeIn:self alignedAt:CENTER];
-    [_tagLine setY:CGRectGetMaxY(_title.frame) + kTitleTaglineSpacing];
+    BCHowItWorks *tagLine = [[[NSBundle mainBundle] loadNibNamed:@"BCHowItWorks" owner:self options:nil] objectAtIndex:0];
+    [self addSubview:tagLine];
+    [tagLine placeIn:self alignedAt:CENTER];
+    [tagLine sizeToFit];
+    [tagLine setY:CGRectGetMaxY(_title.frame)];
+    tagLine.howItWorksText.textColor = [[BCGlobalsManager globalsManager] blackTaglineColor];
+    tagLine.howItWorksText.font = [UIFont fontWithName:@"Poly" size:kTagLineFont];
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleHowItWorksTap:)];
+    [tagLine addGestureRecognizer:tapGesture];
+    
     
     UIFont *emailFont = [UIFont fontWithName:@"Poly" size:18.0];
     NSMutableAttributedString *emailAttributedString = [[NSMutableAttributedString alloc]
@@ -95,25 +111,22 @@ static const float kEmailMargin = 30.0;
     [_errorText setX:CGRectGetMinX(_divider.frame)];
     _errorText.alpha = 0;
     
-    _joinBar = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth([UIScreen mainScreen].bounds), kJoinBarHeight)];
+    UIFont *joinFont = [UIFont fontWithName:@"Poly" size:16.0];
+    UIColor *joinFontColor = [[BCGlobalsManager globalsManager] greenColor];
+    _joinBar = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth([UIScreen mainScreen].bounds), kJoinBarHeight)];
     [self addSubview:_joinBar];
+    [_joinBar setTitle:@"Join" forState:UIControlStateNormal];
+    [_joinBar setTitleColor:joinFontColor forState:UIControlStateNormal];
+    _joinBar.titleLabel.font = joinFont;
     _joinBar.backgroundColor = [[BCGlobalsManager globalsManager] greenBackgroundColor];
     [_joinBar setY:CGRectGetMaxY(self.bounds) - CGRectGetHeight(_joinBar.bounds)];
+    [_joinBar addTarget:self action:@selector(joinTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [_joinBar setTitleColor:[[BCGlobalsManager globalsManager] greenPublishColor] forState:UIControlStateHighlighted];
     
-    
-    UIFont *joinFont = [UIFont fontWithName:@"Poly" size:16.0];
-    UIColor *joinFontColor = [[BCGlobalsManager globalsManager] greenPublishColor];
-    NSMutableAttributedString *joinAttributedString = [[NSMutableAttributedString alloc]
-                                                       initWithString:@"Join"
-                                                       attributes:@{ NSFontAttributeName: joinFont,
-                                                                     NSForegroundColorAttributeName: joinFontColor}];
-    CGRect joinRect = [joinAttributedString boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX}
-                                                           options:NSStringDrawingUsesLineFragmentOrigin
-                                                           context:nil];
-    _joinLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, joinRect.size.width, joinRect.size.height)];
-    _joinLabel.attributedText = joinAttributedString;
-    [_joinBar addSubview:_joinLabel];
-    [_joinLabel placeIn:_joinBar alignedAt:CENTER];
+    UIActivityIndicatorView *loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    [_joinBar addSubview:loadingIndicator];
+    [loadingIndicator placeIn:_joinBar alignedAt:CENTER];
+    NSLog(NSStringFromCGRect(loadingIndicator.frame));
     
     self.backgroundColor = [UIColor whiteColor];
 
@@ -185,10 +198,32 @@ static const float kEmailMargin = 30.0;
     UILabel *tagLine = [[UILabel alloc] init];
     tagLine.font = tagLineFont;
     tagLine.textColor = tagLineColor;
-    tagLine.text = @"Speak your mind";
+    tagLine.text = @"Share thoughts anonymously";
     [tagLine sizeToFit];
 
     return tagLine;
+}
+
+- (void)handleHowItWorksTap:(id)sender
+{
+    [_viewController handleHowItWorksTap];
+}
+
+- (void)joinTapped:(id)sender
+{
+    NSLog(@"Join button tapped");
+
+    [_viewController joinTapped];
+    [self fadeJoinButtonIn];
+}
+
+- (void)fadeJoinButtonIn
+{
+    [UIView transitionWithView:_joinBar
+                      duration:0.4
+                       options:UIViewAnimationOptionTransitionCrossDissolve
+                    animations:^{ _joinBar.highlighted = YES; }
+                    completion:nil];
 }
 
 @end
@@ -213,28 +248,36 @@ static const float kEmailMargin = 30.0;
 - (void)loadView
 {
     [super loadView];
-    _av = [[BCAuthView alloc] init];
+    _av = [[BCAuthView alloc] init:self];
     [self.view addSubview:_av];
     self.view.backgroundColor = [UIColor whiteColor];
 }
 
-- (void)joinTapped:(UITapGestureRecognizer*)gesture
+- (void)joinTapped
 {
     int persons = 18;
+    NSString *udid = [[UIDevice currentDevice].identifierForVendor UUIDString];
+
     SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
         int status = (int)[responseObject[@"status"] integerValue];
+
+        // ERROR CASE
         if (status == 1) {
             // FIXME: turn this on when we decide on the teaser
             [_av updateEmail:persons withError:YES];
-        } else if (status == 2) {
+        }
+        
+        // WHITELIST CASE
+        else if (status == 2) {
             // Not whitelisted
             BCWaitingViewController *vc = [[BCWaitingViewController alloc] init];
             vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
             [self presentViewController:vc animated:YES completion:^() {}];
-        } else {
-            NSString *udid = [[UIDevice currentDevice].identifierForVendor UUIDString];
+        }
+        
+        // EMAIL SUCCESS CASE, OFF TO VERIFICATION
+        else {
             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-            
             NSString *email = (NSString*)responseObject[@"email"];
             [defaults setObject:email forKey:kEmailKey];
             [defaults setObject:udid forKey:kUdidKey];
@@ -253,7 +296,8 @@ static const float kEmailMargin = 30.0;
     };
     
     [[BCAPIClient sharedClient] sendAuth:_av.email.text success:success failure:failure];
-    [[BCGlobalsManager globalsManager] logFlurryEvent:@"join_tap" withParams:nil];
+    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"email_entered", _av.email.text, nil];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:@"join_tap" withParams:params];
 }
 
 - (void)viewDidLoad
@@ -262,11 +306,6 @@ static const float kEmailMargin = 30.0;
     [_av.getEmail setKeyboardType:UIKeyboardTypeEmailAddress];
     [_av.getEmail becomeFirstResponder];
     _av.getEmail.delegate = self;
-    
-	// Do any additional setup after loading the view.
-    UIView *joinBar = _av.getJoinBar;
-    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(joinTapped:)];
-    [joinBar addGestureRecognizer:tapGesture];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -280,6 +319,16 @@ static const float kEmailMargin = 30.0;
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+- (void)handleHowItWorksTap
+{
+    NSLog(@"Got a how it works tap");
+    BCWaitingViewController *vc = [[BCWaitingViewController alloc] init];
+    vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    [self presentViewController:vc animated:YES completion:nil];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:@"how_it_works_tap" withParams:nil];
+}
+
 
 #pragma UITextField Delegate
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
