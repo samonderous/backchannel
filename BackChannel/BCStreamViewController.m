@@ -733,7 +733,7 @@ static BOOL isSwipeLocked = NO;
         
         if (_thresholdCrossed)
         {
-            [self.delegate swipeReleaseAnimationBackComplete:self inDirection:direction];
+            [self.delegate swipeReleaseAnimationBackComplete:self inDirection:side > 0 ? RIGHT_DIRECTION : LEFT_DIRECTION];
         }
     }
 }
