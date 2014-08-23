@@ -8,11 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
-typedef enum Vote {
+typedef NS_ENUM(NSInteger, Vote)
+{
     VOTE_NONE = 0,
-    VOTE_AGREE,
-    VOTE_DISAGREE
-} Vote;
+    VOTE_AGREE = 1,
+    VOTE_DISAGREE = 2
+};
+
 
 @interface BCSecretModel : NSObject
 

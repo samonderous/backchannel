@@ -497,7 +497,7 @@ static BOOL isSwipeLocked = NO;
     _size = size;
     _secretModel = secretModel;
     _bottomLayerContainerView = bottomLayerContainerView;
-    _isDragging = NO;
+    _isDragging = YES;
 
     _textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel withWidth:size.width];
     _footerView = [[BCCellTopLayerFooterView alloc] init:secretModel.timeStr withWidth:size.width];
@@ -519,6 +519,7 @@ static BOOL isSwipeLocked = NO;
     
     if (_secretModel.vote != VOTE_NONE) {
         [self updateVoteView];
+        _isDragging = NO;
     }
     self.backgroundColor = [UIColor whiteColor];
     
@@ -669,7 +670,11 @@ static BOOL isSwipeLocked = NO;
 
 - (void)handleSwipe:(UIPanGestureRecognizer*)gesture
 {
-    if (_secretModel.vote != VOTE_NONE || isSwipeLocked) return;
+    // Condition: (_isDragging == NO && _thresholdCrossed) to handle case where
+    // handleSwipe gets called after threshold gets reached and swipeRelease*
+    // delegate gets called to log vote. We want to block swipe only if they crossed
+    // threshold but still want to enter into END state so check on isDragging as well.
+    if ((_isDragging == NO && _thresholdCrossed) || isSwipeLocked) return;
     
     CGFloat dragThreshold = 1.0f;
     CGFloat voteThreshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset + kVoteThresholdMargin;
@@ -1503,6 +1508,7 @@ static BOOL isSwipeLocked = NO;
 # pragma Cell Top Container View Delegate
 - (void)swipeReleaseAnimationBackComplete:(BCCellTopLayerContainerView*)containerView inDirection:(Direction)direction
 {
+
     BCSecretModel *secretModel = containerView.secretModel;
     if (secretModel.vote != VOTE_NONE) {
         return;
@@ -1518,17 +1524,19 @@ static BOOL isSwipeLocked = NO;
         [[BCGlobalsManager globalsManager] logFlurryEvent:@"vote_neg_one" withParams:nil];
     }
 
-    SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"Vote success");
-    };
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
+            NSLog(@"Vote success");
+        };
+        
+        FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+            NSLog(@"Error in vote: %@", error);
+            NSLog(@"error code %d", (int)operation.response.statusCode);
+        };
+        
+        [[BCAPIClient sharedClient] setVote:secretModel withVote:secretModel.vote success:success failure:failure];
+    });
     
-    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"Error in vote: %@", error);
-        NSLog(@"error code %d", (int)operation.response.statusCode);
-    };
-    
-    [[BCAPIClient sharedClient] setVote:secretModel withVote:secretModel.vote success:success failure:failure];
-
     [containerView updateVoteView];
 }
 

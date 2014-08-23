@@ -96,7 +96,7 @@ static NSString *kOlderPostsPath = @"backend/getolderposts/";
     [self fetchSecrets:kOlderPostsPath success:success failure:failure withParams:params];
 }
 
-- (void)setVote:(BCSecretModel*)model withVote:(Vote)vote success:(SuccessCallback)success failure:(FailureCallback)failure
+- (void)setVote:(BCSecretModel*)model withVote:(NSInteger)vote success:(SuccessCallback)success failure:(FailureCallback)failure
 {
     NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
     [params setObject:(NSString*)[[UIDevice currentDevice].identifierForVendor UUIDString] forKey:@"udid"];

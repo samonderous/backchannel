@@ -17,6 +17,9 @@
 static const float kJoinBarHeight = 60.0;
 static const float kEmailMargin = 30.0;
 
+NSString *assuranceMessage = @"We will not share your id with co-workers or employers.";
+NSString *errorMessage = @"Be sure to enter a valid work email address";
+
 
 @interface BCHowItWorks ()
 @end
@@ -29,7 +32,7 @@ static const float kEmailMargin = 30.0;
 @property (strong, nonatomic) UILabel *tagLine;
 @property (strong, nonatomic, getter = getEmail) UITextField *email;
 @property (strong, nonatomic) UIView *divider;
-@property (strong, nonatomic) TTTAttributedLabel *errorText;
+@property (strong, nonatomic) UILabel *errorText;
 @property (strong, nonatomic, getter = getJoinBar) UIButton *joinBar;
 @property (strong, nonatomic) TTTAttributedLabel *joinLabel;
 @property (assign, getter = hasErrors) BOOL hasErrors;
@@ -91,10 +94,10 @@ static const float kEmailMargin = 30.0;
     _email.autocapitalizationType = UITextAutocapitalizationTypeNone;
     _email.autocorrectionType = UITextAutocorrectionTypeNo;
     _email.attributedText = emailAttributedString;
-    _email.placeholder = @"Enter corporate email";
+    _email.placeholder = @"Enter your work email";
     if ([_email respondsToSelector:@selector(setAttributedPlaceholder:)]) {
         UIColor *color = [[BCGlobalsManager globalsManager] emptyPostCellColor];;
-        _email.attributedPlaceholder = [[NSAttributedString alloc] initWithString:@"Enter corporate email" attributes:@{NSForegroundColorAttributeName: color}];
+        _email.attributedPlaceholder = [[NSAttributedString alloc] initWithString:@"Enter your work email" attributes:@{NSForegroundColorAttributeName: color}];
     }
     _email.font = emailFont;
     [_email placeIn:self alignedAt:CENTER];
@@ -106,20 +109,14 @@ static const float kEmailMargin = 30.0;
     [_divider setY:CGRectGetMaxY(_email.frame) + 15.0];
 
     UIFont *errorFont = [UIFont fontWithName:@"Poly" size:10.0];
-    UIColor *errorFontColor = [[BCGlobalsManager globalsManager] redColor];
-    NSMutableAttributedString *errorAttributedString = [[NSMutableAttributedString alloc]
-                                                        initWithString:@"Be sure to enter a valid corporate email address"
-                                                        attributes:@{ NSFontAttributeName: errorFont,
-                                                                      NSForegroundColorAttributeName: errorFontColor}];
-    CGRect errorRect = [errorAttributedString boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX}
-                                                           options:NSStringDrawingUsesLineFragmentOrigin
-                                                           context:nil];
-    _errorText = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, errorRect.size.width, errorRect.size.height)];
+    _errorText = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, CGFLOAT_MAX, CGFLOAT_MAX)];
     [self addSubview:_errorText];
-    _errorText.attributedText = errorAttributedString;
+    _errorText.text = assuranceMessage;
+    _errorText.font = errorFont;
+    [self showAssurance];
+    [_errorText sizeToFit];
     [_errorText setY:CGRectGetMaxY(_divider.frame) + 5.0];
     [_errorText setX:CGRectGetMinX(_divider.frame)];
-    _errorText.alpha = 0;
     
     UIFont *joinFont = [UIFont fontWithName:@"Poly" size:16.0];
     UIColor *joinFontColor = [[BCGlobalsManager globalsManager] greenColor];
@@ -147,16 +144,22 @@ static const float kEmailMargin = 30.0;
     [super layoutSubviews];
 }
 
-- (void)removeError
+- (void)showAssurance
 {
-    _errorText.alpha = 0.0;
+    UIColor *errorFontColor = [[BCGlobalsManager globalsManager] blackTaglineColor];
+    _errorText.text = assuranceMessage;
+    _errorText.textColor = errorFontColor;
     _divider.backgroundColor = [[BCGlobalsManager globalsManager] blackDividerColor];
     _hasErrors = NO;
 }
 
 - (void)showError
 {
-    _errorText.alpha = 1.0;
+    UIColor *errorFontColor = [[BCGlobalsManager globalsManager] redColor];
+
+    _errorText.text = errorMessage;
+    _errorText.textColor = errorFontColor;
+    
     _divider.backgroundColor = [[BCGlobalsManager globalsManager] redColor];
     _hasErrors = YES;
 }
@@ -361,7 +364,7 @@ static const float kEmailMargin = 30.0;
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
 {
     if (_av.hasErrors) {
-        [_av removeError];
+        [_av showAssurance];
     }
     
     return YES;
