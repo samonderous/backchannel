@@ -51,7 +51,9 @@ static const float kAssetTextSpacing = 30.0;
 
     [textAttrString addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] publishTutorialHintColor]
                            range: NSMakeRange(88, textString.length - 88)];
-    
+
+    [textAttrString addAttribute: NSFontAttributeName value:[UIFont fontWithName:@"Poly" size:18.0] range:NSMakeRange(0, 88)];
+
     [textAttrString addAttribute: NSFontAttributeName value:[UIFont fontWithName:@"Poly" size:12.0] range:NSMakeRange(88, textString.length - 88)];
     
     _text.numberOfLines = 0;
