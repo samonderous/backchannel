@@ -93,10 +93,11 @@ static const float kGreatLabelMargin = 40.0;
     UIButton *backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     [self addSubview:backButton];
     [backButton setTitle:@"←" forState:UIControlStateNormal];
-    [backButton setContentEdgeInsets:UIEdgeInsetsMake(2, 2, 2, 2)];
+    [backButton setContentEdgeInsets:UIEdgeInsetsMake(13, 14, 13, 14)];
     [backButton sizeToFit];
-    [backButton placeIn:self alignedAt:TOP_LEFT withMargin:15.0];
-    backButton.titleLabel.font = [UIFont fontWithName:@"Poly" size:24.0];
+    [backButton setX:6];
+    [backButton setY:22];
+    backButton.titleLabel.font = [UIFont fontWithName:@"Poly" size:28.0];
     [backButton setTitleColor:[[BCGlobalsManager globalsManager] blueColor] forState:UIControlStateNormal];
     [backButton addTarget:self action:@selector(handleBackButtonTap:) forControlEvents:UIControlEventTouchUpInside];
     
