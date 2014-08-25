@@ -63,7 +63,7 @@ static const float kGreatLabelMargin = 40.0;
     [_verifyView placeIn:self alignedAt:CENTER];
     [_verifyView setY:kAssetTopMargin];
 
-    NSString *greatLabelString = @"Great! Check your email. We sent an email to";
+    NSString *greatLabelString = @"Great! Check your email. We sent an access link to";
     TTTAttributedLabel *greatLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, CGFLOAT_MAX)];
     [self addSubview:greatLabel];
 
@@ -77,7 +77,7 @@ static const float kGreatLabelMargin = 40.0;
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *email = (NSString*)[defaults objectForKey:kEmailKey];
-    UILabel *emailLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, 23.0)];
+    UILabel *emailLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, 22.0)];
     [self addSubview:emailLabel];
     emailLabel.font = [UIFont fontWithName:@"Poly" size:18.0];
     emailLabel.numberOfLines = 1;
