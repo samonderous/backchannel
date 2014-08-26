@@ -8,14 +8,12 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import <MessageUI/MessageUI.h>
-//#import <QuartzCore/QuartzCore.h>
 
 #import "UIScrollView+SVPullToRefresh.h"
 #import "UIScrollView+SVInfiniteScrolling.h"
 #import "MCSwipeTableViewCell.h"
 #import "TTTAttributedLabel.h"
 #import "Utils.h"
-
 
 #import "BCAppDelegate.h"
 #import "BCStreamViewController.h"
@@ -189,11 +187,14 @@ static const int kOldPostsBatchSize = 10;
     
     [_nevermind setTitle:@"Nevermind" forState:UIControlStateNormal];
     [_nevermind setTitleColor:[[BCGlobalsManager globalsManager] creamColor] forState:UIControlStateNormal];
+    [_nevermind setTitleColor:[[BCGlobalsManager globalsManager] creamPublishColor] forState:UIControlStateHighlighted];
+
     _nevermind.backgroundColor = [[BCGlobalsManager globalsManager] creamBackgroundColor];
     _nevermind.titleLabel.font = [UIFont fontWithName:@"Poly" size:18.0];
     
     [_publish setTitle:@"Publish" forState:UIControlStateNormal];
     [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenColor] forState:UIControlStateNormal];
+    [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenPublishColor] forState:UIControlStateHighlighted];
     _publish.backgroundColor = [[BCGlobalsManager globalsManager] greenBackgroundColor];
     _publish.titleLabel.font = [UIFont fontWithName:@"Poly" size:18.0];
     _publish.userInteractionEnabled = NO;
@@ -260,16 +261,6 @@ static const int kOldPostsBatchSize = 10;
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:[NSNumber numberWithBool:YES] forKey:kPublishTutorialKey];
-}
-
-- (void)setPublishPush
-{
-    [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenPublishColor] forState:UIControlStateNormal];
-}
-
-- (void)unsetPublishPush
-{
-    [_publish setTitleColor:[[BCGlobalsManager globalsManager] greenColor] forState:UIControlStateNormal];
 }
 
 - (void)updateBar:(int)count
@@ -383,7 +374,6 @@ static const int kOldPostsBatchSize = 10;
                                                  initWithString:voteText
                                                  attributes:@{ NSFontAttributeName:font,
                                                                NSForegroundColorAttributeName: [[BCGlobalsManager globalsManager] creamColor]}];
-    
     
     [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] blackTaglineColor]
                            range: NSMakeRange(range.location, range.location)];
@@ -506,7 +496,7 @@ static BOOL isSwipeLocked = NO;
     _size = size;
     _secretModel = secretModel;
     _bottomLayerContainerView = bottomLayerContainerView;
-    _isDragging = NO;
+    _isDragging = YES;
 
     _textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel withWidth:size.width];
     _footerView = [[BCCellTopLayerFooterView alloc] init:secretModel.timeStr withWidth:size.width];
@@ -528,6 +518,8 @@ static BOOL isSwipeLocked = NO;
     
     if (_secretModel.vote != VOTE_NONE) {
         [self updateVoteView];
+        _isDragging = NO;
+        _secretModel.isVoted = YES;
     }
     self.backgroundColor = [UIColor whiteColor];
     
@@ -678,8 +670,13 @@ static BOOL isSwipeLocked = NO;
 
 - (void)handleSwipe:(UIPanGestureRecognizer*)gesture
 {
-    if (_secretModel.vote != VOTE_NONE || isSwipeLocked) return;
-    
+    // Condition: (_isDragging == NO && _thresholdCrossed) to handle case where
+    // handleSwipe gets called after threshold gets reached and swipeRelease*
+    // delegate gets called to log vote. We want to block swipe only if they crossed
+    // threshold but still want to enter into END state so check on isDragging as well.
+    //if ((_isDragging == NO && _thresholdCrossed) || isSwipeLocked) return;
+    if (_secretModel.isVoted || isSwipeLocked) return;
+
     CGFloat dragThreshold = 1.0f;
     CGFloat voteThreshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset + kVoteThresholdMargin;
 
@@ -742,7 +739,7 @@ static BOOL isSwipeLocked = NO;
         
         if (_thresholdCrossed)
         {
-            [self.delegate swipeReleaseAnimationBackComplete:self inDirection:direction];
+            [self.delegate swipeReleaseAnimationBackComplete:self inDirection:side > 0 ? RIGHT_DIRECTION : LEFT_DIRECTION];
         }
     }
 }
@@ -763,8 +760,15 @@ static BOOL isSwipeLocked = NO;
 @property (assign) BOOL isSwipeLock;
 @property (assign) BOOL isComposeMode;
 @property (strong, nonatomic) UIRefreshControl *refreshControl;
-@property (strong, nonatomic) UIImageView *tutorialAsset;
 @property (strong, nonatomic) UIBarButtonItem *shareItem;
+
+// Nasty Tutorial stuff
+@property (assign) BOOL inTutorialMode;
+@property (strong, nonatomic) UIImageView *top;
+@property (strong, nonatomic) UIImageView *text;
+@property (strong, nonatomic) UIImageView *bluebar;
+@property (strong, nonatomic) UIImageView *gotit;
+
 @end
 
 @implementation BCStreamViewController
@@ -1017,7 +1021,7 @@ static BOOL isSwipeLocked = NO;
     picker.mailComposeDelegate = self;
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *subject = [NSString stringWithFormat:@"Sharing this on the %@ Backchannel", [defaults objectForKey:kOrgNameKey]];
+    NSString *subject = [NSString stringWithFormat:@"Anonymous post on %@'s Backchannel", [defaults objectForKey:kOrgNameKey]];
     [picker setSubject:subject];
     
     // Attach an image to the email
@@ -1029,19 +1033,11 @@ static BOOL isSwipeLocked = NO;
     [picker addAttachmentData:data mimeType:@"image/jpeg" fileName:@"backchannel"];
     
     // Fill out the email body text
-    NSString *emailBody = @"There's an app called Backchannel where you can read and share thoughts anonymously with (and only with) other fellow employees.<br/><br/><a href='https://bckchannelapp.com/backend/share/'>Check out our %@ Backchannel</a>.";
+    NSString *emailBody = @"I thought you'd find this anonymous post interesting! It's from Backchannel, an app to share workplace thoughts anonymously with co-workers.<br/><br/><a href='http://backchannel.it'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
     emailBody = [NSString stringWithFormat:emailBody, [defaults objectForKey:kOrgNameKey]];
     [picker setMessageBody:emailBody isHTML:YES];
     
     [self presentViewController:picker animated:YES completion:NULL];
-}
-
-- (void)streamButtonTap:(UITapGestureRecognizer*)gesture
-{
-    CGPoint touchLocation = [gesture locationInView:self.view];
-    if (touchLocation.y > CGRectGetMaxY(self.view.bounds) - 60.0) {
-        [self unsetupStreamTutorial];
-    }
 }
 
 - (void)showStreamTutorial
@@ -1051,13 +1047,13 @@ static BOOL isSwipeLocked = NO;
     if (isShowStreamTutorial) {
         return;
     }
-        
+
     [UIView animateWithDuration:0.7 animations:^{
-        _tutorialAsset.alpha = 1.0;
+        _top.alpha = 1.0;
+        _bluebar.alpha = 1.0;
+        _text.alpha = 1.0;
+        _gotit.alpha = 1.0;
     } completion:^(BOOL finished) {
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(streamButtonTap:)];
-        [_tutorialAsset addGestureRecognizer:tap];
-        _tutorialAsset.userInteractionEnabled = YES;
     }];
 }
 
@@ -1066,26 +1062,73 @@ static BOOL isSwipeLocked = NO;
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     BOOL isShowStreamTutorial = [[defaults objectForKey:kStreamTutorialKey] boolValue];
     if (!isShowStreamTutorial) {
+        
         if (IS_IPHONE_5) {
-            _tutorialAsset = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h@2x.png"]];
+            _top = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h-top.png"]];
+            _text = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h-text.png"]];
+            _bluebar = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h-bluebar.png"]];
+            _gotit = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h-gotit.png"]];
+
         } else {
-            _tutorialAsset = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay.png"]];
+            _top = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-top.png"]];
+            _text = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-text.png"]];
+            _bluebar = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-bluebar.png"]];
+            _gotit = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-gotit.png"]];
         }
-        [self.view.window addSubview:_tutorialAsset];
-        _tutorialAsset.frame = self.view.window.bounds;
-        _tutorialAsset.alpha = 0.0;
+
+        [self.view.window addSubview:_top];
+        
+        // UIImageView's by default set this to NO which allow touch to go through. By setting to YES
+        // the UIImageView will consume the touch and not let it pass through.
+        _top.userInteractionEnabled = YES;
+        
+        [_gotit setY:CGRectGetMaxY(self.view.window.bounds) - CGRectGetHeight(_gotit.bounds)];
+        [self.view.window addSubview:_gotit];
+        
+        _gotit.userInteractionEnabled = YES;
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(gotGotItTap)];
+        [_gotit addGestureRecognizer:tap];
+        
+        [_bluebar setY:CGRectGetMinY(_gotit.frame) - CGRectGetHeight(_bluebar.bounds)];
+        [self.view.window addSubview:_bluebar];
+        
+        [_text setY:CGRectGetMinY(_bluebar.frame) - CGRectGetHeight(_text.bounds)];
+        [self.view.window addSubview:_text];
+        
+        _inTutorialMode = YES;
+        _messageTable.scrollEnabled = NO;
+        _top.alpha = 0.0;
+        _bluebar.alpha = 0.0;
+        _text.alpha = 0.0;
+        _gotit.alpha = 0.0;
+        
     }
+}
+
+- (void)gotGotItTap
+{
+    [self unsetupStreamTutorial];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:@"got_it_tapped" withParams:nil];
+    _inTutorialMode = NO;
+    _messageTable.scrollEnabled = YES;
 }
 
 - (void)unsetupStreamTutorial
 {
     [UIView animateWithDuration:0.5 animations:^{
-        _tutorialAsset.alpha = 0.0;
+        _top.alpha = 0.0;
+        _bluebar.alpha = 0.0;
+        _text.alpha = 0.0;
+        _gotit.alpha = 0.0;
     } completion:^(BOOL finished) {
-        [_tutorialAsset removeFromSuperview];
-        _tutorialAsset = nil;
+        [_top removeFromSuperview];
+        [_bluebar removeFromSuperview];
+        [_text removeFromSuperview];
+        [_gotit removeFromSuperview];
+        _top = _bluebar = _text = _gotit = nil;
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         [defaults setObject:[NSNumber numberWithBool:YES] forKey:kStreamTutorialKey];
+        [[BCGlobalsManager globalsManager] logFlurryEventTimed:@"entered_stream_view" withParams:nil];
     }];
 }
 
@@ -1102,6 +1145,12 @@ static BOOL isSwipeLocked = NO;
     [self getLatestPosts:^{
         [self showStreamTutorial];
     }];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:@"entered_stream_view" withParams:nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -1317,10 +1366,10 @@ static BOOL isSwipeLocked = NO;
     }];
 }
 
-- (void)nevermindTap
+- (void)nevermindTap:(id)sender
 {
     _isComposeMode = NO;
-    
+
     // NOTE: I need a performBatchUpdates here because the _isComposeMode = NO makes the delegates
     // return a new height for the compose cell, so performBatchUpdates will do the necessary
     // animations to bring the first cell back to its original spot.
@@ -1329,16 +1378,22 @@ static BOOL isSwipeLocked = NO;
     } completion:^(BOOL finished) {
     }];
     
+    [UIView transitionWithView:(UIButton*)sender
+                      duration:0.4
+                       options:UIViewAnimationOptionTransitionCrossDissolve
+                    animations:^{ ((UIButton*)sender).highlighted = YES; }
+                    completion:nil];
+    
     [[BCGlobalsManager globalsManager] logFlurryEvent:@"tap_nevermind" withParams:nil];
 }
 
-- (void)publishHoldDown
+- (void)publishHoldDown:(id)sender
 {
     NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = cell.ccv;
     [ccv.bar.publishMeter.layer removeAllAnimations];
-    [ccv.bar setPublishPush];
+    //[ccv.bar setPublishPush];
 
     [[BCGlobalsManager globalsManager] logFlurryEventTimed:@"tap_publish" withParams:nil];
 
@@ -1349,25 +1404,23 @@ static BOOL isSwipeLocked = NO;
             ccv.bar.publishMeter.hidden = YES;
             [ccv.bar setPublishTutorialShown];
             [self addNewSecretToStream];
-            
             NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"state", @"finished", nil];
             [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:@"tap_publish" withParams:params];
         } else {
             NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"state", @"unfinished", nil];
             [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:@"tap_publish" withParams:params];
-            
             [ccv.bar triggerPublishTutorial];
         }
     }];
 }
 
-- (void)publishHoldRelease
+- (void)publishHoldRelease:(id)sender
 {
 
     NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = cell.ccv;
-    
+
     CALayer *layer = ccv.bar.publishMeter.layer.presentationLayer; // not entirely sure why I need to pick x out of this layer
     float maxX = CGRectGetMaxX(layer.frame);
     CGRect layerFrame = ccv.bar.publishMeter.layer.frame;
@@ -1381,7 +1434,12 @@ static BOOL isSwipeLocked = NO;
         [ccv.bar.publishMeter setX:-CGRectGetWidth([UIScreen mainScreen].bounds)];
     } completion:^(BOOL finished) {
     }];
-    [ccv.bar unsetPublishPush];
+
+    [UIView transitionWithView:(UIButton*)sender
+                      duration:0.4
+                       options:UIViewAnimationOptionTransitionCrossDissolve
+                    animations:^{ ((UIButton*)sender).highlighted = YES; }
+                    completion:nil];
 }
 
 - (void)removeCompose
@@ -1390,7 +1448,10 @@ static BOOL isSwipeLocked = NO;
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = cell.ccv;
     
-    _messageTable.scrollEnabled = YES;
+    if (!_inTutorialMode) {
+        _messageTable.scrollEnabled = YES;
+    }
+    
     [ccv removeFromSuperview];
     cell.ccv = nil;
     [ccv.textView resignFirstResponder];
@@ -1413,9 +1474,9 @@ static BOOL isSwipeLocked = NO;
     UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout*)collectionView.collectionViewLayout;
     [ccv setX:-flowLayout.sectionInset.left];
     
-    [cbv.nevermind addTarget:self action:@selector(nevermindTap) forControlEvents:UIControlEventTouchUpInside];
-    [cbv.publish addTarget:self action:@selector(publishHoldDown) forControlEvents:UIControlEventTouchDown];
-    [cbv.publish addTarget:self action:@selector(publishHoldRelease) forControlEvents:UIControlEventTouchUpInside];
+    [cbv.nevermind addTarget:self action:@selector(nevermindTap:) forControlEvents:UIControlEventTouchUpInside];
+    [cbv.publish addTarget:self action:@selector(publishHoldDown:) forControlEvents:UIControlEventTouchDown];
+    [cbv.publish addTarget:self action:@selector(publishHoldRelease:) forControlEvents:UIControlEventTouchUpInside];
     
     ccv.textView.delegate = self;
     
@@ -1495,6 +1556,7 @@ static BOOL isSwipeLocked = NO;
 # pragma Cell Top Container View Delegate
 - (void)swipeReleaseAnimationBackComplete:(BCCellTopLayerContainerView*)containerView inDirection:(Direction)direction
 {
+
     BCSecretModel *secretModel = containerView.secretModel;
     if (secretModel.vote != VOTE_NONE) {
         return;
@@ -1510,17 +1572,21 @@ static BOOL isSwipeLocked = NO;
         [[BCGlobalsManager globalsManager] logFlurryEvent:@"vote_neg_one" withParams:nil];
     }
 
-    SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"Vote success");
-    };
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
+            NSLog(@"Vote success");
+            secretModel.isVoted = YES;
+        };
+        
+        FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+            NSLog(@"Error in vote: %@", error);
+            NSLog(@"error code %d", (int)operation.response.statusCode);
+            secretModel.isVoted = YES;
+        };
+        
+        [[BCAPIClient sharedClient] setVote:secretModel withVote:secretModel.vote success:success failure:failure];
+    });
     
-    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"Error in vote: %@", error);
-        NSLog(@"error code %d", (int)operation.response.statusCode);
-    };
-    
-    [[BCAPIClient sharedClient] setVote:secretModel withVote:secretModel.vote success:success failure:failure];
-
     [containerView updateVoteView];
 }
 

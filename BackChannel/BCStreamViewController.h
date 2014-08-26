@@ -75,7 +75,7 @@ typedef enum Direction {
 @interface BCStreamViewController : UIViewController<UICollectionViewDataSource,
                                                         UICollectionViewDelegate,
                                                         UICollectionViewDelegateFlowLayout,
-                                                        UITextViewDelegate>
+                                                        UITextViewDelegate, BCCellTopLayerContainerViewDelegate>
 
 - (void)getLatestPosts:(void (^)(void))callback;
 - (void)getLatestNoscrollPosts;

@@ -10,4 +10,7 @@
 
 @interface BCVerificationViewController : UIViewController
 
+- (void)handleBackButtonTap;
+- (void)resendTapped;
+
 @end

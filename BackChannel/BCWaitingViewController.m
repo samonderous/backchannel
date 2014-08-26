@@ -18,6 +18,7 @@ static const float kButtonHeight = 60.0;
 static const float kAssetTextSpacing = 30.0;
 
 @interface BCWaitingView : UIView
+@property (strong, nonatomic) BCWaitingViewController *viewController;
 @property (strong, nonatomic) UILabel *title;
 @property (strong, nonatomic) UILabel *tagLine;
 @property (strong, nonatomic) UIImageView *asset;
@@ -27,9 +28,12 @@ static const float kAssetTextSpacing = 30.0;
 
 @implementation BCWaitingView
 
-- (id)init
+- (id)init:(BCWaitingViewController*)viewController
 {
     self = [super initWithFrame:[UIScreen mainScreen].applicationFrame];
+    
+    _viewController = viewController;
+    
     _title = [BCAuthView getTitle];
     [self addSubview:_title];
     
@@ -47,7 +51,9 @@ static const float kAssetTextSpacing = 30.0;
 
     [textAttrString addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] publishTutorialHintColor]
                            range: NSMakeRange(88, textString.length - 88)];
-    
+
+    [textAttrString addAttribute: NSFontAttributeName value:[UIFont fontWithName:@"Poly" size:18.0] range:NSMakeRange(0, 88)];
+
     [textAttrString addAttribute: NSFontAttributeName value:[UIFont fontWithName:@"Poly" size:12.0] range:NSMakeRange(88, textString.length - 88)];
     
     _text.numberOfLines = 0;
@@ -66,6 +72,17 @@ static const float kAssetTextSpacing = 30.0;
     [inviteLabel sizeToFit];
     [inviteLabel placeIn:_inviteButton alignedAt:CENTER];
     [_inviteButton addSubview:inviteLabel];
+    
+    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [self addSubview:backButton];
+    [backButton setTitle:@"←" forState:UIControlStateNormal];
+[backButton setContentEdgeInsets:UIEdgeInsetsMake(13, 14, 13, 14)];
+    [backButton sizeToFit];
+    [backButton setX:6];
+    [backButton setY:22];
+    backButton.titleLabel.font = [UIFont fontWithName:@"Poly" size:28.0];
+    [backButton setTitleColor:[[BCGlobalsManager globalsManager] blueColor] forState:UIControlStateNormal];
+    [backButton addTarget:self action:@selector(handleBackButtonTap:) forControlEvents:UIControlEventTouchUpInside];
     
     return self;
 }
@@ -93,6 +110,11 @@ static const float kAssetTextSpacing = 30.0;
     [_inviteButton placeIn:self alignedAt:BOTTOM];
 }
 
+- (void)handleBackButtonTap:(id)sender {
+    
+    [_viewController handleBackButtonTap];
+}
+
 @end
 
 
@@ -115,14 +137,13 @@ static const float kAssetTextSpacing = 30.0;
 - (void)loadView
 {
     [super loadView];
-    _wv = [[BCWaitingView alloc] init];
+    _wv = [[BCWaitingView alloc] init:self];
     [self.view addSubview:_wv];
     self.view.backgroundColor = [UIColor whiteColor];
 }
 
 - (void)inviteButtonTap:(UITapGestureRecognizer*)gesture
 {
-    NSLog(@"Got a tap");
     if (![MFMailComposeViewController canSendMail]) {
         return;
     }
@@ -130,7 +151,7 @@ static const float kAssetTextSpacing = 30.0;
     MFMailComposeViewController *picker = [[MFMailComposeViewController alloc] init];
     picker.mailComposeDelegate = self;
     
-    NSString *subject = [NSString stringWithFormat:@"Inviting you to our Backchannel"];
+    NSString *subject = [NSString stringWithFormat:@"Join me on Backchannel"];
     [picker setSubject:subject];
     
     // Attach an image to the email
@@ -140,7 +161,7 @@ static const float kAssetTextSpacing = 30.0;
     */
     
     // Fill out the email body text
-    NSString *emailBody = @"There's an app called Backchannel where you can read and share thoughts anonymously with (and only with) other fellow employees.<br/><br/><a href='https://bckchannelapp.com/backend/invite/'>Check out our Backchannel</a>.";
+    NSString *emailBody = @"I just started using Backchannel, a place to share workplace thoughts anonymously with co-workers.<br/><br/><a href='http://backchannel.it'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
     [picker setMessageBody:emailBody isHTML:YES];
     
     [self presentViewController:picker animated:YES completion:NULL];
@@ -189,5 +210,12 @@ static const float kAssetTextSpacing = 30.0;
     
     [self dismissViewControllerAnimated:YES completion:NULL];
 }
+
+- (void)handleBackButtonTap {
+    BCAuthViewController *vc = [[BCAuthViewController alloc] init];
+    vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    [self presentViewController:vc animated:YES completion:^() {}];
+}
+
 
 @end

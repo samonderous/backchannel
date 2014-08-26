@@ -38,10 +38,12 @@ NSString *kOrgDomainKey = @"orgDomain";
 {
     _blueColor = [UIColor colorWithRed:(41.0/255.0) green:(99.0/255.0) blue:(120.0/255.0) alpha:1.0];
     _blueBackgroundColor = [UIColor colorWithRed:(41.0/255.0) green:(99.0/255.0) blue:(120.0/255.0) alpha:0.10];
+    _bluePublishColor = [UIColor colorWithRed:(41.0/255.0) green:(99.0/255.0) blue:(120.0/255.0) alpha:0.40];
     _emptyPostCellColor = [UIColor colorWithRed:(41.0/255.0) green:(99.0/255.0) blue:(120.0/255.0) alpha:0.5];
     _greenColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:1.0];
     _creamColor = [UIColor colorWithRed:(163.0/255.0) green:(161.0/255.0) blue:(121.0/255.0) alpha:1.0];
     _creamBackgroundColor = [UIColor colorWithRed:(163.0/255.0) green:(161.0/255.0) blue:(121.0/255.0) alpha:0.10];
+    _creamPublishColor = [UIColor colorWithRed:(163.0/255.0) green:(161.0/255.0) blue:(121.0/255.0) alpha:0.40];
     _greenBackgroundColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:0.10];
     _fontColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:0.5];
     _blackPublishFontColor = [UIColor colorWithRed:(0.0/255.0) green:(0.0/255.0) blue:(0.0/255.0) alpha:0.2];
@@ -60,9 +62,13 @@ NSString *kOrgDomainKey = @"orgDomain";
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *email = [defaults objectForKey:kEmailKey];
-    NSDictionary *defaultparams = [NSDictionary dictionaryWithObjectsAndKeys:
-                            @"User", email ? email : @"", nil];
+    NSString *udid = [[UIDevice currentDevice].identifierForVendor UUIDString];
+    NSMutableDictionary *defaultparams = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                            @"User", email ? email : @"", @"Udid", udid, nil];
     
+    if (params) {
+        [defaultparams addEntriesFromDictionary:params];
+    }
     [Flurry logEvent:eventName withParameters:defaultparams];
 }
 
@@ -70,8 +76,12 @@ NSString *kOrgDomainKey = @"orgDomain";
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *email = [defaults objectForKey:kEmailKey];
-    NSDictionary *defaultparams = [NSDictionary dictionaryWithObjectsAndKeys:
-                                   @"User", email ? email : @"", nil];
+    NSString *udid = [[UIDevice currentDevice].identifierForVendor UUIDString];
+    NSMutableDictionary *defaultparams = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   @"User", email ? email : @"", @"Udid", udid, nil];
+    if (params) {
+        [defaultparams addEntriesFromDictionary:params];
+    }
     
     [Flurry logEvent:eventName withParameters:defaultparams timed:YES];
 }

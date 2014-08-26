@@ -23,7 +23,7 @@ typedef  void (^FailureCallback)(AFHTTPRequestOperation *operation, NSError *err
 
 - (void)sendAuth:(NSString*)email success:(SuccessCallback)success failure:(FailureCallback)failure;
 - (void)getStream:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure;
-- (void)setVote:(BCSecretModel*)model withVote:(Vote)vote success:(SuccessCallback)success failure:(FailureCallback)failure;
+- (void)setVote:(BCSecretModel*)model withVote:(NSInteger)vote success:(SuccessCallback)success failure:(FailureCallback)failure;
 - (void)sendVerificationEmail:(SuccessCallback)success failure:(FailureCallback)failure;
 - (void)createSecret:(NSString*)text success:(SuccessCallback)success failure:(FailureCallback)failure;
 - (void)sendVerification:(SuccessCallback)success failure:(FailureCallback)failure;

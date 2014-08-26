@@ -117,14 +117,13 @@ class EmailMultiRelated(EmailMultiAlternatives):
 def send_verify_email(org, email, udid):
 
 	to_email = email or 'saureen@gmail.com'
-	subject = "Verify your email to join %s's Backchannel" % org.name
+	subject = "Your access link to %s's Backchannel" % org.name
 
-	link1 = "<a href='backchannel://backchannel.it/?u=%s'>Please click here</a>" % udid
-	link2 = "<a href='http://bckchannelapp.com/backend/verify/?u=%s'>here</a>" % udid
-	item_html = "%s or %s on your iPhone to verify your account" % (link1, link2)
+	link = "<a href='http://bckchannelapp.com/backend/verify/?u=%s'>here</a>" % udid
+	item_html = "Thanks for joining! On your iPhone, tap %s to access FuckedCo's Backchannel and start sharing workplace thoughts anonymously with your co-workers." % link
 
-	footer = "<br /><br />Welcome,<br />The Backchannel Team"
-	msg = EmailMultiAlternatives(subject, "", from_email = "Backchannel <backchannel@bckchannelapp.com>", to=[to_email])
+	footer = "<br /><br />The Backchannel Team</br /><a href='http://backchannel.it'>backchannel.it</a>"
+	msg = EmailMultiAlternatives(subject, "", from_email = "Backchannel <info@backchannel.it>", to=[to_email])
 	msg.attach_alternative(item_html + footer, "text/html")
 
 	try:
