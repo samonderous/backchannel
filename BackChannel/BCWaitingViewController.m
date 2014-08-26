@@ -51,7 +51,9 @@ static const float kAssetTextSpacing = 30.0;
 
     [textAttrString addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] publishTutorialHintColor]
                            range: NSMakeRange(88, textString.length - 88)];
-    
+
+    [textAttrString addAttribute: NSFontAttributeName value:[UIFont fontWithName:@"Poly" size:18.0] range:NSMakeRange(0, 88)];
+
     [textAttrString addAttribute: NSFontAttributeName value:[UIFont fontWithName:@"Poly" size:12.0] range:NSMakeRange(88, textString.length - 88)];
     
     _text.numberOfLines = 0;
@@ -74,10 +76,11 @@ static const float kAssetTextSpacing = 30.0;
     UIButton *backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     [self addSubview:backButton];
     [backButton setTitle:@"←" forState:UIControlStateNormal];
-    [backButton setContentEdgeInsets:UIEdgeInsetsMake(2, 2, 2, 2)];
+[backButton setContentEdgeInsets:UIEdgeInsetsMake(13, 14, 13, 14)];
     [backButton sizeToFit];
-    [backButton placeIn:self alignedAt:TOP_LEFT withMargin:15.0];
-    backButton.titleLabel.font = [UIFont fontWithName:@"Poly" size:24.0];
+    [backButton setX:6];
+    [backButton setY:22];
+    backButton.titleLabel.font = [UIFont fontWithName:@"Poly" size:28.0];
     [backButton setTitleColor:[[BCGlobalsManager globalsManager] blueColor] forState:UIControlStateNormal];
     [backButton addTarget:self action:@selector(handleBackButtonTap:) forControlEvents:UIControlEventTouchUpInside];
     
@@ -148,7 +151,7 @@ static const float kAssetTextSpacing = 30.0;
     MFMailComposeViewController *picker = [[MFMailComposeViewController alloc] init];
     picker.mailComposeDelegate = self;
     
-    NSString *subject = [NSString stringWithFormat:@"Inviting you to our Backchannel"];
+    NSString *subject = [NSString stringWithFormat:@"Join me on Backchannel"];
     [picker setSubject:subject];
     
     // Attach an image to the email
@@ -158,7 +161,7 @@ static const float kAssetTextSpacing = 30.0;
     */
     
     // Fill out the email body text
-    NSString *emailBody = @"There's an app called Backchannel where you can read and share thoughts anonymously with (and only with) other fellow employees.<br/><br/><a href='https://bckchannelapp.com/backend/invite/'>Check out our Backchannel</a>.";
+    NSString *emailBody = @"I just started using Backchannel, a place to share workplace thoughts anonymously with co-workers.<br/><br/><a href='http://backchannel.it'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
     [picker setMessageBody:emailBody isHTML:YES];
     
     [self presentViewController:picker animated:YES completion:NULL];

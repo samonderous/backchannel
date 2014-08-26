@@ -1021,7 +1021,7 @@ static BOOL isSwipeLocked = NO;
     picker.mailComposeDelegate = self;
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *subject = [NSString stringWithFormat:@"Sharing this on the %@ Backchannel", [defaults objectForKey:kOrgNameKey]];
+    NSString *subject = [NSString stringWithFormat:@"Anonymous post on %@'s Backchannel", [defaults objectForKey:kOrgNameKey]];
     [picker setSubject:subject];
     
     // Attach an image to the email
@@ -1033,7 +1033,7 @@ static BOOL isSwipeLocked = NO;
     [picker addAttachmentData:data mimeType:@"image/jpeg" fileName:@"backchannel"];
     
     // Fill out the email body text
-    NSString *emailBody = @"There's an app called Backchannel where you can read and share thoughts anonymously with (and only with) other fellow employees.<br/><br/><a href='https://bckchannelapp.com/backend/share/'>Check out our %@ Backchannel</a>.";
+    NSString *emailBody = @"I thought you'd find this anonymous post interesting! It's from Backchannel, an app to share workplace thoughts anonymously with co-workers.<br/><br/><a href='http://backchannel.it'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
     emailBody = [NSString stringWithFormat:emailBody, [defaults objectForKey:kOrgNameKey]];
     [picker setMessageBody:emailBody isHTML:YES];
     

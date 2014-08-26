@@ -63,7 +63,7 @@ static const float kGreatLabelMargin = 40.0;
     [_verifyView placeIn:self alignedAt:CENTER];
     [_verifyView setY:kAssetTopMargin];
 
-    NSString *greatLabelString = @"Great! Check your email. We sent an email to";
+    NSString *greatLabelString = @"Great! Check your email. We sent an access link to";
     TTTAttributedLabel *greatLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, CGFLOAT_MAX)];
     [self addSubview:greatLabel];
 
@@ -77,7 +77,7 @@ static const float kGreatLabelMargin = 40.0;
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *email = (NSString*)[defaults objectForKey:kEmailKey];
-    UILabel *emailLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, 23.0)];
+    UILabel *emailLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, 22.0)];
     [self addSubview:emailLabel];
     emailLabel.font = [UIFont fontWithName:@"Poly" size:18.0];
     emailLabel.numberOfLines = 1;
@@ -93,10 +93,11 @@ static const float kGreatLabelMargin = 40.0;
     UIButton *backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     [self addSubview:backButton];
     [backButton setTitle:@"←" forState:UIControlStateNormal];
-    [backButton setContentEdgeInsets:UIEdgeInsetsMake(2, 2, 2, 2)];
+    [backButton setContentEdgeInsets:UIEdgeInsetsMake(13, 14, 13, 14)];
     [backButton sizeToFit];
-    [backButton placeIn:self alignedAt:TOP_LEFT withMargin:15.0];
-    backButton.titleLabel.font = [UIFont fontWithName:@"Poly" size:24.0];
+    [backButton setX:6];
+    [backButton setY:22];
+    backButton.titleLabel.font = [UIFont fontWithName:@"Poly" size:28.0];
     [backButton setTitleColor:[[BCGlobalsManager globalsManager] blueColor] forState:UIControlStateNormal];
     [backButton addTarget:self action:@selector(handleBackButtonTap:) forControlEvents:UIControlEventTouchUpInside];
     
