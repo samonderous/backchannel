@@ -89,6 +89,19 @@ class TrackInvite(models.Model):
     def __unicode__(self):
         return str(self.clicked)
 
+class TrackClickOrg(models.Model):
+
+    email = models.CharField(max_length=500)
+    clicked = models.IntegerField()
+    org = models.CharField(max_length=200)
+
+    class Meta:
+        db_table = 'track_click_org'
+
+    def __unicode__(self):
+        return self.email
+
+
 class WaitlistOrg(models.Model):
     email = models.CharField(max_length=200)
 
