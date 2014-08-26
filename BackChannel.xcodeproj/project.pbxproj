@@ -76,6 +76,18 @@
 		C1F5B74418CBC6FE00D3FD32 /* BCVerificationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5B74318CBC6FE00D3FD32 /* BCVerificationViewController.m */; };
 		C1F6D21418C6B94200498506 /* TisaPro.otf in Resources */ = {isa = PBXBuildFile; fileRef = C100166F18BD4D4C00347A31 /* TisaPro.otf */; };
 		C1FAACEC19A3E83C005D761E /* info-icon2-20px.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FAACEB19A3E83C005D761E /* info-icon2-20px.png */; };
+		C1FBE4A919ABBD8C00D0A355 /* swipeoverlay-568h-bluebar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FBE49D19ABBD8C00D0A355 /* swipeoverlay-568h-bluebar@2x.png */; };
+		C1FBE4AA19ABBD8C00D0A355 /* swipeoverlay-568h-gotit@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FBE49E19ABBD8C00D0A355 /* swipeoverlay-568h-gotit@2x.png */; };
+		C1FBE4AB19ABBD8C00D0A355 /* swipeoverlay-568h-text@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FBE49F19ABBD8C00D0A355 /* swipeoverlay-568h-text@2x.png */; };
+		C1FBE4AC19ABBD8C00D0A355 /* swipeoverlay-568h-top@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FBE4A019ABBD8C00D0A355 /* swipeoverlay-568h-top@2x.png */; };
+		C1FBE4AD19ABBD8C00D0A355 /* swipeoverlay-bluebar.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FBE4A119ABBD8C00D0A355 /* swipeoverlay-bluebar.png */; };
+		C1FBE4AE19ABBD8C00D0A355 /* swipeoverlay-bluebar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FBE4A219ABBD8C00D0A355 /* swipeoverlay-bluebar@2x.png */; };
+		C1FBE4AF19ABBD8C00D0A355 /* swipeoverlay-gotit.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FBE4A319ABBD8C00D0A355 /* swipeoverlay-gotit.png */; };
+		C1FBE4B019ABBD8C00D0A355 /* swipeoverlay-gotit@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FBE4A419ABBD8C00D0A355 /* swipeoverlay-gotit@2x.png */; };
+		C1FBE4B119ABBD8C00D0A355 /* swipeoverlay-text.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FBE4A519ABBD8C00D0A355 /* swipeoverlay-text.png */; };
+		C1FBE4B219ABBD8C00D0A355 /* swipeoverlay-text@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FBE4A619ABBD8C00D0A355 /* swipeoverlay-text@2x.png */; };
+		C1FBE4B319ABBD8C00D0A355 /* swipeoverlay-top.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FBE4A719ABBD8C00D0A355 /* swipeoverlay-top.png */; };
+		C1FBE4B419ABBD8C00D0A355 /* swipeoverlay-top@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C1FBE4A819ABBD8C00D0A355 /* swipeoverlay-top@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -199,6 +211,18 @@
 		C1F5B74218CBC6FE00D3FD32 /* BCVerificationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BCVerificationViewController.h; sourceTree = "<group>"; };
 		C1F5B74318CBC6FE00D3FD32 /* BCVerificationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BCVerificationViewController.m; sourceTree = "<group>"; };
 		C1FAACEB19A3E83C005D761E /* info-icon2-20px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "info-icon2-20px.png"; sourceTree = "<group>"; };
+		C1FBE49D19ABBD8C00D0A355 /* swipeoverlay-568h-bluebar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-568h-bluebar@2x.png"; sourceTree = "<group>"; };
+		C1FBE49E19ABBD8C00D0A355 /* swipeoverlay-568h-gotit@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-568h-gotit@2x.png"; sourceTree = "<group>"; };
+		C1FBE49F19ABBD8C00D0A355 /* swipeoverlay-568h-text@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-568h-text@2x.png"; sourceTree = "<group>"; };
+		C1FBE4A019ABBD8C00D0A355 /* swipeoverlay-568h-top@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-568h-top@2x.png"; sourceTree = "<group>"; };
+		C1FBE4A119ABBD8C00D0A355 /* swipeoverlay-bluebar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-bluebar.png"; sourceTree = "<group>"; };
+		C1FBE4A219ABBD8C00D0A355 /* swipeoverlay-bluebar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-bluebar@2x.png"; sourceTree = "<group>"; };
+		C1FBE4A319ABBD8C00D0A355 /* swipeoverlay-gotit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-gotit.png"; sourceTree = "<group>"; };
+		C1FBE4A419ABBD8C00D0A355 /* swipeoverlay-gotit@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-gotit@2x.png"; sourceTree = "<group>"; };
+		C1FBE4A519ABBD8C00D0A355 /* swipeoverlay-text.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-text.png"; sourceTree = "<group>"; };
+		C1FBE4A619ABBD8C00D0A355 /* swipeoverlay-text@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-text@2x.png"; sourceTree = "<group>"; };
+		C1FBE4A719ABBD8C00D0A355 /* swipeoverlay-top.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-top.png"; sourceTree = "<group>"; };
+		C1FBE4A819ABBD8C00D0A355 /* swipeoverlay-top@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "swipeoverlay-top@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -248,6 +272,7 @@
 				C13708B9190F649E00DC7175 /* swipeoverlay-568h@2x.png */,
 				C13708BA190F649E00DC7175 /* swipeoverlay.png */,
 				C13708BB190F649E00DC7175 /* swipeoverlay@2x.png */,
+				C1FBE49C19ABBD8C00D0A355 /* Cut-tutorial-images */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -466,6 +491,25 @@
 			path = ../Flurry;
 			sourceTree = "<group>";
 		};
+		C1FBE49C19ABBD8C00D0A355 /* Cut-tutorial-images */ = {
+			isa = PBXGroup;
+			children = (
+				C1FBE49D19ABBD8C00D0A355 /* swipeoverlay-568h-bluebar@2x.png */,
+				C1FBE49E19ABBD8C00D0A355 /* swipeoverlay-568h-gotit@2x.png */,
+				C1FBE49F19ABBD8C00D0A355 /* swipeoverlay-568h-text@2x.png */,
+				C1FBE4A019ABBD8C00D0A355 /* swipeoverlay-568h-top@2x.png */,
+				C1FBE4A219ABBD8C00D0A355 /* swipeoverlay-bluebar@2x.png */,
+				C1FBE4A119ABBD8C00D0A355 /* swipeoverlay-bluebar.png */,
+				C1FBE4A319ABBD8C00D0A355 /* swipeoverlay-gotit.png */,
+				C1FBE4A419ABBD8C00D0A355 /* swipeoverlay-gotit@2x.png */,
+				C1FBE4A519ABBD8C00D0A355 /* swipeoverlay-text.png */,
+				C1FBE4A619ABBD8C00D0A355 /* swipeoverlay-text@2x.png */,
+				C1FBE4A719ABBD8C00D0A355 /* swipeoverlay-top.png */,
+				C1FBE4A819ABBD8C00D0A355 /* swipeoverlay-top@2x.png */,
+			);
+			path = "Cut-tutorial-images";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -548,25 +592,37 @@
 			files = (
 				C182A7E8191A2614007037F2 /* Poly-Regular.ttf in Resources */,
 				C1FAACEC19A3E83C005D761E /* info-icon2-20px.png in Resources */,
+				C1FBE4B119ABBD8C00D0A355 /* swipeoverlay-text.png in Resources */,
 				C13708BC190F649E00DC7175 /* swipeoverlay-568h@2x.png in Resources */,
 				C1F6D21418C6B94200498506 /* TisaPro.otf in Resources */,
+				C1FBE4AC19ABBD8C00D0A355 /* swipeoverlay-568h-top@2x.png in Resources */,
+				C1FBE4B019ABBD8C00D0A355 /* swipeoverlay-gotit@2x.png in Resources */,
+				C1FBE4A919ABBD8C00D0A355 /* swipeoverlay-568h-bluebar@2x.png in Resources */,
 				C13708B6190F647400DC7175 /* waitlistedorg.png in Resources */,
 				C13FC2C319A3D87A00C5AA47 /* info-icon1-20px.png in Resources */,
 				C13708BD190F649E00DC7175 /* swipeoverlay.png in Resources */,
 				C14C9D6118CF8EF300A79BFD /* verify_asset.png in Resources */,
 				C13708B8190F647B00DC7175 /* waitlistedorg@2x.png in Resources */,
 				C14C9DAE18D3CD5500A79BFD /* envelope@2x.png in Resources */,
+				C1FBE4B219ABBD8C00D0A355 /* swipeoverlay-text@2x.png in Resources */,
 				C1316DF218B3F741005A85B8 /* Main_iPad.storyboard in Resources */,
+				C1FBE4AD19ABBD8C00D0A355 /* swipeoverlay-bluebar.png in Resources */,
+				C1FBE4B319ABBD8C00D0A355 /* swipeoverlay-top.png in Resources */,
+				C1FBE4AA19ABBD8C00D0A355 /* swipeoverlay-568h-gotit@2x.png in Resources */,
 				C13FC2C119A3D87600C5AA47 /* info-icon2-24px.png in Resources */,
 				C13708B21905DE2D00DC7175 /* arrow.png in Resources */,
 				C1316DF718B3F741005A85B8 /* Images.xcassets in Resources */,
 				C13708B31905DE2D00DC7175 /* arrow@2x.png in Resources */,
+				C1FBE4AF19ABBD8C00D0A355 /* swipeoverlay-gotit.png in Resources */,
+				C1FBE4B419ABBD8C00D0A355 /* swipeoverlay-top@2x.png in Resources */,
 				C13708BE190F649E00DC7175 /* swipeoverlay@2x.png in Resources */,
 				C1316DEF18B3F741005A85B8 /* Main_iPhone.storyboard in Resources */,
 				C14C9DAD18D3CD5500A79BFD /* envelope.png in Resources */,
 				C1316DE618B3F741005A85B8 /* InfoPlist.strings in Resources */,
 				C13FC2C519A3D87E00C5AA47 /* info-icon1-24px.png in Resources */,
+				C1FBE4AB19ABBD8C00D0A355 /* swipeoverlay-568h-text@2x.png in Resources */,
 				C13FC2C719A3D94F00C5AA47 /* BCHowItWorks.xib in Resources */,
+				C1FBE4AE19ABBD8C00D0A355 /* swipeoverlay-bluebar@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

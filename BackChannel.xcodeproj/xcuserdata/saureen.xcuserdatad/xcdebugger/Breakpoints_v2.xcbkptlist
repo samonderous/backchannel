@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BackChannel/BCStreamViewController.m"
-            timestampString = "430449618.936331"
+            timestampString = "430700022.085123"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "718"
-            endingLineNumber = "718"
+            startingLineNumber = "719"
+            endingLineNumber = "719"
             landmarkName = "-handleSwipe:"
             landmarkType = "5">
          </BreakpointContent>
@@ -58,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BackChannel/BCStreamViewController.m"
-            timestampString = "430449618.936331"
+            timestampString = "430700022.085123"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "744"
-            endingLineNumber = "744"
+            startingLineNumber = "745"
+            endingLineNumber = "745"
             landmarkName = "-handleSwipe:"
             landmarkType = "5">
          </BreakpointContent>

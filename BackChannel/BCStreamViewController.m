@@ -375,7 +375,6 @@ static const int kOldPostsBatchSize = 10;
                                                  attributes:@{ NSFontAttributeName:font,
                                                                NSForegroundColorAttributeName: [[BCGlobalsManager globalsManager] creamColor]}];
     
-    
     [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] blackTaglineColor]
                            range: NSMakeRange(range.location, range.location)];
     
@@ -520,6 +519,7 @@ static BOOL isSwipeLocked = NO;
     if (_secretModel.vote != VOTE_NONE) {
         [self updateVoteView];
         _isDragging = NO;
+        _secretModel.isVoted = YES;
     }
     self.backgroundColor = [UIColor whiteColor];
     
@@ -674,8 +674,9 @@ static BOOL isSwipeLocked = NO;
     // handleSwipe gets called after threshold gets reached and swipeRelease*
     // delegate gets called to log vote. We want to block swipe only if they crossed
     // threshold but still want to enter into END state so check on isDragging as well.
-    if ((_isDragging == NO && _thresholdCrossed) || isSwipeLocked) return;
-    
+    //if ((_isDragging == NO && _thresholdCrossed) || isSwipeLocked) return;
+    if (_secretModel.isVoted || isSwipeLocked) return;
+
     CGFloat dragThreshold = 1.0f;
     CGFloat voteThreshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset + kVoteThresholdMargin;
 
@@ -759,8 +760,15 @@ static BOOL isSwipeLocked = NO;
 @property (assign) BOOL isSwipeLock;
 @property (assign) BOOL isComposeMode;
 @property (strong, nonatomic) UIRefreshControl *refreshControl;
-@property (strong, nonatomic) UIImageView *tutorialAsset;
 @property (strong, nonatomic) UIBarButtonItem *shareItem;
+
+// Nasty Tutorial stuff
+@property (assign) BOOL inTutorialMode;
+@property (strong, nonatomic) UIImageView *top;
+@property (strong, nonatomic) UIImageView *text;
+@property (strong, nonatomic) UIImageView *bluebar;
+@property (strong, nonatomic) UIImageView *gotit;
+
 @end
 
 @implementation BCStreamViewController
@@ -1032,15 +1040,6 @@ static BOOL isSwipeLocked = NO;
     [self presentViewController:picker animated:YES completion:NULL];
 }
 
-- (void)streamButtonTap:(UITapGestureRecognizer*)gesture
-{
-    CGPoint touchLocation = [gesture locationInView:self.view];
-    if (touchLocation.y > CGRectGetMaxY(self.view.bounds) - 60.0) {
-        [self unsetupStreamTutorial];
-        [[BCGlobalsManager globalsManager] logFlurryEvent:@"got_it_tapped" withParams:nil];
-    }
-}
-
 - (void)showStreamTutorial
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -1048,13 +1047,13 @@ static BOOL isSwipeLocked = NO;
     if (isShowStreamTutorial) {
         return;
     }
-        
+
     [UIView animateWithDuration:0.7 animations:^{
-        _tutorialAsset.alpha = 1.0;
+        _top.alpha = 1.0;
+        _bluebar.alpha = 1.0;
+        _text.alpha = 1.0;
+        _gotit.alpha = 1.0;
     } completion:^(BOOL finished) {
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(streamButtonTap:)];
-        [_tutorialAsset addGestureRecognizer:tap];
-        _tutorialAsset.userInteractionEnabled = YES;
     }];
 }
 
@@ -1063,24 +1062,70 @@ static BOOL isSwipeLocked = NO;
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     BOOL isShowStreamTutorial = [[defaults objectForKey:kStreamTutorialKey] boolValue];
     if (!isShowStreamTutorial) {
+        
         if (IS_IPHONE_5) {
-            _tutorialAsset = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h@2x.png"]];
+            _top = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h-top.png"]];
+            _text = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h-text.png"]];
+            _bluebar = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h-bluebar.png"]];
+            _gotit = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h-gotit.png"]];
+
         } else {
-            _tutorialAsset = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay.png"]];
+            _top = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-top.png"]];
+            _text = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-text.png"]];
+            _bluebar = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-bluebar.png"]];
+            _gotit = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-gotit.png"]];
         }
-        [self.view.window addSubview:_tutorialAsset];
-        _tutorialAsset.frame = self.view.window.bounds;
-        _tutorialAsset.alpha = 0.0;
+
+        [self.view.window addSubview:_top];
+        
+        // UIImageView's by default set this to NO which allow touch to go through. By setting to YES
+        // the UIImageView will consume the touch and not let it pass through.
+        _top.userInteractionEnabled = YES;
+        
+        [_gotit setY:CGRectGetMaxY(self.view.window.bounds) - CGRectGetHeight(_gotit.bounds)];
+        [self.view.window addSubview:_gotit];
+        
+        _gotit.userInteractionEnabled = YES;
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(gotGotItTap)];
+        [_gotit addGestureRecognizer:tap];
+        
+        [_bluebar setY:CGRectGetMinY(_gotit.frame) - CGRectGetHeight(_bluebar.bounds)];
+        [self.view.window addSubview:_bluebar];
+        
+        [_text setY:CGRectGetMinY(_bluebar.frame) - CGRectGetHeight(_text.bounds)];
+        [self.view.window addSubview:_text];
+        
+        _inTutorialMode = YES;
+        _messageTable.scrollEnabled = NO;
+        _top.alpha = 0.0;
+        _bluebar.alpha = 0.0;
+        _text.alpha = 0.0;
+        _gotit.alpha = 0.0;
+        
     }
+}
+
+- (void)gotGotItTap
+{
+    [self unsetupStreamTutorial];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:@"got_it_tapped" withParams:nil];
+    _inTutorialMode = NO;
+    _messageTable.scrollEnabled = YES;
 }
 
 - (void)unsetupStreamTutorial
 {
     [UIView animateWithDuration:0.5 animations:^{
-        _tutorialAsset.alpha = 0.0;
+        _top.alpha = 0.0;
+        _bluebar.alpha = 0.0;
+        _text.alpha = 0.0;
+        _gotit.alpha = 0.0;
     } completion:^(BOOL finished) {
-        [_tutorialAsset removeFromSuperview];
-        _tutorialAsset = nil;
+        [_top removeFromSuperview];
+        [_bluebar removeFromSuperview];
+        [_text removeFromSuperview];
+        [_gotit removeFromSuperview];
+        _top = _bluebar = _text = _gotit = nil;
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         [defaults setObject:[NSNumber numberWithBool:YES] forKey:kStreamTutorialKey];
         [[BCGlobalsManager globalsManager] logFlurryEventTimed:@"entered_stream_view" withParams:nil];
@@ -1403,7 +1448,10 @@ static BOOL isSwipeLocked = NO;
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCComposeContainerView *ccv = cell.ccv;
     
-    _messageTable.scrollEnabled = YES;
+    if (!_inTutorialMode) {
+        _messageTable.scrollEnabled = YES;
+    }
+    
     [ccv removeFromSuperview];
     cell.ccv = nil;
     [ccv.textView resignFirstResponder];
@@ -1527,11 +1575,13 @@ static BOOL isSwipeLocked = NO;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
         SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
             NSLog(@"Vote success");
+            secretModel.isVoted = YES;
         };
         
         FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
             NSLog(@"Error in vote: %@", error);
             NSLog(@"error code %d", (int)operation.response.statusCode);
+            secretModel.isVoted = YES;
         };
         
         [[BCAPIClient sharedClient] setVote:secretModel withVote:secretModel.vote success:success failure:failure];

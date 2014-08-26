@@ -24,6 +24,7 @@
     _timeStr = timeStr;
     _vote = vote;
     _isNew = NO;
+    _isVoted = NO;
     
     return self;
 }
