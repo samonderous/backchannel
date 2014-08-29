@@ -142,7 +142,7 @@ def _time_str(time_delta):
     elif time_delta >= 3600 and time_delta < 86400:
         time_str = "%sh" % (time_delta / 60 / 60)
     else:
-        time_str = "a few days ago"
+        time_str = "sometime ago"
 
     return time_str
 
@@ -275,10 +275,34 @@ def resendemail(request):
 def signup(request):
     ic = request.GET.get('c')
     try:
-        tc = TrackClick.objects.get(invite_code=ic)
-        tc.clicked = 1
-        tc.save()
+        tco = TrackClickOrg.objects.get(id=ic)
+	if tco.clicked is None:
+	    tco.clicked = 0
+        tco.clicked = tco.clicked + 1
+        tco.save()
     except Exception, e:
         pass
 
-    return redirect('http://signup.backchannel.it')
+    return redirect('http://itunes.com/apps/thebackchannel')
+
+
+def share(request):
+    try:
+        ts = TrackShare.objects.get(id=1)
+        ts.clicked += 1
+        ts.save()
+    except Exception, e:
+        pass
+
+    return redirect('http://itunes.com/apps/thebackchannel')
+
+
+def invite(request):
+    try:
+        ti = TrackInvite.objects.get(id=1)
+        ti.clicked += 1
+        ti.save()
+    except Exception, e:
+        pass
+
+    return redirect('http://itunes.com/apps/thebackchannel')

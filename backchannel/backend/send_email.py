@@ -120,7 +120,7 @@ def send_verify_email(org, email, udid):
 	subject = "Your access link to %s's Backchannel" % org.name
 
 	link = "<a href='http://bckchannelapp.com/backend/verify/?u=%s'>here</a>" % udid
-	item_html = "Thanks for joining! On your iPhone, tap %s to access FuckedCo's Backchannel and start sharing workplace thoughts anonymously with your co-workers." % link
+	item_html = "Thanks for joining! On your iPhone, tap %s to access your backchannel and start sharing workplace thoughts anonymously with your co-workers." % link
 
 	footer = "<br /><br />The Backchannel Team</br /><a href='http://backchannel.it'>backchannel.it</a>"
 	msg = EmailMultiAlternatives(subject, "", from_email = "Backchannel <info@backchannel.it>", to=[to_email])
@@ -132,34 +132,39 @@ def send_verify_email(org, email, udid):
 		print "send_email exception = %s" % e
 
 
-def send_share_email(email, code):
+def send_share_email(email, code, photo):
 
 	to_email = email
-	subject = "Someone at LinkedIn would like to backchannel something to you"
+	subject = "Your coworker shared an anonymous post"
 
 	# HTML + image container 
 	related = MIMEMultipart("related")
 
-        link = '<a href="http://bckchannelapp.com/backend/signup/?c=%s">Get invited to join LinkedIn\'s Backchannel</a>' % code
+        link = '<a href="https://bckchannelapp.com/backend/signup/?c=%s">View more anonymous posts on your company\'s Backchannel</a>' % code
+	#link = '<a href="backchannel://backchannel.it/">View more anonymous posts on your company\'s Backchannel</a>'
+        photo_url = '<a href="https://bckchannelapp.com/backend/signup/?c=%s">' % code
+        image_link = '<img src="cid:%s"' % photo 
+        image_link += ' width="80%" height="auto"/></a>'
 
 	# Add the HTML
-	html = MIMEText("Can't be a PM posting this but agree with general sentiment :)<br /><br />" + link + "<br /><br /><a href='http://bckchannelapp.com/backend/signup/?c=%s'><img src='cid:photo1.PNG' width='50%' height='50%'/></a>", "html")
+	html = MIMEText("Your coworker thought you may find this anonymous post interesting...<br /><br />" + link + "<br /><br />" + photo_url + image_link,  "html")
 	related.attach(html)
 
 	# Add an image
-	with open("./backchannel/templates/photo1.PNG", "rb") as handle:
+	with open("./backchannel/templates/%s" % photo, "rb") as handle:
 		image = MIMEImage(handle.read())
-	image.add_header("Content-ID", "<photo1.PNG>")
+	image.add_header("Content-ID", "<%s>" % photo)
 	image.add_header("Content-Disposition", "inline")
 	related.attach(image)
 
-	msg = EmailMultiRelated(subject, "", from_email = "Backchannel <backchannel@bckchannelapp.com>", to=[to_email])
+	msg = EmailMultiRelated(subject, "", from_email = "LinkedIn's Backchannel <hello@bckchannelapp.com>", to=[to_email])
 
 	# add the HTML version
 	msg.attach(related)
 
 	# Indicate that only one of the two types (text vs html) should be rendered
 	msg.mixed_subtype = "alternative"
+        print "About to send email to emp"
 	msg.send()
 
 
@@ -171,7 +176,7 @@ def send_test():
 	item_html = "Hello"
 
 	footer = "Welcome, The Backchannel Team"
-	msg = EmailMultiAlternatives(subject, "", from_email = "Backchannel <backchannel@backchannel.it>", to=[to_email])
+	msg = EmailMultiAlternatives(subject, "", from_email = "Backchannel <hello@backchannel.it>", to=[to_email])
 	msg.attach_alternative(item_html + footer, "text/html")
 
 	try:

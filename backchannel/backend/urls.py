@@ -19,6 +19,8 @@ urlpatterns = patterns('',
     url(r'^getlatestposts/', views.getlatestposts, name='getlatestposts'),
     url(r'^getolderposts/', views.getolderposts, name='getolderposts'),
     url(r'^signup/', views.signup, name='signup'),
+    url(r'^share/', views.share, name='share'),
+    url(r'^invite/', views.invite, name='invite'),
 )
 
 urlpatterns += staticfiles_urlpatterns()

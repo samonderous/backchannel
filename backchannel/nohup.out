@@ -1,0 +1,127 @@
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+Traceback (most recent call last):
+  File "parse.py", line 128, in <module>
+    sim.sendemail()
+  File "parse.py", line 100, in sendemail
+    time.sleep(secs)
+KeyboardInterrupt
+About to send email to emp
+Traceback (most recent call last):
+  File "parse.py", line 133, in <module>
+    sim.sendemail()
+  File "parse.py", line 100, in sendemail
+    time.sleep(secs)
+KeyboardInterrupt
+About to send email to emp
+About to send email to emp
+Traceback (most recent call last):
+  File "parse.py", line 133, in <module>
+    sim.sendemail()
+  File "parse.py", line 100, in sendemail
+    time.sleep(secs)
+KeyboardInterrupt
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+Traceback (most recent call last):
+  File "parse.py", line 133, in <module>
+    sim.sendemail()
+  File "parse.py", line 100, in sendemail
+    time.sleep(secs)
+KeyboardInterrupt
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
+About to send email to emp
