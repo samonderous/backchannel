@@ -8,6 +8,7 @@
 
 #import "BCGlobalsManager.h"
 
+const float kCellHeight = 251.0f;
 const float kKeyboardHeight = 216.0;
 const float kTitleTopMargin = 30.0;
 const float kTitleFontSize = 23.0;

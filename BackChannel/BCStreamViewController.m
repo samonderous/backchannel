@@ -11,7 +11,6 @@
 
 #import "UIScrollView+SVPullToRefresh.h"
 #import "UIScrollView+SVInfiniteScrolling.h"
-#import "MCSwipeTableViewCell.h"
 #import "TTTAttributedLabel.h"
 #import "Utils.h"
 
@@ -20,8 +19,8 @@
 #import "BCModels.h"
 #import "BCGlobalsManager.h"
 #import "BCAPIClient.h"
+#import "BCCommentsViewController.h"
 
-static const float kCellHeight = 251.0f;
 static const float kSecretFontSize = 16.0;
 static const float kCellComposeHeight = 64.0;
 static const float kHeaderFooterHeight = 30.0;
@@ -1249,7 +1248,17 @@ static BOOL isSwipeLocked = NO;
         [bcv placeIn:cell.contentView alignedAt:CENTER];
         
         [self setSeparator:cell indexPath:indexPath];
+        
+        UITapGestureRecognizer *tapCell = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cellTapped:)];
+        [cell addGestureRecognizer:tapCell];
     }
+}
+
+- (void)cellTapped:(id)sender
+{
+    BCCommentsViewController *vc = [[BCCommentsViewController alloc] initWithNibName:@"BCComments" bundle:nil];
+    vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    [self presentViewController:vc animated:YES completion:^() {}];
 }
 
 - (BCStreamCollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -1560,19 +1569,36 @@ static BOOL isSwipeLocked = NO;
     
 }
 
+- (void)setupDetailView:(NSIndexPath*)indexPath
+{
+    [_messageTable scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionTop animated:YES];
+    UICollectionViewCell *cell = [_messageTable cellForItemAtIndexPath:indexPath];
+
+    [UIView animateWithDuration:1.0 delay:0.0 options:UIViewAnimationOptionCurveLinear
+                     animations:^{
+                         cell.alpha = 0.2;
+                     }
+                     completion:^(BOOL finished) {
+                     }];
+}
+
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.item != 0 || _isComposeMode) {
+    if (_isComposeMode) {
         return;
     }
     
-    [collectionView.collectionViewLayout invalidateLayout];
-    [collectionView performBatchUpdates:^{
-        [self animateComposeCellTransitionToCompose];
-        [self setupCompose:collectionView indexPath:indexPath];
-    } completion:^(BOOL finished) {
-    }];
-    
+    if (indexPath.item == 0) {
+        [collectionView.collectionViewLayout invalidateLayout];
+        [collectionView performBatchUpdates:^{
+            [self animateComposeCellTransitionToCompose];
+            [self setupCompose:collectionView indexPath:indexPath];
+        } completion:^(BOOL finished) {
+        }];
+    } else {
+        [self setupDetailView:indexPath];
+    }
+
     [[BCGlobalsManager globalsManager] logFlurryEvent:kEventCreatePost withParams:nil];
 }
 

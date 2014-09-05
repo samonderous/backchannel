@@ -31,3 +31,12 @@ typedef NS_ENUM(NSInteger, Vote)
 - (id)init:(NSString*)text withSid:(NSUInteger)sid withTime:(NSInteger)time withTimeStr:(NSString*)timeStr withAgrees:(NSInteger)agrees withDisagree:(NSInteger)disagrees withVote:(Vote)vote;
 
 @end
+
+
+@interface BCCommentModel : NSObject
+
+@property (strong, nonatomic) NSString *comment;
+
+- (id)init:(NSString*)comment;
+
+@end

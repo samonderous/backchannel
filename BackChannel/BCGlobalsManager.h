@@ -13,6 +13,7 @@
 
 #define IS_IPHONE_5 ( fabs( ( double )[ [ UIScreen mainScreen ] bounds ].size.height - ( double )568 ) < DBL_EPSILON )
 
+extern const float kCellHeight;
 extern const float kKeyboardHeight;
 extern const float kTitleTopMargin;
 extern const float kTitleFontSize;

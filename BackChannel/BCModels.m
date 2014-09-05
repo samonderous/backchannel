@@ -30,3 +30,18 @@
 }
 
 @end
+
+@interface BCCommentModel ()
+@end
+
+@implementation BCCommentModel
+
+- (id)init:(NSString*)comment
+{
+    self = [super init];
+    _comment = comment;
+    
+    return self;
+}
+
+@end
