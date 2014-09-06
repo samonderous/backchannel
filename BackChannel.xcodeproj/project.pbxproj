@@ -74,7 +74,7 @@
 		C16D092318EA358400BB88FB /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C16D092218EA358400BB88FB /* Crashlytics.framework */; };
 		C182A7E7191A25ED007037F2 /* Poly-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C13708B4190F613B00DC7175 /* Poly-Regular.ttf */; };
 		C182A7E8191A2614007037F2 /* Poly-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C13708B4190F613B00DC7175 /* Poly-Regular.ttf */; };
-		C1DF85B919BA392600B1B6A9 /* avatar1.png in Resources */ = {isa = PBXBuildFile; fileRef = C1DF85B819BA392600B1B6A9 /* avatar1.png */; };
+		C1DF85BB19BA7E9700B1B6A9 /* avatar1.png in Resources */ = {isa = PBXBuildFile; fileRef = C1DF85BA19BA7E9700B1B6A9 /* avatar1.png */; };
 		C1E6D95018EB901F0007BF21 /* libFlurry_4.4.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E6D94F18EB901F0007BF21 /* libFlurry_4.4.0.a */; };
 		C1E6D95218EB90510007BF21 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E6D95118EB90510007BF21 /* SystemConfiguration.framework */; };
 		C1F0C31218C51C5500009BDD /* BCGlobalsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F0C31118C51C5500009BDD /* BCGlobalsManager.m */; };
@@ -213,7 +213,7 @@
 		C14DB9EB19B6AC750049AD4B /* BCCommentsCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BCCommentsCell.xib; sourceTree = "<group>"; };
 		C14DB9ED19B6B87B0049AD4B /* avatar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar.png; sourceTree = "<group>"; };
 		C16D092218EA358400BB88FB /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
-		C1DF85B819BA392600B1B6A9 /* avatar1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar1.png; sourceTree = "<group>"; };
+		C1DF85BA19BA7E9700B1B6A9 /* avatar1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar1.png; sourceTree = "<group>"; };
 		C1E6D94E18EB901F0007BF21 /* Flurry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Flurry.h; sourceTree = "<group>"; };
 		C1E6D94F18EB901F0007BF21 /* libFlurry_4.4.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libFlurry_4.4.0.a; sourceTree = "<group>"; };
 		C1E6D95118EB90510007BF21 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -271,7 +271,7 @@
 			isa = PBXGroup;
 			children = (
 				C14DB9ED19B6B87B0049AD4B /* avatar.png */,
-				C1DF85B819BA392600B1B6A9 /* avatar1.png */,
+				C1DF85BA19BA7E9700B1B6A9 /* avatar1.png */,
 				C13FC2C419A3D87E00C5AA47 /* info-icon1-24px.png */,
 				C13FC2C219A3D87A00C5AA47 /* info-icon1-20px.png */,
 				C13FC2C019A3D87600C5AA47 /* info-icon2-24px.png */,
@@ -621,7 +621,7 @@
 				C1FBE4AC19ABBD8C00D0A355 /* swipeoverlay-568h-top@2x.png in Resources */,
 				C1FBE4B019ABBD8C00D0A355 /* swipeoverlay-gotit@2x.png in Resources */,
 				C1FBE4A919ABBD8C00D0A355 /* swipeoverlay-568h-bluebar@2x.png in Resources */,
-				C1DF85B919BA392600B1B6A9 /* avatar1.png in Resources */,
+				C1DF85BB19BA7E9700B1B6A9 /* avatar1.png in Resources */,
 				C13708B6190F647400DC7175 /* waitlistedorg.png in Resources */,
 				C13FC2C319A3D87A00C5AA47 /* info-icon1-20px.png in Resources */,
 				C14DB9E019B678580049AD4B /* BCComments.xib in Resources */,

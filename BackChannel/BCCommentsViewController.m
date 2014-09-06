@@ -8,15 +8,14 @@
 
 #import "BCCommentsViewController.h"
 #import "BCStreamViewController.h"
-#import "BCModels.h"
 #import "BCGlobalsManager.h"
 
 static const float kPostAnimationFinishedHeight = 40.0;
 
 @interface BCCommentsViewCell : UICollectionViewCell
 @property (strong, nonatomic) IBOutlet UIImageView *avatar;
-@property (strong, nonatomic) IBOutlet UITextView *commentText;
-
+@property (weak, nonatomic) IBOutlet UILabel *commentText;
+@property (strong, nonatomic) UIView *separator;
 @end
 
 @interface BCCommentsViewCell ()
@@ -24,6 +23,18 @@ static const float kPostAnimationFinishedHeight = 40.0;
 @end
 
 @implementation BCCommentsViewCell
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+}
+
+- (void)prepareForReuse
+{
+    [_separator removeFromSuperview];
+    _separator = nil;
+}
+
 @end
 
 
@@ -38,7 +49,6 @@ static const float kPostAnimationFinishedHeight = 40.0;
 @property (strong, nonatomic) IBOutlet UIButton *sendButton;
 @property (strong, nonatomic) IBOutlet HPGrowingTextView *commentsTextView;
 
-@property (strong, nonatomic) BCSecretModel *secretModel;
 @property (assign) BOOL inEditMode;
 @property (assign) CGFloat lastContentOffset;
 @property (strong, nonatomic) NSMutableArray *commentModels;
@@ -56,28 +66,44 @@ static const float kPostAnimationFinishedHeight = 40.0;
     return self;
 }
 
+- (void)setupMockComments
+{
+    NSArray *commentStr = @[@"This is to test whether this thing works with some mock comments.",
+                            @"This truly is a great company! I wish I continued working here.",
+                            @"Now that this is over this is so amazing that this is great.",
+                            @"LOL!",
+                            @"For once all of this controversy has ended and I'm glad I want to see some top management getinvolved b/c right now I'm not seeing very much progress. It's great to see what's happening otherwise because you never know. Otherwise bad things will happen. And this is just a test to see if a long comment works :)",
+                            @"I like how xcode wraps text and indents it from where you started writing your string in the editor. This never used to happen before. Might be a new thing. Before it'd wrap to the start of the next line which was annoying."];
+    _commentModels = [[NSMutableArray alloc] init];
+    [_commentModels addObject:[[BCCommentModel alloc] init:commentStr[0]]];
+    [_commentModels addObject:[[BCCommentModel alloc] init:commentStr[1]]];
+    [_commentModels addObject:[[BCCommentModel alloc] init:commentStr[2]]];
+    [_commentModels addObject:[[BCCommentModel alloc] init:commentStr[3]]];
+    [_commentModels addObject:[[BCCommentModel alloc] init:commentStr[4]]];
+    [_commentModels addObject:[[BCCommentModel alloc] init:commentStr[5]]];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    [self setupMockComments];
+    
     _comments.delegate = self;
     _comments.dataSource = self;
     _commentsTextView.delegate = self;
-    [_sendButton addTarget:self action:@selector(sendTapped:) forControlEvents:UIControlEventTouchUpInside];
     _commentsTextView.layer.borderWidth = 1.0;
     _commentsTextView.layer.borderColor = [UIColor lightGrayColor].CGColor;
     _commentsTextView.layer.cornerRadius = 3.0;
     //[_comments registerClass:[BCCommentsViewCell class] forCellWithReuseIdentifier:];
     [_comments registerNib:[UINib nibWithNibName:@"BCCommentsCell" bundle:nil] forCellWithReuseIdentifier:@"BCCommentsCollectionViewCell"];
     _comments.backgroundColor = [UIColor whiteColor];
-    
-    [self registerForKeyboardNotifications];
-    
+    [_sendButton addTarget:self action:@selector(sendTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [_sendButton setTitleColor:[[BCGlobalsManager globalsManager] creamColor] forState:UIControlStateNormal];
+
     [self.view bringSubviewToFront:_bar];
-    
-    //[_post debug];
-    //[_comments debug];
-    //[_bar debug];
+
+    [self registerForKeyboardNotifications];
     
     UIButton *backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     [self.view addSubview:backButton];
@@ -93,10 +119,17 @@ static const float kPostAnimationFinishedHeight = 40.0;
     _inEditMode = NO;
     _lastContentOffset = _comments.contentOffset.y;
 
+    [_post addSubview:_content];
+    [_content placeIn:_post alignedAt:CENTER];
+    
     UIView *separator = [[UIView alloc] initWithFrame:CGRectMake(0.0, CGRectGetMaxY(_post.bounds) - 1.0, 80.0, 1.0)];
     separator.backgroundColor = [[BCGlobalsManager globalsManager] blackDividerColor];
     [_post addSubview:separator];
     [separator placeIn:_post alignedAt:BOTTOM];
+    
+    //[_post debug];
+    //[_comments debug];
+    //[_bar debug];
 }
 
 - (void)handleBackButtonTap:(id)sender
@@ -192,29 +225,31 @@ static const float kPostAnimationFinishedHeight = 40.0;
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return 15;
+    return _commentModels.count;
 }
 
 - (BCCommentsViewCell*)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 
 {
     BCCommentsViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCCommentsCollectionViewCell" forIndexPath:indexPath];
-    
 
-    UIImage *avatar = [UIImage imageNamed:@"avatar.png"];
+    BCCommentModel *commentModel = [_commentModels objectAtIndex:indexPath.row];
+    cell.commentText.text = commentModel.comment;
     
-    CGRect rect = CGRectMake(0,0,20,20);
-    UIGraphicsBeginImageContext( rect.size );
-    [avatar drawInRect:rect];
-    UIImage *picture = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    NSData *imageData = UIImagePNGRepresentation(picture);
-    cell.avatar.image = [UIImage imageWithData:imageData];
-     
+    cell.avatar.image = [UIImage imageNamed:@"avatar1.png"];
     cell.avatar.layer.cornerRadius = CGRectGetHeight(cell.avatar.bounds) / 2.0;
     cell.avatar.clipsToBounds = YES;
     
+    cell.commentText.font = [UIFont fontWithName:@"Poly" size:13.0];
+    
+    cell.separator = [[UIView alloc] initWithFrame:CGRectMake(0.0,
+                                                          CGRectGetMaxY(cell.contentView.bounds) - 1.0,
+                                                          50.0,
+                                                          1.0)];
+    cell.separator.backgroundColor = [[BCGlobalsManager globalsManager] blackDividerColor];
+    [cell.contentView addSubview:cell.separator];
+    [cell.separator placeIn:cell.contentView alignedAt:BOTTOM];
+
     return cell;
 }
 
@@ -237,19 +272,7 @@ static const float kPostAnimationFinishedHeight = 40.0;
     if (scrollView.contentOffset.y <= 0 && [_commentsTextView isFirstResponder])
     {
         [_commentsTextView resignFirstResponder];
-    } /*else if (!_inEditMode && _lastContentOffset <= scrollView.contentOffset.y)
-    {
-        [UIView animateWithDuration:2.0 delay:0.0 options:UIViewAnimationOptionCurveLinear
-                         animations:^{
-                             [_post setHeight:kPostAnimationFinishedHeight];
-                             _postText.alpha = 0.3;
-                             [_postText setY:(CGRectGetMaxY(_post.bounds) - CGRectGetHeight(_postText.bounds) * .65)];
-                             [_comments setY:CGRectGetMaxY(_post.frame)];
-                             [_comments setHeight:CGRectGetHeight(self.view.bounds) - CGRectGetHeight(_bar.bounds) - kPostAnimationFinishedHeight - 20.0];
-                         }
-                         completion:^(BOOL finished) {
-                         }];
-    }*/
+    }
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
@@ -270,5 +293,28 @@ static const float kPostAnimationFinishedHeight = 40.0;
     [_bar setHeight:CGRectGetHeight(_bar.frame) + delta];
     [self.view layoutIfNeeded]; // THIS WAS REQUIRED OTHERWISE something screwed up with geometry
 }
+
+#pragma mark CollectionView Layout Delegate
+
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSArray *nib = [[NSBundle mainBundle] loadNibNamed:@"BCCommentsCell" owner:self options:nil];
+    BCCommentsViewCell *cell = (BCCommentsViewCell*)[nib objectAtIndex:0];
+    NSLog(@"The w = %f and h = %f", CGRectGetWidth(cell.bounds), CGRectGetHeight(cell.bounds));
+    BCCommentModel *commentModel = (BCCommentModel*)[_commentModels objectAtIndex:indexPath.row];
+    cell.commentText.text = commentModel.comment;
+
+    NSDictionary *attributes = @{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:13.0]};
+    
+    CGRect rect = [commentModel.comment boundingRectWithSize:CGSizeMake(CGRectGetWidth(cell.commentText.bounds), CGFLOAT_MAX)
+                                              options:NSStringDrawingUsesLineFragmentOrigin
+                                           attributes:attributes
+                                              context:nil];
+    rect.size.height += 25; // some padding
+    return (CGSize){CGRectGetWidth(collectionView.bounds), rect.size.height};
+}
+
+
 
 @end

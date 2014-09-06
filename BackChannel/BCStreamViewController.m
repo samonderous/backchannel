@@ -1254,9 +1254,15 @@ static BOOL isSwipeLocked = NO;
     }
 }
 
-- (void)cellTapped:(id)sender
+- (void)cellTapped:(UITapGestureRecognizer*)sender
 {
+    BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)sender.view;
     BCCommentsViewController *vc = [[BCCommentsViewController alloc] initWithNibName:@"BCComments" bundle:nil];
+    vc.secretModel = (BCSecretModel*)[_messages objectAtIndex:[_messageTable indexPathForCell:cell].row - 1];
+    float width = CGRectGetWidth(cell.bounds);
+    CGSize size = (CGSize){width, CGRectGetHeight(cell.contentView.bounds)};
+    BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:vc.secretModel withSize:size withBottomContainer:nil];
+    vc.content = tcv;
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     [self presentViewController:vc animated:YES completion:^() {}];
 }
@@ -1266,6 +1272,7 @@ static BOOL isSwipeLocked = NO;
 {
     BCStreamCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCStreamCollectionViewCell" forIndexPath:indexPath];
     [self prepareCell:cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath];
+
     return cell;
 }
 

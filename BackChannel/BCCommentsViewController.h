@@ -7,9 +7,15 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BCModels.h"
+#import "BCStreamCollectionViewCell.h"
 #import "HPGrowingTextView.h"
 
+
 @interface BCCommentsViewController : UIViewController
+
+@property (strong, nonatomic) BCSecretModel *secretModel;
+@property (strong, nonatomic) UIView *content;
 
 @end
 
