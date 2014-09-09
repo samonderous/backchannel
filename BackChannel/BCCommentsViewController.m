@@ -9,8 +9,9 @@
 #import "BCCommentsViewController.h"
 #import "BCStreamViewController.h"
 #import "BCGlobalsManager.h"
+#import "Utils.h"
 
-static const float kPostAnimationFinishedHeight = 40.0;
+static const float kPostAnimationFinishedHeight = 50.0;
 
 @interface BCCommentsViewCell : UICollectionViewCell
 @property (strong, nonatomic) IBOutlet UIImageView *avatar;
@@ -37,17 +38,21 @@ static const float kPostAnimationFinishedHeight = 40.0;
 
 @end
 
+@interface BCCommentsBar : UIView
 
-@implementation BCGrowingTextView
+@property (strong, nonatomic) IBOutlet UIButton *sendButton;
+@property (strong, nonatomic) IBOutlet HPGrowingTextView *commentsTextView;
+
+@end
+
+@implementation BCCommentsBar
 @end
 
 
 @interface BCCommentsViewController ()<UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, HPGrowingTextViewDelegate>
-@property (strong, nonatomic) IBOutlet UIView *post;
-@property (strong, nonatomic) IBOutlet UICollectionView *comments;
-@property (strong, nonatomic) IBOutlet UIView *bar;
-@property (strong, nonatomic) IBOutlet UIButton *sendButton;
-@property (strong, nonatomic) IBOutlet HPGrowingTextView *commentsTextView;
+@property (strong, nonatomic) UIView *post;
+@property (strong, nonatomic) UICollectionView *comments;
+@property (strong, nonatomic) BCCommentsBar *bar;
 
 @property (assign) BOOL inEditMode;
 @property (assign) CGFloat lastContentOffset;
@@ -83,23 +88,38 @@ static const float kPostAnimationFinishedHeight = 40.0;
     [_commentModels addObject:[[BCCommentModel alloc] init:commentStr[5]]];
 }
 
+- (void)loadView
+{
+    self.view = [[UIView alloc] initWithFrame:[UIScreen mainScreen].applicationFrame];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     [self setupMockComments];
+    self.view.backgroundColor = [UIColor whiteColor];
+    
+    _post = [[UIView alloc] initWithFrame:CGRectZero];
+    [self.view addSubview:_post];
+    
+    _bar = (BCCommentsBar*)[[NSBundle mainBundle] loadNibNamed:@"BCCommentsBar" owner:self options:nil][0];
+    [self.view addSubview:_bar];
+    
+    UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+    _comments = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+    [self.view addSubview:_comments];
     
     _comments.delegate = self;
     _comments.dataSource = self;
-    _commentsTextView.delegate = self;
-    _commentsTextView.layer.borderWidth = 1.0;
-    _commentsTextView.layer.borderColor = [UIColor lightGrayColor].CGColor;
-    _commentsTextView.layer.cornerRadius = 3.0;
-    //[_comments registerClass:[BCCommentsViewCell class] forCellWithReuseIdentifier:];
+    _bar.commentsTextView.delegate = self;
+    _bar.commentsTextView.layer.borderWidth = 1.0;
+    _bar.commentsTextView.layer.borderColor = [UIColor lightGrayColor].CGColor;
+    _bar.commentsTextView.layer.cornerRadius = 3.0;
     [_comments registerNib:[UINib nibWithNibName:@"BCCommentsCell" bundle:nil] forCellWithReuseIdentifier:@"BCCommentsCollectionViewCell"];
     _comments.backgroundColor = [UIColor whiteColor];
-    [_sendButton addTarget:self action:@selector(sendTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [_sendButton setTitleColor:[[BCGlobalsManager globalsManager] creamColor] forState:UIControlStateNormal];
+    [_bar.sendButton addTarget:self action:@selector(sendTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [_bar.sendButton setTitleColor:[[BCGlobalsManager globalsManager] creamColor] forState:UIControlStateNormal];
 
     [self.view bringSubviewToFront:_bar];
 
@@ -120,16 +140,42 @@ static const float kPostAnimationFinishedHeight = 40.0;
     _lastContentOffset = _comments.contentOffset.y;
 
     [_post addSubview:_content];
-    [_content placeIn:_post alignedAt:CENTER];
+
+
+    //[_post debug];
+    //[_comments debug];
+    //[_bar debug];
+    //[_post addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionOld context:NULL];
     
+    [Utils debugRect:self.view withName:@"view"];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [_post setSize:(CGSize){[UIScreen mainScreen].bounds.size.width, kCellHeight}];
+    [_comments setY:CGRectGetMaxY(_post.frame)];
+    [_comments setSize:(CGSize){[UIScreen mainScreen].bounds.size.width, CGRectGetMaxY(self.view.bounds) - CGRectGetHeight(_bar.bounds) - CGRectGetHeight(_post.bounds)}];
+    [_bar setY:CGRectGetMaxY(_comments.frame)];
+    [_content placeIn:_post alignedAt:CENTER];
     UIView *separator = [[UIView alloc] initWithFrame:CGRectMake(0.0, CGRectGetMaxY(_post.bounds) - 1.0, 80.0, 1.0)];
     separator.backgroundColor = [[BCGlobalsManager globalsManager] blackDividerColor];
     [_post addSubview:separator];
     [separator placeIn:_post alignedAt:BOTTOM];
-    
-    //[_post debug];
-    //[_comments debug];
-    //[_bar debug];
+}
+
+// Debug frame changes
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if([keyPath isEqualToString:@"frame"]) {
+        CGRect oldFrame = CGRectNull;
+        CGRect newFrame = CGRectNull;
+        if([change objectForKey:@"old"] != [NSNull null]) {
+            oldFrame = [[change objectForKey:@"old"] CGRectValue];
+        }
+        if([object valueForKeyPath:keyPath] != [NSNull null]) {
+            newFrame = [[object valueForKeyPath:keyPath] CGRectValue];
+        }
+    }
 }
 
 - (void)handleBackButtonTap:(id)sender
@@ -137,9 +183,37 @@ static const float kPostAnimationFinishedHeight = 40.0;
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+- (void)scrollToBottom
+{
+   NSIndexPath *lastIndexPath = [NSIndexPath indexPathForItem:[_comments numberOfItemsInSection:0] - 1 inSection:0];
+   [_comments scrollToItemAtIndexPath:lastIndexPath atScrollPosition:UICollectionViewScrollPositionBottom animated:YES];
+}
+
+- (void)addComment:(NSString*)commentString
+{
+    BCCommentModel *commentModel = [[BCCommentModel alloc] init:commentString];
+    [_commentModels addObject:commentModel];
+    _bar.commentsTextView.text = @"";
+}
+
 - (void)sendTapped:(id)sender
 {
-    NSLog(@"Send tapped");
+    NSString *commentString = [[_bar.commentsTextView.text copy] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    
+    if ([commentString  isEqual: @""]) {
+        return;
+    }
+    
+    [self addComment:commentString];
+    [_comments performBatchUpdates:^{
+        [_comments insertItemsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForItem:_commentModels.count - 1 inSection:0]]];
+    } completion:^(BOOL finished) {
+        [self scrollToBottom];
+    }];
+}
+
+- (BOOL)prefersStatusBarHidden {
+    return YES;
 }
 
 - (void)didReceiveMemoryWarning
@@ -161,15 +235,16 @@ static const float kPostAnimationFinishedHeight = 40.0;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(keyboardDidShow:)
                                                  name:UIKeyboardDidShowNotification object:nil];
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardDidHide:)
+                                                 name:UIKeyboardDidHideNotification object:nil];
 }
 
 - (void)keyboardDidShow:(NSNotification*)notification
 {
     NSDictionary* info = [notification userInfo];
     CGSize keyboardSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
-    CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
-    [_comments setHeight:(CGRectGetHeight(self.view.bounds) - keyboardSize.height - CGRectGetHeight(_bar.bounds) - kPostAnimationFinishedHeight - statusBarHeight)];
+    [_comments setHeight:(CGRectGetHeight(self.view.bounds) - keyboardSize.height - CGRectGetHeight(_bar.bounds) - kPostAnimationFinishedHeight)];
 }
 
 - (void)keyboardWillBeShown:(NSNotification*)notification
@@ -179,27 +254,22 @@ static const float kPostAnimationFinishedHeight = 40.0;
     NSValue* value = [info objectForKey:UIKeyboardAnimationDurationUserInfoKey];
     NSTimeInterval duration;
     [value getValue:&duration];
-    [self.view layoutIfNeeded];
+    //[self.view layoutIfNeeded];
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveLinear
                      animations:^{
                          [_bar setY:(CGRectGetHeight(self.view.bounds) - keyboardSize.height - CGRectGetHeight(_bar.bounds))];
                          [_post setHeight:kPostAnimationFinishedHeight];
                          [_comments setY:CGRectGetMaxY(_post.frame)];
-                         [self.view layoutIfNeeded];
+                         //[self.view layoutIfNeeded];
                      }
                      completion:^(BOOL finished) {
                          _inEditMode = YES;
-                         
-                         //Scroll to bottom
-                         //NSIndexPath *lastIndexPath = [NSIndexPath indexPathForItem:[_comments numberOfItemsInSection:0] - 1 inSection:0];
-                         //[_comments scrollToItemAtIndexPath:lastIndexPath atScrollPosition:UICollectionViewScrollPositionBottom animated:YES];
                      }];
 }
 
 - (void)keyboardWillBeHidden:(NSNotification*)notification
 {
     NSDictionary* info = [notification userInfo];
-    //CGSize keyboardSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
     NSValue* value = [info objectForKey:UIKeyboardAnimationDurationUserInfoKey];
     NSTimeInterval duration;
     [value getValue:&duration];
@@ -215,6 +285,10 @@ static const float kPostAnimationFinishedHeight = 40.0;
                      }];
 }
 
+- (void)keyboardDidHide:(NSNotification*)notification
+{
+    [_comments setHeight:(CGRectGetHeight(self.view.bounds) - kCellHeight - CGRectGetHeight(_bar.bounds))];
+}
 
 #pragma mark Collection View Delegate (_messagesTable)
 
@@ -269,9 +343,9 @@ static const float kPostAnimationFinishedHeight = 40.0;
 
 - (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView
 {
-    if (scrollView.contentOffset.y <= 0 && [_commentsTextView isFirstResponder])
+    if (scrollView.contentOffset.y <= 0 && [_bar.commentsTextView isFirstResponder])
     {
-        [_commentsTextView resignFirstResponder];
+        [_bar.commentsTextView resignFirstResponder];
     }
 }
 
@@ -292,6 +366,7 @@ static const float kPostAnimationFinishedHeight = 40.0;
     [_bar setY:CGRectGetMinY(_bar.frame) - delta];
     [_bar setHeight:CGRectGetHeight(_bar.frame) + delta];
     [self.view layoutIfNeeded]; // THIS WAS REQUIRED OTHERWISE something screwed up with geometry
+    NSLog(@"The internal text view widht = %f", growingTextView.internalTextView.bounds.size.width);
 }
 
 #pragma mark CollectionView Layout Delegate
@@ -314,7 +389,5 @@ static const float kPostAnimationFinishedHeight = 40.0;
     rect.size.height += 25; // some padding
     return (CGSize){CGRectGetWidth(collectionView.bounds), rect.size.height};
 }
-
-
 
 @end

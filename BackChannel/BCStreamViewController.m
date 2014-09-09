@@ -1257,7 +1257,7 @@ static BOOL isSwipeLocked = NO;
 - (void)cellTapped:(UITapGestureRecognizer*)sender
 {
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)sender.view;
-    BCCommentsViewController *vc = [[BCCommentsViewController alloc] initWithNibName:@"BCComments" bundle:nil];
+    BCCommentsViewController *vc = [[BCCommentsViewController alloc] init];
     vc.secretModel = (BCSecretModel*)[_messages objectAtIndex:[_messageTable indexPathForCell:cell].row - 1];
     float width = CGRectGetWidth(cell.bounds);
     CGSize size = (CGSize){width, CGRectGetHeight(cell.contentView.bounds)};

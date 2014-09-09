@@ -18,7 +18,3 @@
 @property (strong, nonatomic) UIView *content;
 
 @end
-
-
-@interface BCGrowingTextView : HPGrowingTextView
-@end
