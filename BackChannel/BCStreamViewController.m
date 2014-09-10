@@ -494,7 +494,7 @@ static const int kOldPostsBatchSize = 10;
 
 static BOOL isSwipeLocked = NO;
 
-- (id)init:(BCSecretModel*)secretModel withSize:(CGSize)size withBottomContainer:(BCCellBottomLayerContainerView*)bottomLayerContainerView
+- (id)init:(BCSecretModel*)secretModel withSize:(CGSize)size withBottomContainer:(BCCellBottomLayerContainerView*)bottomLayerContainerView forComment:(BOOL)isComment
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
     static dispatch_once_t oncePredicate;
@@ -539,6 +539,13 @@ static BOOL isSwipeLocked = NO;
     _animator = [[UIDynamicAnimator alloc] initWithReferenceView:self.superview];
     _swipeCellStartX = 0;
     _thresholdCrossed = NO;
+    
+    if (isComment) {
+        [self setHeight:CGRectGetHeight(self.bounds) - CGRectGetMaxY(_headerView.frame)];
+        [_headerView removeFromSuperview];
+        [_textView placeIn:self alignedAt:CENTER];
+        [_footerView setY:(CGRectGetMaxY(_textView.frame) + kComposeTextViewFooterViewMargin)];
+    }
     
     return self;
 }
@@ -1237,7 +1244,7 @@ static BOOL isSwipeLocked = NO;
         float width = CGRectGetWidth(cell.bounds);
         CGSize size = (CGSize){width, CGRectGetHeight(cell.contentView.bounds)};
         BCCellBottomLayerContainerView *bcv = [[BCCellBottomLayerContainerView alloc] init:size];
-        BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:secretModel withSize:size withBottomContainer:bcv];
+        BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:secretModel withSize:size withBottomContainer:bcv forComment:NO];
 
         tcv.delegate = self;
         [tcv addSwipes];
@@ -1261,10 +1268,17 @@ static BOOL isSwipeLocked = NO;
     vc.secretModel = (BCSecretModel*)[_messages objectAtIndex:[_messageTable indexPathForCell:cell].row - 1];
     float width = CGRectGetWidth(cell.bounds);
     CGSize size = (CGSize){width, CGRectGetHeight(cell.contentView.bounds)};
-    BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:vc.secretModel withSize:size withBottomContainer:nil];
+    BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:vc.secretModel withSize:size withBottomContainer:nil forComment:YES];
     vc.content = tcv;
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-    [self presentViewController:vc animated:YES completion:^() {}];
+    vc.title = @"Backchannel";
+    vc.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"←" style:UIBarButtonItemStylePlain target:self action:@selector(popCommentsViewController)];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)popCommentsViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (BCStreamCollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
