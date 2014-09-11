@@ -56,7 +56,7 @@
     
     //[Flurry setCrashReportingEnabled:YES];
     #if !TARGET_IPHONE_SIMULATOR
-    [Flurry startSession:@"MWV2G8ZG3JTK75ZPRNMC"];
+    //[Flurry startSession:@"MWV2G8ZG3JTK75ZPRNMC"];
     #endif
     
     [[BCGlobalsManager globalsManager] loadConfig];
