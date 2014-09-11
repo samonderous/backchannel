@@ -18,6 +18,9 @@ static NSString *kCreatePostPath = @"backend/createsecret/";
 static NSString *kVerificationPath = @"backend/verify/";
 static NSString *kLatestPostsPath = @"backend/getlatestposts/";
 static NSString *kOlderPostsPath = @"backend/getolderposts/";
+static NSString *kCommentsPath = @"backend/comments/";
+static NSString *kCommentCreatePath = @"backend/createcomment/";
+
 
 @implementation BCAPIClient
 
@@ -122,5 +125,32 @@ static NSString *kOlderPostsPath = @"backend/getolderposts/";
                              @"email": [defaults objectForKey:kEmailKey]};
     [[BCAPIClient sharedClient] POST:kVerificationPath parameters:params success:success failure:failure];
 }
+
+- (void)createComment:(NSString*)text onSecret:(BCSecretModel*)model success:(SuccessCallback)success failure:(FailureCallback)failure
+{
+    NSDictionary *params = @{@"udid": [[UIDevice currentDevice].identifierForVendor UUIDString],
+                             @"text": text,
+                             @"sid": [NSNumber numberWithInteger:model.sid]};
+    [[BCAPIClient sharedClient] POST:kCommentCreatePath parameters:params success:success failure:failure];
+}
+
+- (void)fetchCommentsFor:(BCSecretModel*)model success:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure
+{
+    [[BCAPIClient sharedClient] GET:kCommentsPath
+                         parameters:@{@"sid": [NSNumber numberWithInteger:model.sid]}
+                            success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                                NSMutableArray *comments = [[NSMutableArray alloc] init];
+                                for (NSDictionary *comment in responseObject[@"comments"]) {
+                                    BCCommentModel *commentModel = [[BCCommentModel alloc] init:comment[@"text"]];
+                                    [comments addObject:commentModel];
+                                }
+                                success(comments);
+                            }
+                            failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                                
+                                failure(operation, error);
+                            }];
+}
+
 
 @end

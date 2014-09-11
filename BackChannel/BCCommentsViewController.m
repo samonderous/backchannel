@@ -10,6 +10,7 @@
 #import "BCStreamViewController.h"
 #import "BCGlobalsManager.h"
 #import "Utils.h"
+#import "BCAPIClient.h"
 
 
 @interface BCCommentsViewPostCell : UICollectionViewCell
