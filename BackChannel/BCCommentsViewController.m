@@ -143,9 +143,7 @@
     _comments.dataSource = self;
     _bar.backgroundColor = [UIColor colorWithRed:235.0/255.0 green:235.0/255.0 blue:235.0/255.0 alpha:1.0];
     _bar.commentsTextView.delegate = self;
-    _bar.commentsTextView.layer.borderWidth = 1.0;
-    _bar.commentsTextView.layer.borderColor = [UIColor lightGrayColor].CGColor;
-    _bar.commentsTextView.layer.cornerRadius = 3.0;
+    _bar.commentsTextView.layer.borderColor = [UIColor clearColor].CGColor;
     [_comments registerNib:[UINib nibWithNibName:@"BCCommentsCell" bundle:nil] forCellWithReuseIdentifier:@"BCCommentsCollectionViewCell"];
     [_comments registerClass:[BCCommentsViewPostCell class] forCellWithReuseIdentifier:@"BCCommentsCollectionViewPostCell"];
     _comments.backgroundColor = [UIColor whiteColor];
@@ -232,6 +230,7 @@
         [_comments insertItemsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForItem:_commentModels.count - 1 + 1 inSection:0]]];
     } completion:^(BOOL finished) {
         [self scrollToBottom];
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventPostedComment withParams:nil];
     }];
 }
 
@@ -272,6 +271,7 @@
     NSDictionary* info = [notification userInfo];
     CGSize keyboardSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
     [_comments setHeight:(CGRectGetHeight(self.view.bounds) - keyboardSize.height - CGRectGetHeight(_bar.bounds))];
+    [self scrollToBottom];
 }
 
 - (void)keyboardWillBeShown:(NSNotification*)notification
@@ -291,6 +291,7 @@
                      completion:^(BOOL finished) {
                          _inEditMode = YES;
                      }];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventTappedCommentField withParams:nil];
 }
 
 - (void)keyboardWillBeHidden:(NSNotification*)notification

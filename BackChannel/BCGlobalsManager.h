@@ -29,13 +29,19 @@ extern NSString *kOrgNameKey;
 extern NSString *kOrgDomainKey;
 
 extern NSString *kEventJoinTapped;
+extern NSString *kEventJoinTappedErrorResponse;
+extern NSString *kEventJoinTappedWhitelistResponse;
+extern NSString *kEventJoinTappedSuccessResponse;
 extern NSString *kEventGotItTapped;
+extern NSString *kEventSkipTapped;
 extern NSString *kEventEnteredStream;
 extern NSString *kEventNevermindTapped;
 extern NSString *kEventPublishTapped;
 extern NSString *kEventCreatePost;
 extern NSString *kEventVotePlusOne;
+extern NSString *kEventVotePlusOneTutorial;
 extern NSString *kEventVoteNegOne;
+extern NSString *kEventVoteNegOneTutorial;
 extern NSString *kEventShareCancel;
 extern NSString *kEventShareSaved;
 extern NSString *kEventShareSent;
@@ -48,6 +54,15 @@ extern NSString *kEventOpenMailTapped;
 extern NSString *kEventResendMailTapped;
 extern NSString *kEventBackButtonTapFromVerification;
 extern NSString *kEventBackButtonTapFromWaitlist;
+extern NSString *kEventTappedToComments;
+extern NSString *kEventTappedCommentField;
+extern NSString *kEventPostedComment;
+extern NSString *kEventAccessLinkClicked;
+extern NSString *kEventAccessLinkClickAlreadyVerified;
+extern NSString *kEventAccessLinkClickUdidNotEqual;
+extern NSString *kEventAccessLinkClickVerifyErrorNoUser;
+extern NSString *kEventAccessLinkClickVerifySuccess;
+
 
 @interface BCGlobalsManager : NSObject
 

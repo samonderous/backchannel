@@ -55,7 +55,9 @@
     [Crashlytics startWithAPIKey:@"f59d6a71a710bdff855cd287d71b64b426d0e957"];
     
     //[Flurry setCrashReportingEnabled:YES];
+    #if !TARGET_IPHONE_SIMULATOR
     [Flurry startSession:@"MWV2G8ZG3JTK75ZPRNMC"];
+    #endif
     
     [[BCGlobalsManager globalsManager] loadConfig];
     //[[AFNetworkActivityLogger sharedLogger] startLogging];

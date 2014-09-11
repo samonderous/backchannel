@@ -276,11 +276,15 @@ NSString *errorMessage = @"Be sure to enter a valid work email address";
         if (status == 1) {
             // FIXME: turn this on when we decide on the teaser
             [_av updateEmail:persons withError:YES];
+            NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"email_entered", _av.email.text, nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventJoinTappedErrorResponse withParams:params];
         }
         
         // WHITELIST CASE
         else if (status == 2) {
             // Not whitelisted
+            NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"email_entered", _av.email.text, nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventJoinTappedWhitelistResponse withParams:params];
             BCWaitingViewController *vc = [[BCWaitingViewController alloc] init];
             vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
             [self presentViewController:vc animated:YES completion:^() {}];
@@ -288,6 +292,8 @@ NSString *errorMessage = @"Be sure to enter a valid work email address";
         
         // EMAIL SUCCESS CASE, OFF TO VERIFICATION
         else {
+            NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"email_entered", _av.email.text, nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventJoinTappedSuccessResponse withParams:params];
             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
             NSString *email = (NSString*)responseObject[@"email"];
             [defaults setObject:email forKey:kEmailKey];

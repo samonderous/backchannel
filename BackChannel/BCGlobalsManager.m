@@ -24,6 +24,7 @@ NSString *kOrgNameKey = @"orgName";
 NSString *kOrgDomainKey = @"orgDomain";
 
 NSString *kEventGotItTapped = @"got_it_tapped";
+NSString *kEventSkipTapped = @"skip_tapped";
 NSString *kEventEnteredStream = @"entered_stream_view";
 NSString *kEventNevermindTapped = @"tap_nevermind";
 NSString *kEventPublishTapped = @"tap_publish";
@@ -35,6 +36,9 @@ NSString *kEventShareSaved = @"share_saved";
 NSString *kEventShareSent = @"share_sent";
 NSString *kEventShareFailed = @"share_failed";
 NSString *kEventJoinTapped = @"join_tap";
+NSString *kEventJoinTappedErrorResponse = @"join_tapped_error_response";
+NSString *kEventJoinTappedWhitelistResponse = @"join_tapped_whitelist_response";
+NSString *kEventJoinTappedSuccessResponse = @"join_tapped_success_response";
 NSString *kEventInviteCancel = @"invite_cancel";
 NSString *kEventInviteSaved = @"invite_saved";
 NSString *kEventInviteSent = @"invite_sent";
@@ -43,6 +47,18 @@ NSString *kEventOpenMailTapped = @"openmail_tap";
 NSString *kEventResendMailTapped = @"resendmail_tap";
 NSString *kEventBackButtonTapFromVerification = @"back_button_tapped_from_verification";
 NSString *kEventBackButtonTapFromWaitlist = @"back_button_tapped_from_waitlist";
+NSString *kEventVoteNegOneTutorial = @"vote_neg_one_tutorial";
+NSString *kEventVotePlusOneTutorial = @"vote_plus_one_tutorial";
+NSString *kEventTappedToComments = @"tapped_to_comments";
+NSString *kEventTappedCommentField = @"tapped_comment_field";
+NSString *kEventPostedComment = @"posted_comment";
+NSString *kEventAccessLinkClicked = @"access_link_clicked";
+NSString *kEventAccessLinkClickAlreadyVerified = @"access_link_already_verified_back_to_auth";
+NSString *kEventAccessLinkClickUdidNotEqual = @"access_link_udid_not_equal_back_to_auth";
+NSString *kEventAccessLinkClickVerifyErrorNoUser = @"access_link_verify_server_error";
+NSString *kEventAccessLinkClickVerifySuccess = @"access_link_verify_server_success_to_stream_view";
+
+
 
 
 

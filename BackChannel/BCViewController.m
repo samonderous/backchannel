@@ -31,6 +31,8 @@ typedef enum TransitionType {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *verified = [defaults objectForKey:kVerifiedKey];
     
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventAccessLinkClicked withParams:nil];
+
     if ([verified isEqualToString:@"NO"]) {
         if (![udidIN isEqualToString:[defaults objectForKey:kUdidKey]]) {
             BCAuthViewController *vc = [[BCAuthViewController alloc] init];
@@ -39,7 +41,7 @@ typedef enum TransitionType {
             [defaults removeObjectForKey:kUdidKey];
             [defaults removeObjectForKey:kVerifiedKey];
             [defaults synchronize];
-            
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventAccessLinkClickUdidNotEqual withParams:nil];
             return vc;
         }
         
@@ -52,7 +54,14 @@ typedef enum TransitionType {
             if (status == 1) {
                 NSLog(@"Error in creating user on server");
                 // TODO: If no user notify user who's waiting on verification page
-                
+                BCAuthViewController *avc = [[BCAuthViewController alloc] init];
+                NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                [defaults removeObjectForKey:kEmailKey];
+                [defaults removeObjectForKey:kUdidKey];
+                [defaults removeObjectForKey:kVerifiedKey];
+                [defaults synchronize];
+                [[BCGlobalsManager globalsManager] logFlurryEvent:kEventAccessLinkClickVerifyErrorNoUser withParams:nil];
+                [vc presentViewController:avc animated:YES completion:^() {}];
             } else {
                 NSString *orgName = (NSString*)responseObject[@"name"];
                 NSString *orgDomain = (NSString*)responseObject[@"domain"];
@@ -65,6 +74,7 @@ typedef enum TransitionType {
                 UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:sc];
                 sc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
                 [vc presentViewController:nc animated:YES completion:^() {}];
+                [[BCGlobalsManager globalsManager] logFlurryEvent:kEventAccessLinkClickVerifySuccess withParams:nil];
             }
         };
         
@@ -80,6 +90,7 @@ typedef enum TransitionType {
         // Keep on verified page until we get a success. We want to make sure we have a user.
         return vc;
     } else {
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventAccessLinkClickAlreadyVerified withParams:nil];
         BCAuthViewController *vc = [[BCAuthViewController alloc] init];
         return vc;
     }

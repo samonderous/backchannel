@@ -1147,7 +1147,11 @@ static BOOL isSwipeLocked = NO;
 - (void)gotitTapped:(id)sender
 {
     [self unsetupStreamTutorial];
-    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventGotItTapped withParams:nil];
+    if ([_gotit.titleLabel.text isEqualToString:@"Got it!"]) {
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventGotItTapped withParams:nil];
+    } else {
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventSkipTapped withParams:nil];
+    }
     _inTutorialMode = NO;
     _messageTable.scrollEnabled = YES;
 }
@@ -1274,6 +1278,7 @@ static BOOL isSwipeLocked = NO;
     vc.title = @"Backchannel";
     vc.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"←" style:UIBarButtonItemStylePlain target:self action:@selector(popCommentsViewController)];
     [self.navigationController pushViewController:vc animated:YES];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventTappedToComments withParams:nil];
 }
 
 - (void)popCommentsViewController
@@ -1649,11 +1654,20 @@ static BOOL isSwipeLocked = NO;
     if (direction == LEFT_DIRECTION) {
         secretModel.disagrees++;
         secretModel.vote = VOTE_DISAGREE;
-        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVotePlusOne withParams:nil];
+        if (_inTutorialMode) {
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVoteNegOneTutorial withParams:nil];
+        } else {
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVoteNegOne withParams:nil];
+        }
+        
     } else if (direction == RIGHT_DIRECTION) {
         secretModel.agrees++;
         secretModel.vote = VOTE_AGREE;
-        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVoteNegOne withParams:nil];
+        if (_inTutorialMode) {
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVotePlusOneTutorial withParams:nil];
+        } else {
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVotePlusOne withParams:nil];
+        }
     }
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
