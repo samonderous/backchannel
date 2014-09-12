@@ -432,7 +432,7 @@ static const int kOldPostsBatchSize = 10;
     [self addSubview:timeLabel];
     [timeLabel sizeToFit];
     [timeLabel placeIn:self alignedAt:CENTER_LEFT];
-    
+
     return self;
 }
 
@@ -514,6 +514,7 @@ static BOOL isSwipeLocked = NO;
     [self addSubview:_textView];
     [self addSubview:_footerView];
     [self addVoteViews];
+    [self addCommentCountView];
     
     [_footerView placeIn:self alignedAt:CENTER];
     [_textView placeIn:self alignedAt:CENTER];
@@ -550,6 +551,40 @@ static BOOL isSwipeLocked = NO;
     return self;
 }
 
+- (void)addCommentCountView
+{
+    UIView *commentsCountView = nil;
+    
+    UIImageView *commentsImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_comments"]];
+
+    int commentsCount = 32; // wire through comment count here
+    if (commentsCount == 0)
+    {
+        commentsCountView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, commentsImageView.frame.size.width, kHeaderFooterHeight)];
+        [commentsCountView addSubview:commentsImageView];
+        [commentsImageView placeIn:commentsCountView alignedAt:CENTER];
+    }
+    else
+    {
+        UILabel *commentsCountLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, _size.width, _size.height)];
+        commentsCountLabel.font = [UIFont fontWithName:@"Poly" size:15.0];
+        commentsCountLabel.textColor = [[BCGlobalsManager globalsManager] grayVoteCountColor];
+        commentsCountLabel.text = [NSString stringWithFormat:@"%d", commentsCount];
+        [commentsCountLabel sizeToFit];
+        
+        commentsCountView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, commentsCountLabel.frame.size.width + 5 + commentsImageView.frame.size.width, kHeaderFooterHeight)];
+
+        [commentsCountView addSubview:commentsImageView];
+        [commentsImageView placeIn:commentsCountView alignedAt:CENTER_LEFT];
+        
+        [commentsCountView addSubview:commentsCountLabel];
+        [commentsCountLabel placeIn:commentsCountView alignedAt:CENTER_RIGTH];
+    }
+    
+    [self addSubview:commentsCountView];
+    [commentsCountView placeIn:self alignedAt:BOTTOM];
+    [commentsCountView setY:commentsCountView.frame.origin.y - kComposeTextViewHeaderViewMargin];
+}
 
 - (void)addVoteViews
 {
