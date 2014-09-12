@@ -10,6 +10,60 @@
 #import "BCStreamViewController.h"
 #import "BCGlobalsManager.h"
 #import "Utils.h"
+#import "BCAPIClient.h"
+
+
+@interface BCCommentPlaceHolder : UIView
+
+@property (strong, nonatomic) UILabel *noCommentsYet;
+@property (strong, nonatomic) UIActivityIndicatorView *activityIndicator;
+@end
+
+@implementation BCCommentPlaceHolder
+
+- (id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        _noCommentsYet = [[UILabel alloc] init];
+        [self addSubview:_noCommentsYet];
+        _noCommentsYet.text = @"No comments yet. Be the first.";
+        _noCommentsYet.textColor = [[BCGlobalsManager globalsManager] blackDividerColor];
+        _noCommentsYet.font = [UIFont fontWithName:@"Poly" size:16.0];
+        [_noCommentsYet sizeToFit];
+        
+        _activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+        [self addSubview:_activityIndicator];
+        
+        self.backgroundColor = [UIColor whiteColor];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    [_noCommentsYet placeIn:self alignedAt:CENTER];
+    [_activityIndicator placeIn:self alignedAt:CENTER];
+}
+
+- (void)showWaiting
+{
+    _noCommentsYet.hidden = YES;
+    [_activityIndicator startAnimating];
+    _activityIndicator.hidden = NO;
+}
+
+- (void)showNoCommentsYet
+{
+    [_activityIndicator stopAnimating];
+    _activityIndicator.hidden = YES;
+    _noCommentsYet.hidden = NO;
+}
+
+@end
 
 
 @interface BCCommentsViewPostCell : UICollectionViewCell
@@ -58,16 +112,55 @@
 
 @property (strong, nonatomic) IBOutlet UIButton *sendButton;
 @property (strong, nonatomic) IBOutlet HPGrowingTextView *commentsTextView;
+@property (strong, nonatomic) UIActivityIndicatorView *activityIndicator;
 
 @end
 
 @implementation BCCommentsBar
+
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    self = [super initWithCoder:aDecoder];
+    return self;
+}
+
+// Need this because IBOutlets are not setup yet at initWithCoder time. This is called at the end of the unarchive of nib.
+- (void)awakeFromNib
+{
+    [super awakeFromNib];
+    
+    _activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+    [_sendButton addSubview:_activityIndicator];
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    [_activityIndicator placeIn:_sendButton alignedAt:CENTER];
+
+}
+
+- (void)showIndicator
+{
+    [_sendButton setTitle:@"" forState:UIControlStateNormal];
+    [_sendButton setTitle:@"" forState:UIControlStateHighlighted];
+    [_activityIndicator startAnimating];
+}
+
+- (void)hideIndicator
+{
+    [_sendButton setTitle:@"Post" forState:UIControlStateNormal];
+    [_sendButton setTitle:@"Post" forState:UIControlStateHighlighted];
+    [_activityIndicator stopAnimating];
+}
+
 @end
 
 
 @interface BCCommentsViewController ()<UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, HPGrowingTextViewDelegate>
 @property (strong, nonatomic) UICollectionView *comments;
 @property (strong, nonatomic) BCCommentsBar *bar;
+@property (strong, nonatomic) BCCommentPlaceHolder *placeHolder;
 
 @property (assign) BOOL inEditMode;
 @property (assign) CGFloat lastContentOffset;
@@ -129,7 +222,9 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-    [self setupMockComments];
+    //[self setupMockComments];
+    _commentModels = [[NSMutableArray alloc] init];
+
     self.view.backgroundColor = [UIColor whiteColor];
     
     _bar = (BCCommentsBar*)[[NSBundle mainBundle] loadNibNamed:@"BCCommentsBar" owner:self options:nil][0];
@@ -138,6 +233,10 @@
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
     _comments = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
     [self.view addSubview:_comments];
+    _comments.alwaysBounceVertical = YES;
+
+    _placeHolder = [[BCCommentPlaceHolder alloc] initWithFrame:CGRectZero];
+    [_comments addSubview:_placeHolder];
     
     _comments.delegate = self;
     _comments.dataSource = self;
@@ -176,6 +275,31 @@
     [self setupCommentsBar];
 }
 
+- (void)getComments:(void (^)(void))callback
+{
+    void (^success)(NSMutableArray*) = ^(NSMutableArray *comments) {
+        
+        if (comments.count == 0) {
+            [_placeHolder showNoCommentsYet];
+        } else {
+            [_placeHolder removeFromSuperview];
+            _commentModels = comments;
+            [_comments reloadData];
+        }
+        
+        if (callback) {
+            callback();
+        }
+    };
+    
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error in get stream: %@", error);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
+    };
+    
+    [[BCAPIClient sharedClient] fetchCommentsFor:_secretModel success:success failure:failure];
+    [_placeHolder showWaiting];
+}
 
 - (void)viewWillAppear:(BOOL)animated
 {
@@ -183,6 +307,13 @@
     [_comments setY:0.0];
     [_comments setSize:(CGSize){[UIScreen mainScreen].bounds.size.width, CGRectGetMaxY(self.view.bounds) - CGRectGetHeight(_bar.bounds)}];
     [_bar setY:CGRectGetMaxY(_comments.frame)];
+    
+    [_placeHolder setY:CGRectGetHeight(_content.bounds)];
+    [_placeHolder setSize:(CGSize){CGRectGetWidth(_comments.bounds),
+        CGRectGetHeight(_comments.bounds) - CGRectGetHeight(_content.bounds) - CGRectGetHeight(_bar.bounds)}];
+    [_placeHolder layoutIfNeeded];
+
+    [self getComments:nil];
 }
 
 // Debug frame changes
@@ -225,13 +356,26 @@
         return;
     }
     
-    [self addComment:commentString];
-    [_comments performBatchUpdates:^{
-        [_comments insertItemsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForItem:_commentModels.count - 1 + 1 inSection:0]]];
-    } completion:^(BOOL finished) {
-        [self scrollToBottom];
-        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventPostedComment withParams:nil];
-    }];
+    SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
+        [_bar hideIndicator];
+        [_placeHolder removeFromSuperview];
+        [self addComment:commentString];
+        [_comments performBatchUpdates:^{
+            [_comments insertItemsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForItem:_commentModels.count - 1 + 1 inSection:0]]];
+        } completion:^(BOOL finished) {
+            [self scrollToBottom];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventPostedComment withParams:nil];
+        }];
+    };
+    
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error in get stream: %@", error);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
+        [_bar hideIndicator];
+    };
+    
+    [[BCAPIClient sharedClient] createComment:commentString onSecret:_secretModel success:success failure:failure];
+    [_bar showIndicator];
 }
 
 /*
@@ -286,7 +430,6 @@
                      animations:^{
                          [_bar setY:(CGRectGetHeight(self.view.bounds) - keyboardSize.height - CGRectGetHeight(_bar.bounds))];
                          [self.view layoutIfNeeded];
-
                      }
                      completion:^(BOOL finished) {
                          _inEditMode = YES;
@@ -394,8 +537,8 @@
     [_comments setHeight:CGRectGetHeight(_comments.bounds) - delta];
     [_bar setY:CGRectGetMinY(_bar.frame) - delta];
     [_bar setHeight:CGRectGetHeight(_bar.frame) + delta];
+    [_bar.sendButton setY:CGRectGetMinY(_bar.sendButton.frame) + delta];
     [self.view layoutIfNeeded]; // THIS WAS REQUIRED OTHERWISE something screwed up with geometry
-    NSLog(@"The internal text view widht = %f", growingTextView.internalTextView.bounds.size.width);
 }
 
 #pragma mark CollectionView Layout Delegate

@@ -11,8 +11,8 @@
 
 #import "BCModels.h"
 
-static NSString *kAPIBaseURL = @"https://bckchannelapp.com/";
-
+//static NSString *kAPIBaseURL = @"https://bckchannelapp.com/";
+static NSString *kAPIBaseURL = @"http://ec2-54-92-236-21.compute-1.amazonaws.com/";
 
 typedef  void (^SuccessCallback)(AFHTTPRequestOperation *operation, id responseObject);
 typedef  void (^FailureCallback)(AFHTTPRequestOperation *operation, NSError *error);
@@ -29,5 +29,7 @@ typedef  void (^FailureCallback)(AFHTTPRequestOperation *operation, NSError *err
 - (void)sendVerification:(SuccessCallback)success failure:(FailureCallback)failure;
 - (void)getLatestPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withTopSid:(int)topSid;
 - (void)getOlderPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withLastSid:(int)lastSid;
+- (void)fetchCommentsFor:(BCSecretModel*)model success:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure;
+- (void)createComment:(NSString*)text onSecret:(BCSecretModel*)model success:(SuccessCallback)success failure:(FailureCallback)failure;
 
 @end
