@@ -494,7 +494,7 @@ static const int kOldPostsBatchSize = 10;
 
 static BOOL isSwipeLocked = NO;
 
-- (id)init:(BCSecretModel*)secretModel withSize:(CGSize)size withBottomContainer:(BCCellBottomLayerContainerView*)bottomLayerContainerView forComment:(BOOL)isComment
+- (id)init:(BCSecretModel*)secretModel withSize:(CGSize)size withBottomContainer:(BCCellBottomLayerContainerView*)bottomLayerContainerView
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
     static dispatch_once_t oncePredicate;
@@ -514,7 +514,7 @@ static BOOL isSwipeLocked = NO;
     [self addSubview:_textView];
     [self addSubview:_footerView];
     [self addVoteViews];
-    [self addCommentCountView];
+    [self addCommentCountView:secretModel];
     
     [_footerView placeIn:self alignedAt:CENTER];
     [_textView placeIn:self alignedAt:CENTER];
@@ -541,23 +541,16 @@ static BOOL isSwipeLocked = NO;
     _swipeCellStartX = 0;
     _thresholdCrossed = NO;
     
-    if (isComment) {
-        [self setHeight:CGRectGetHeight(self.bounds) - CGRectGetMaxY(_headerView.frame)];
-        [_headerView removeFromSuperview];
-        [_textView placeIn:self alignedAt:CENTER];
-        [_footerView setY:(CGRectGetMaxY(_textView.frame) + kComposeTextViewFooterViewMargin)];
-    }
-    
     return self;
 }
 
-- (void)addCommentCountView
+- (void)addCommentCountView:(BCSecretModel*)secretModel
 {
     UIView *commentsCountView = nil;
     
     UIImageView *commentsImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_comments"]];
 
-    int commentsCount = 32; // wire through comment count here
+    int commentsCount = secretModel.commentCount;
     if (commentsCount == 0)
     {
         commentsCountView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, commentsImageView.frame.size.width, kHeaderFooterHeight)];
@@ -1284,7 +1277,7 @@ static BOOL isSwipeLocked = NO;
         float width = CGRectGetWidth(cell.bounds);
         CGSize size = (CGSize){width, CGRectGetHeight(cell.contentView.bounds)};
         BCCellBottomLayerContainerView *bcv = [[BCCellBottomLayerContainerView alloc] init:size];
-        BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:secretModel withSize:size withBottomContainer:bcv forComment:NO];
+        BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:secretModel withSize:size withBottomContainer:bcv];
 
         tcv.delegate = self;
         [tcv addSwipes];
@@ -1308,7 +1301,7 @@ static BOOL isSwipeLocked = NO;
     vc.secretModel = (BCSecretModel*)[_messages objectAtIndex:[_messageTable indexPathForCell:cell].row - 1];
     float width = CGRectGetWidth(cell.bounds);
     CGSize size = (CGSize){width, CGRectGetHeight(cell.contentView.bounds)};
-    BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:vc.secretModel withSize:size withBottomContainer:nil forComment:YES];
+    BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:vc.secretModel withSize:size withBottomContainer:nil];
     vc.content = tcv;
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     vc.title = @"Backchannel";
