@@ -25,7 +25,7 @@
     _vote = vote;
     _isNew = NO;
     _isVoted = NO;
-    _commentCount = 0;
+    _commentCount = commentCount;
     
     return self;
 }

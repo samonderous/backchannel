@@ -16,5 +16,6 @@
 
 @property (strong, nonatomic) BCSecretModel *secretModel;
 @property (strong, nonatomic) UIView *content;
+@property (strong, nonatomic) void (^postUpdateCallback)(void);
 
 @end

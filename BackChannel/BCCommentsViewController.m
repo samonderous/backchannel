@@ -137,7 +137,7 @@ static const CGFloat kCommentPadding = 30.0;
 {
     [super awakeFromNib];
     
-    _activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+    _activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     [_sendButton addSubview:_activityIndicator];
 }
 
@@ -253,6 +253,7 @@ static const CGFloat kCommentPadding = 30.0;
     _bar.commentsTextView.font = [UIFont fontWithName:@"Poly" size:15.0];
     _bar.commentsTextView.placeholder = @"What do you think?";
     _bar.commentsTextView.placeholderColor = [[BCGlobalsManager globalsManager] emptyPostCellColor];
+    [[UITextView appearance] setTintColor:[[BCGlobalsManager globalsManager] blueColor]];
     CALayer *topLine = [[CALayer alloc] init];
     topLine.frame = CGRectMake(0.0, 0.0, CGRectGetWidth(_bar.bounds), 0.5);
     topLine.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.2].CGColor;
@@ -377,10 +378,14 @@ static const CGFloat kCommentPadding = 30.0;
         [_bar hideIndicator];
         [_placeHolder removeFromSuperview];
         [self addComment:commentString];
+        _secretModel.commentCount = [responseObject[@"comment_count"] integerValue];
         [_comments performBatchUpdates:^{
             [_comments insertItemsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForItem:_commentModels.count - 1 + 1 inSection:0]]];
         } completion:^(BOOL finished) {
             [self scrollToBottom];
+            [_content setNeedsLayout];
+             _postUpdateCallback();
+
             [[BCGlobalsManager globalsManager] logFlurryEvent:kEventPostedComment withParams:nil];
         }];
     };

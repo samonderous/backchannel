@@ -469,11 +469,60 @@ static const int kOldPostsBatchSize = 10;
 @end
 
 
+
+@interface BCCommentsCountView : UIView
+
+@property (strong, nonatomic) UIImageView *commentsImageView;
+@property (strong, nonatomic) BCSecretModel *secretModel;
+@property (strong, nonatomic) UILabel *commentsCountLabel;
+@end
+
+@implementation BCCommentsCountView
+
+- (id)init:(BCSecretModel*)secretModel
+{
+    self = [super init];
+    
+    if (self) {
+        _secretModel = secretModel;
+        _commentsImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_comments.png"]];
+        _commentsCountLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+        [self layoutSubviews];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    if (_secretModel.commentCount == 0) {
+        [self addSubview:_commentsImageView];
+        [self setSize:_commentsImageView.bounds.size];
+    } else {
+        _commentsCountLabel.font = [UIFont fontWithName:@"Poly" size:15.0];
+        _commentsCountLabel.textColor = [[BCGlobalsManager globalsManager] grayVoteCountColor];
+        _commentsCountLabel.text = [NSString stringWithFormat:@"%d", _secretModel.commentCount];
+        [_commentsCountLabel sizeToFit];
+        [self setSize:(CGSize){_commentsCountLabel.bounds.size.width + 5 + _commentsImageView.bounds.size.width,
+            kHeaderFooterHeight}];
+        [self addSubview:_commentsCountLabel];
+        [self addSubview:_commentsImageView];
+        [_commentsImageView placeIn:self alignedAt:CENTER_LEFT];
+        [_commentsCountLabel placeIn:self alignedAt:CENTER_RIGTH];
+    }
+}
+
+@end
+
+
 @interface BCCellTopLayerContainerView ()
 @property (strong, nonatomic) BCCellBottomLayerContainerView *bottomLayerContainerView;
 @property (strong, nonatomic) BCCellTopLayerTextView *textView;
 @property (strong, nonatomic) BCCellTopLayerFooterView *footerView;
 @property (strong, nonatomic) BCCellTopLayerHeaderView *headerView;
+@property (strong, nonatomic) BCCommentsCountView *commentsCountView;
 @property (strong, nonatomic) BCSecretModel *secretModel;
 @property (assign) CGSize size;
 @property (assign) BOOL isDragging;
@@ -510,11 +559,12 @@ static BOOL isSwipeLocked = NO;
 
     _textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel withWidth:size.width];
     _footerView = [[BCCellTopLayerFooterView alloc] init:secretModel.timeStr withWidth:size.width];
-
+    _commentsCountView = [[BCCommentsCountView alloc] init:secretModel];
+    
     [self addSubview:_textView];
     [self addSubview:_footerView];
+    [self addSubview:_commentsCountView];
     [self addVoteViews];
-    [self addCommentCountView:secretModel];
     
     [_footerView placeIn:self alignedAt:CENTER];
     [_textView placeIn:self alignedAt:CENTER];
@@ -544,39 +594,11 @@ static BOOL isSwipeLocked = NO;
     return self;
 }
 
-- (void)addCommentCountView:(BCSecretModel*)secretModel
+- (void)layoutSubviews
 {
-    UIView *commentsCountView = nil;
-    
-    UIImageView *commentsImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_comments"]];
-
-    int commentsCount = secretModel.commentCount;
-    if (commentsCount == 0)
-    {
-        commentsCountView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, commentsImageView.frame.size.width, kHeaderFooterHeight)];
-        [commentsCountView addSubview:commentsImageView];
-        [commentsImageView placeIn:commentsCountView alignedAt:CENTER];
-    }
-    else
-    {
-        UILabel *commentsCountLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, _size.width, _size.height)];
-        commentsCountLabel.font = [UIFont fontWithName:@"Poly" size:15.0];
-        commentsCountLabel.textColor = [[BCGlobalsManager globalsManager] grayVoteCountColor];
-        commentsCountLabel.text = [NSString stringWithFormat:@"%d", commentsCount];
-        [commentsCountLabel sizeToFit];
-        
-        commentsCountView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, commentsCountLabel.frame.size.width + 5 + commentsImageView.frame.size.width, kHeaderFooterHeight)];
-
-        [commentsCountView addSubview:commentsImageView];
-        [commentsImageView placeIn:commentsCountView alignedAt:CENTER_LEFT];
-        
-        [commentsCountView addSubview:commentsCountLabel];
-        [commentsCountLabel placeIn:commentsCountView alignedAt:CENTER_RIGTH];
-    }
-    
-    [self addSubview:commentsCountView];
-    [commentsCountView placeIn:self alignedAt:BOTTOM];
-    [commentsCountView setY:commentsCountView.frame.origin.y - kComposeTextViewHeaderViewMargin];
+    [super layoutSubviews];
+    [_commentsCountView layoutSubviews];
+    [_commentsCountView placeIn:self alignedAt:BOTTOM withMargin:kComposeTextViewHeaderViewMargin];
 }
 
 - (void)addVoteViews
@@ -1303,6 +1325,9 @@ static BOOL isSwipeLocked = NO;
     CGSize size = (CGSize){width, CGRectGetHeight(cell.contentView.bounds)};
     BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:vc.secretModel withSize:size withBottomContainer:nil];
     vc.content = tcv;
+    vc.postUpdateCallback = ^{
+        [cell.cv setNeedsLayout];
+    };
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     vc.title = @"Backchannel";
     vc.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"←" style:UIBarButtonItemStylePlain target:self action:@selector(popCommentsViewController)];
