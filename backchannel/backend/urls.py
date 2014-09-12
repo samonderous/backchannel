@@ -21,6 +21,8 @@ urlpatterns = patterns('',
     url(r'^signup/', views.signup, name='signup'),
     url(r'^share/', views.share, name='share'),
     url(r'^invite/', views.invite, name='invite'),
+    url(r'^comments/', views.comments, name='comments'),
+    url(r'^createcomment/', views.createcomment, name='createcomment'),
 )
 
 urlpatterns += staticfiles_urlpatterns()

@@ -119,10 +119,10 @@ def send_verify_email(org, email, udid):
 	to_email = email or 'saureen@gmail.com'
 	subject = "Your access link to %s's Backchannel" % org.name
 
-	link = "<a href='http://bckchannelapp.com/backend/verify/?u=%s'>here</a>" % udid
-	item_html = "Thanks for joining! On your iPhone, tap %s to access your backchannel and start sharing workplace thoughts anonymously with your co-workers." % link
+	link = "<a href='https://bckchannelapp.com/backend/verify/?u=%s'>here to access</a>" % udid
+	item_html = "Thanks for joining!<br /><br />On your iPhone, tap %s your Backchannel and start sharing workplace thoughts anonymously with your coworkers." % link
 
-	footer = "<br /><br />The Backchannel Team</br /><a href='http://backchannel.it'>backchannel.it</a>"
+	footer = "<br /><br />The Backchannel Team<br /><a href='http://backchannel.it'>backchannel.it</a>"
 	msg = EmailMultiAlternatives(subject, "", from_email = "Backchannel <info@backchannel.it>", to=[to_email])
 	msg.attach_alternative(item_html + footer, "text/html")
 
@@ -157,7 +157,7 @@ def send_share_email(email, code, photo):
 	image.add_header("Content-Disposition", "inline")
 	related.attach(image)
 
-	msg = EmailMultiRelated(subject, "", from_email = "LinkedIn's Backchannel <hello@bckchannelapp.com>", to=[to_email])
+	msg = EmailMultiRelated(subject, "", from_email = "Backchannel <info@backchannel.it>", to=[to_email])
 
 	# add the HTML version
 	msg.attach(related)

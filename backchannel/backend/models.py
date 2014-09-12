@@ -34,6 +34,7 @@ class Secret(models.Model):
     org = models.ForeignKey('Org')
     agrees = models.IntegerField()
     disagrees = models.IntegerField()
+    comment_count = models.IntegerField()
 
     class Meta:
         db_table = 'secret'
@@ -110,6 +111,19 @@ class WaitlistOrg(models.Model):
 
     def __unicode__(self):
         return self.email
+
+class Comment(models.Model):
+    user = models.ForeignKey('User')
+    secret = models.ForeignKey('Secret')
+    text = models.CharField(max_length=5000)
+    time_created = models.IntegerField()
+
+    class Meta:
+        db_table = 'comment'
+
+    def __unicode__(self):
+        return self.text
+
 
 
 SEED_SECRETS = [
