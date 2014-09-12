@@ -29,7 +29,7 @@ static const CGFloat kCommentPadding = 30.0;
     if (self) {
         _noCommentsYet = [[UILabel alloc] init];
         [self addSubview:_noCommentsYet];
-        _noCommentsYet.text = @"No comments yet. Be the first.";
+        _noCommentsYet.text = @"No comments yet. Any thoughts?";
         _noCommentsYet.textColor = [[BCGlobalsManager globalsManager] blackDividerColor];
         _noCommentsYet.font = [UIFont fontWithName:@"Poly" size:16.0];
         [_noCommentsYet sizeToFit];
@@ -250,7 +250,7 @@ static const CGFloat kCommentPadding = 30.0;
     _comments.delegate = self;
     _comments.dataSource = self;
     _bar.commentsTextView.delegate = self;
-    _bar.commentsTextView.font = [UIFont fontWithName:@"Poly" size:14.0];
+    _bar.commentsTextView.font = [UIFont fontWithName:@"Poly" size:15.0];
     _bar.commentsTextView.placeholder = @"What do you think?";
     _bar.commentsTextView.placeholderColor = [[BCGlobalsManager globalsManager] emptyPostCellColor];
     CALayer *topLine = [[CALayer alloc] init];
@@ -262,7 +262,8 @@ static const CGFloat kCommentPadding = 30.0;
     _comments.backgroundColor = [UIColor whiteColor];
     [_bar.sendButton addTarget:self action:@selector(sendTapped:) forControlEvents:UIControlEventTouchUpInside];
     [_bar.sendButton setTitleColor:[[BCGlobalsManager globalsManager] greenColor] forState:UIControlStateNormal];
-
+    _bar.sendButton.titleLabel.font = [UIFont fontWithName:@"Poly" size:15.0];
+    
     [self.view bringSubviewToFront:_bar];
 
     [self registerForKeyboardNotifications];
@@ -509,9 +510,9 @@ static const CGFloat kCommentPadding = 30.0;
         cell.avatar.clipsToBounds = YES;
         [cell.avatar debug];
         NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
-        style.minimumLineHeight = 18.0;
-        style.maximumLineHeight = 18.0;
-        NSDictionary *attributes = @{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:14.0],
+        style.minimumLineHeight = 22.0;
+        style.maximumLineHeight = 22.0;
+        NSDictionary *attributes = @{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:15.0],
                                      NSParagraphStyleAttributeName:style};
         
         NSAttributedString *commentAttr = [[NSAttributedString alloc] initWithString:commentModel.comment attributes:attributes];
@@ -580,9 +581,9 @@ static const CGFloat kCommentPadding = 30.0;
         
         
         NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
-        style.minimumLineHeight = 18.0;
-        style.maximumLineHeight = 18.0;
-        NSDictionary *attributes = @{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:14.0],
+        style.minimumLineHeight = 22.0;
+        style.maximumLineHeight = 22.0;
+        NSDictionary *attributes = @{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:15.0],
                                      NSParagraphStyleAttributeName:style};
         
         NSAttributedString *commentAttr = [[NSAttributedString alloc] initWithString:commentModel.comment attributes:attributes];
