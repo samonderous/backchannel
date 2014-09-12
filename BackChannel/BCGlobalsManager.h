@@ -90,6 +90,7 @@ extern NSString *kEventAccessLinkClickVerifySuccess;
 @property (strong, nonatomic) UIColor *emptyPostCellColor;
 
 @property (strong, nonatomic) UIColor *publishTutorialHintColor;
+@property (strong, nonatomic) UIColor *grayVoteCountColor;
 
 + (id)globalsManager;
 - (void)loadConfig;

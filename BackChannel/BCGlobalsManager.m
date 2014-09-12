@@ -91,6 +91,7 @@ NSString *kEventAccessLinkClickVerifySuccess = @"access_link_verify_server_succe
     _greenPublishColor = [UIColor colorWithRed:(17.0/255.0) green:(156.0/255.0) blue:(96.0/255.0) alpha:0.40];
     _redColor = [UIColor colorWithRed:(204.0/255.0) green:(76.0/255.0) blue:(69.0/255.0) alpha:1.0];
     _publishTutorialHintColor = [UIColor colorWithRed:(102.0/255.0) green:(102.0/255.0) blue:(102/255.0) alpha:1.0];
+    _grayVoteCountColor = [UIColor colorWithRed:(163.0/255.0) green:(163.0/255.0) blue:(163.0/255.0) alpha:1.0];
     
     _composeFont = [UIFont fontWithName:@"Poly" size:18];
     _blackDividerColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.2];
