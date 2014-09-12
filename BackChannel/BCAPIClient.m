@@ -68,7 +68,9 @@ static NSString *kCommentCreatePath = @"backend/createcomment/";
                                                                                  withTimeStr:(NSString*)secret[@"time_ago"]
                                                                                   withAgrees:[((NSString*)secret[@"agrees"]) integerValue]
                                                                                 withDisagree:[((NSString*)secret[@"disagrees"]) integerValue]
-                                                                                    withVote:[((NSString*)secret[@"vote"]) integerValue]];
+                                                                                    withVote:[((NSString*)secret[@"vote"]) integerValue]
+                                                                                    withCommentCount:
+                                                                            [((NSString*)secret[@"comment_count"]) integerValue]];
                                     [secrets addObject:secretModel];
                                 }
                                 success(secrets);

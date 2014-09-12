@@ -13,6 +13,8 @@
 #import "BCAPIClient.h"
 
 
+static const CGFloat kCommentPadding = 30.0;
+
 @interface BCCommentPlaceHolder : UIView
 
 @property (strong, nonatomic) UILabel *noCommentsYet;
@@ -84,8 +86,9 @@
 
 
 @interface BCCommentsViewCell : UICollectionViewCell
+
 @property (strong, nonatomic) IBOutlet UIImageView *avatar;
-@property (weak, nonatomic) IBOutlet UILabel *commentText;
+@property (strong, nonatomic) IBOutlet UILabel *commentText;
 @property (strong, nonatomic) UIView *separator;
 @end
 
@@ -94,6 +97,11 @@
 @end
 
 @implementation BCCommentsViewCell
+
+- (void)awakeFromNib
+{
+    [super awakeFromNib];
+}
 
 - (void)layoutSubviews
 {
@@ -231,6 +239,7 @@
     [self.view addSubview:_bar];
     
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+    layout.minimumLineSpacing = kCommentPadding;
     _comments = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
     [self.view addSubview:_comments];
     _comments.alwaysBounceVertical = YES;
@@ -240,14 +249,19 @@
     
     _comments.delegate = self;
     _comments.dataSource = self;
-    _bar.backgroundColor = [UIColor colorWithRed:235.0/255.0 green:235.0/255.0 blue:235.0/255.0 alpha:1.0];
     _bar.commentsTextView.delegate = self;
-    _bar.commentsTextView.layer.borderColor = [UIColor clearColor].CGColor;
+    _bar.commentsTextView.font = [UIFont fontWithName:@"Poly" size:14.0];
+    _bar.commentsTextView.placeholder = @"What do you think?";
+    _bar.commentsTextView.placeholderColor = [[BCGlobalsManager globalsManager] emptyPostCellColor];
+    CALayer *topLine = [[CALayer alloc] init];
+    topLine.frame = CGRectMake(0.0, 0.0, CGRectGetWidth(_bar.bounds), 0.5);
+    topLine.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.2].CGColor;
+    [_bar.layer addSublayer:topLine];
     [_comments registerNib:[UINib nibWithNibName:@"BCCommentsCell" bundle:nil] forCellWithReuseIdentifier:@"BCCommentsCollectionViewCell"];
     [_comments registerClass:[BCCommentsViewPostCell class] forCellWithReuseIdentifier:@"BCCommentsCollectionViewPostCell"];
     _comments.backgroundColor = [UIColor whiteColor];
     [_bar.sendButton addTarget:self action:@selector(sendTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [_bar.sendButton setTitleColor:[[BCGlobalsManager globalsManager] creamColor] forState:UIControlStateNormal];
+    [_bar.sendButton setTitleColor:[[BCGlobalsManager globalsManager] greenColor] forState:UIControlStateNormal];
 
     [self.view bringSubviewToFront:_bar];
 
@@ -486,13 +500,23 @@
     } else {
         BCCommentsViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCCommentsCollectionViewCell" forIndexPath:indexPath];
         BCCommentModel *commentModel = [_commentModels objectAtIndex:indexPath.row - 1];
-        cell.commentText.text = commentModel.comment;
         
-        cell.avatar.image = [UIImage imageNamed:@"avatar1.png"];
-        cell.avatar.layer.cornerRadius = CGRectGetHeight(cell.avatar.bounds) / 2.0;
+        if (indexPath.item % 2 == 0) {
+            cell.avatar.image = [UIImage imageNamed:@"avatar_author.png"];
+        } else {
+            cell.avatar.image = [UIImage imageNamed:@"avatar_general.png"];
+        }
         cell.avatar.clipsToBounds = YES;
+        [cell.avatar debug];
+        NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
+        style.minimumLineHeight = 18.0;
+        style.maximumLineHeight = 18.0;
+        NSDictionary *attributes = @{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:14.0],
+                                     NSParagraphStyleAttributeName:style};
         
-        cell.commentText.font = [UIFont fontWithName:@"Poly" size:13.0];
+        NSAttributedString *commentAttr = [[NSAttributedString alloc] initWithString:commentModel.comment attributes:attributes];
+        cell.commentText.attributedText = commentAttr;
+        
         newCell = cell;
     }
     
@@ -553,16 +577,25 @@
         BCCommentsViewCell *cell = (BCCommentsViewCell*)[nib objectAtIndex:0];
         //NSLog(@"The w = %f and h = %f", CGRectGetWidth(cell.bounds), CGRectGetHeight(cell.bounds));
         BCCommentModel *commentModel = (BCCommentModel*)[_commentModels objectAtIndex:indexPath.row - 1];
-        cell.commentText.text = commentModel.comment;
         
-        NSDictionary *attributes = @{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:13.0]};
         
-        CGRect rect = [commentModel.comment boundingRectWithSize:CGSizeMake(CGRectGetWidth(cell.commentText.bounds), CGFLOAT_MAX)
-                                                         options:NSStringDrawingUsesLineFragmentOrigin
-                                                      attributes:attributes
-                                                         context:nil];
-        rect.size.height += 25; // some padding
-        return (CGSize){CGRectGetWidth(collectionView.bounds), rect.size.height};
+        NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
+        style.minimumLineHeight = 18.0;
+        style.maximumLineHeight = 18.0;
+        NSDictionary *attributes = @{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:14.0],
+                                     NSParagraphStyleAttributeName:style};
+        
+        NSAttributedString *commentAttr = [[NSAttributedString alloc] initWithString:commentModel.comment attributes:attributes];
+        cell.commentText.attributedText = commentAttr;
+        CGRect rect = [commentAttr boundingRectWithSize:CGSizeMake(CGRectGetWidth(cell.commentText.bounds), CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil];
+        
+        //rect.size.height += 25; // some padding
+        if (indexPath.item == _commentModels.count) {
+            CGFloat lastHeight = fmax(rect.size.height, 25.0);
+            rect.size.height = lastHeight + kCommentPadding;
+        }
+        
+        return (CGSize){CGRectGetWidth(collectionView.bounds), fmax(rect.size.height, 25.0)};
     }
 }
 

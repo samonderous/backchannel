@@ -838,7 +838,8 @@ static BOOL isSwipeLocked = NO;
                                                 withTimeStr:@"now"
                                                  withAgrees:0
                                                withDisagree:0
-                                                   withVote:VOTE_NONE];
+                                                   withVote:VOTE_NONE
+                                     withCommentCount:0];
     secret.isNew = YES;
     
     SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {

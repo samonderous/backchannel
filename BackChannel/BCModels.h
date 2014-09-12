@@ -25,10 +25,11 @@ typedef NS_ENUM(NSInteger, Vote)
 @property (assign) NSInteger disagrees;
 @property (strong, nonatomic) NSString *timeStr;
 @property (assign) Vote vote;
+@property (assign) NSInteger commentCount;
 @property (assign) BOOL isNew;
 @property (assign) BOOL isVoted;
 
-- (id)init:(NSString*)text withSid:(NSUInteger)sid withTime:(NSInteger)time withTimeStr:(NSString*)timeStr withAgrees:(NSInteger)agrees withDisagree:(NSInteger)disagrees withVote:(Vote)vote;
+- (id)init:(NSString*)text withSid:(NSUInteger)sid withTime:(NSInteger)time withTimeStr:(NSString*)timeStr withAgrees:(NSInteger)agrees withDisagree:(NSInteger)disagrees withVote:(Vote)vote withCommentCount:(NSInteger)commentCount;
 
 @end
 
