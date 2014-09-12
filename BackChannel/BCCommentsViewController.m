@@ -508,7 +508,7 @@ static const CGFloat kCommentPadding = 30.0;
             cell.avatar.image = [UIImage imageNamed:@"avatar_general.png"];
         }
         cell.avatar.clipsToBounds = YES;
-        [cell.avatar debug];
+        //[cell.avatar debug];
         NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
         style.minimumLineHeight = 22.0;
         style.maximumLineHeight = 22.0;
