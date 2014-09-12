@@ -33,7 +33,13 @@ typedef enum TransitionType {
     
     if ([verified isEqualToString:@"NO"]) {
         if (![udidIN isEqualToString:[defaults objectForKey:kUdidKey]]) {
-            BCVerificationViewController *vc = [[BCVerificationViewController alloc] init];
+            BCAuthViewController *vc = [[BCAuthViewController alloc] init];
+            NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+            [defaults removeObjectForKey:kEmailKey];
+            [defaults removeObjectForKey:kUdidKey];
+            [defaults removeObjectForKey:kVerifiedKey];
+            [defaults synchronize];
+            
             return vc;
         }
         

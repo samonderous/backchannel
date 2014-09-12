@@ -27,6 +27,26 @@ extern NSString *kStreamTutorialKey;
 extern NSString *kOrgNameKey;
 extern NSString *kOrgDomainKey;
 
+extern NSString *kEventJoinTapped;
+extern NSString *kEventGotItTapped;
+extern NSString *kEventEnteredStream;
+extern NSString *kEventNevermindTapped;
+extern NSString *kEventPublishTapped;
+extern NSString *kEventCreatePost;
+extern NSString *kEventVotePlusOne;
+extern NSString *kEventVoteNegOne;
+extern NSString *kEventShareCancel;
+extern NSString *kEventShareSaved;
+extern NSString *kEventShareSent;
+extern NSString *kEventShareFailed;
+extern NSString *kEventInviteCancel;
+extern NSString *kEventInviteSaved;
+extern NSString *kEventInviteSent;
+extern NSString *kEventInviteFailed;
+extern NSString *kEventOpenMailTapped;
+extern NSString *kEventResendMailTapped;
+extern NSString *kEventBackButtonTapFromVerification;
+extern NSString *kEventBackButtonTapFromWaitlist;
 
 @interface BCGlobalsManager : NSObject
 

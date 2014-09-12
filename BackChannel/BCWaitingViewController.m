@@ -161,7 +161,7 @@ static const float kAssetTextSpacing = 30.0;
     */
     
     // Fill out the email body text
-    NSString *emailBody = @"I just started using Backchannel, a place to share workplace thoughts anonymously with co-workers.<br/><br/><a href='http://backchannel.it'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
+    NSString *emailBody = @"I just started using Backchannel, a place to share workplace thoughts anonymously with coworkers.<br/><br/><a href='http://backchannel.it'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
     [picker setMessageBody:emailBody isHTML:YES];
     
     [self presentViewController:picker animated:YES completion:NULL];
@@ -215,6 +215,8 @@ static const float kAssetTextSpacing = 30.0;
     BCAuthViewController *vc = [[BCAuthViewController alloc] init];
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     [self presentViewController:vc animated:YES completion:^() {}];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventBackButtonTapFromWaitlist withParams:nil];
+
 }
 
 

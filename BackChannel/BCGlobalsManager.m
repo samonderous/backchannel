@@ -22,6 +22,29 @@ NSString *kStreamTutorialKey = @"streamTutorial";
 NSString *kOrgNameKey = @"orgName";
 NSString *kOrgDomainKey = @"orgDomain";
 
+NSString *kEventGotItTapped = @"got_it_tapped";
+NSString *kEventEnteredStream = @"entered_stream_view";
+NSString *kEventNevermindTapped = @"tap_nevermind";
+NSString *kEventPublishTapped = @"tap_publish";
+NSString *kEventCreatePost = @"tap_to_create";
+NSString *kEventVotePlusOne = @"vote_plus_one";
+NSString *kEventVoteNegOne = @"vote_neg_one";
+NSString *kEventShareCancel = @"share_cancel";
+NSString *kEventShareSaved = @"share_saved";
+NSString *kEventShareSent = @"share_sent";
+NSString *kEventShareFailed = @"share_failed";
+NSString *kEventJoinTapped = @"join_tap";
+NSString *kEventInviteCancel = @"invite_cancel";
+NSString *kEventInviteSaved = @"invite_saved";
+NSString *kEventInviteSent = @"invite_sent";
+NSString *kEventInviteFailed = @"invite_failed";
+NSString *kEventOpenMailTapped = @"openmail_tap";
+NSString *kEventResendMailTapped = @"resendmail_tap";
+NSString *kEventBackButtonTapFromVerification = @"back_button_tapped_from_verification";
+NSString *kEventBackButtonTapFromWaitlist = @"back_button_tapped_from_waitlist";
+
+
+
 @implementation BCGlobalsManager
 
 + (id)globalsManager

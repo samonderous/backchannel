@@ -17,7 +17,7 @@
 static const float kJoinBarHeight = 60.0;
 static const float kEmailMargin = 30.0;
 
-NSString *assuranceMessage = @"We will not share your id with co-workers or employers.";
+NSString *assuranceMessage = @"We will not share your id with coworkers or employers.";
 NSString *errorMessage = @"Be sure to enter a valid work email address";
 
 
@@ -65,18 +65,6 @@ NSString *errorMessage = @"Be sure to enter a valid work email address";
     [_tagLine placeIn:self alignedAt:CENTER];
     [_tagLine setY:CGRectGetMaxY(_title.frame) + kTitleTaglineSpacing];
     
-    /*
-    BCHowItWorks *tagLine = [[[NSBundle mainBundle] loadNibNamed:@"BCHowItWorks" owner:self options:nil] objectAtIndex:0];
-    [self addSubview:tagLine];
-    [tagLine placeIn:self alignedAt:CENTER];
-    [tagLine sizeToFit];
-    [tagLine setY:CGRectGetMaxY(_title.frame)];
-    tagLine.howItWorksText.textColor = [[BCGlobalsManager globalsManager] blackTaglineColor];
-    tagLine.howItWorksText.font = [UIFont fontWithName:@"Poly" size:kTagLineFont];
-    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleHowItWorksTap:)];
-    [tagLine addGestureRecognizer:tapGesture];
-    */
-    
     UIFont *emailFont = [UIFont fontWithName:@"Poly" size:18.0];
     NSMutableAttributedString *emailAttributedString = [[NSMutableAttributedString alloc]
                                                         initWithString:@""
@@ -118,7 +106,7 @@ NSString *errorMessage = @"Be sure to enter a valid work email address";
     [_errorText setY:CGRectGetMaxY(_divider.frame) + 5.0];
     [_errorText setX:CGRectGetMinX(_divider.frame)];
     
-    UIFont *joinFont = [UIFont fontWithName:@"Poly" size:16.0];
+    UIFont *joinFont = [UIFont fontWithName:@"Poly" size:18.0];
     UIColor *joinFontColor = [[BCGlobalsManager globalsManager] greenColor];
     _joinBar = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth([UIScreen mainScreen].bounds), kJoinBarHeight)];
     [self addSubview:_joinBar];
@@ -214,11 +202,6 @@ NSString *errorMessage = @"Be sure to enter a valid work email address";
     [tagLine sizeToFit];
 
     return tagLine;
-}
-
-- (void)handleHowItWorksTap:(id)sender
-{
-    [_viewController handleHowItWorksTap];
 }
 
 - (void)joinTapped:(id)sender
@@ -327,7 +310,7 @@ NSString *errorMessage = @"Be sure to enter a valid work email address";
     [[BCAPIClient sharedClient] sendAuth:_av.email.text success:success failure:failure];
 
     NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"email_entered", _av.email.text, nil];
-    [[BCGlobalsManager globalsManager] logFlurryEvent:@"join_tap" withParams:params];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventJoinTapped withParams:params];
 }
 
 - (void)viewDidLoad
@@ -349,16 +332,6 @@ NSString *errorMessage = @"Be sure to enter a valid work email address";
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-
-- (void)handleHowItWorksTap
-{
-    NSLog(@"Got a how it works tap");
-    BCWaitingViewController *vc = [[BCWaitingViewController alloc] init];
-    vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-    [self presentViewController:vc animated:YES completion:nil];
-    [[BCGlobalsManager globalsManager] logFlurryEvent:@"how_it_works_tap" withParams:nil];
-}
-
 
 #pragma UITextField Delegate
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
