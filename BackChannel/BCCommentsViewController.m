@@ -288,6 +288,8 @@ static const CGFloat kCommentPadding = 30.0;
     
     [Utils debugRect:self.view withName:@"view"];
     [self setupCommentsBar];
+    
+    _bar.commentsTextView.frame = CGRectMake(30.0 - 4.0, (_bar.frame.size.height - _bar.commentsTextView.frame.size.height) / 2.0, _bar.commentsTextView.frame.size.width, _bar.commentsTextView.frame.size.height);
 }
 
 - (void)getComments:(void (^)(void))callback
