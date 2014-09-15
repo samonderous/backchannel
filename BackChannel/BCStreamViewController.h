@@ -77,7 +77,7 @@ typedef enum Direction {
                                                         UICollectionViewDelegateFlowLayout,
                                                         UITextViewDelegate, BCCellTopLayerContainerViewDelegate>
 
-- (void)getLatestPosts:(void (^)(void))callback;
+- (void)getLatestPosts:(void (^)(void))callback forFirstTimeTutorial:(BOOL)isForTutorial;
 - (void)getLatestNoscrollPosts;
 
 @end

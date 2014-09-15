@@ -87,10 +87,11 @@ static NSString *kCommentCreatePath = @"backend/createcomment/";
     [self fetchSecrets:kStreamPath success:success failure:failure withParams:params];
 }
 
-- (void)getLatestPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withTopSid:(int)topSid
+- (void)getLatestPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withTopSid:(int)topSid withForTutorial:(BOOL)isForTutorial
 {
     NSDictionary *params = @{@"udid": [[UIDevice currentDevice].identifierForVendor UUIDString],
-                             @"tsid": [NSString stringWithFormat:@"%d", topSid]};
+                             @"tsid": [NSString stringWithFormat:@"%d", topSid],
+                             @"ist": [NSNumber numberWithBool:isForTutorial]};
     [self fetchSecrets:kLatestPostsPath success:success failure:failure withParams:params];
 }
 

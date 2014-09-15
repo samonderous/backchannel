@@ -926,7 +926,7 @@ static BOOL isSwipeLocked = NO;
                                                                       NSFontAttributeName: [UIFont fontWithName:@"Poly" size:18.0]}];
 }
 
-- (void)getLatestPosts:(void (^)(void))callback
+- (void)getLatestPosts:(void (^)(void))callback forFirstTimeTutorial:(BOOL)isForTutorial
 {
     void (^success)(NSMutableArray*) = ^(NSMutableArray *newSecrets) {
         NSLog(@"Get new posts");
@@ -966,7 +966,8 @@ static BOOL isSwipeLocked = NO;
     if (_messages.count) {
         topSid = (int)((BCSecretModel*)[_messages objectAtIndex:0]).sid;
     }
-    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withTopSid:topSid];
+    
+    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withTopSid:topSid withForTutorial:isForTutorial];
 }
 
 - (void)getLatestNoscrollPosts
@@ -1002,7 +1003,7 @@ static BOOL isSwipeLocked = NO;
     if (_messages.count) {
         topSid = (int)((BCSecretModel*)[_messages objectAtIndex:0]).sid;
     }
-    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withTopSid:topSid];
+    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withTopSid:topSid withForTutorial:_inTutorialMode];
 }
 
 - (void)getOlderPosts
@@ -1045,7 +1046,7 @@ static BOOL isSwipeLocked = NO;
 
 - (void)getLatestPostsOnInit
 {
-    [self getLatestPosts:nil];
+    [self getLatestPosts:nil forFirstTimeTutorial:NO];
 }
 
 - (void)viewDidLoad
@@ -1236,9 +1237,11 @@ static BOOL isSwipeLocked = NO;
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    BOOL isShowStreamTutorial = [[defaults objectForKey:kStreamTutorialKey] boolValue];
     [self getLatestPosts:^{
         [self showStreamTutorial];
-    }];
+    } forFirstTimeTutorial:!isShowStreamTutorial];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -1318,6 +1321,10 @@ static BOOL isSwipeLocked = NO;
 
 - (void)cellTapped:(UITapGestureRecognizer*)sender
 {
+    if (_inTutorialMode) {
+        return;
+    }
+    
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)sender.view;
     BCCommentsViewController *vc = [[BCCommentsViewController alloc] init];
     vc.secretModel = (BCSecretModel*)[_messages objectAtIndex:[_messageTable indexPathForCell:cell].row - 1];
