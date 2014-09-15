@@ -13,12 +13,12 @@
                 <rect key="frame" x="0.0" y="0.0" width="320" height="25"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MM3-Ps-BMt">
+                    <imageView autoresizesSubviews="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="MM3-Ps-BMt">
                         <rect key="frame" x="30" y="0.0" width="25" height="25"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="25" id="0TW-hJ-eFc"/>
-                            <constraint firstAttribute="height" constant="27" id="QCQ-rA-vgl"/>
+                            <constraint firstAttribute="height" constant="25" id="QCQ-rA-vgl"/>
                         </constraints>
                     </imageView>
                     <label autoresizesSubviews="NO" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" placeholderIntrinsicWidth="247" placeholderIntrinsicHeight="16" text="Label" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="225" translatesAutoresizingMaskIntoConstraints="NO" id="QBI-sv-5tP">
