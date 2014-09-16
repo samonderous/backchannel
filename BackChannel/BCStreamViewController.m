@@ -555,7 +555,7 @@ static const int kOldPostsBatchSize = 10;
     _size = size;
     _secretModel = secretModel;
     _bottomLayerContainerView = bottomLayerContainerView;
-    _isDragging = YES;
+    _isDragging = NO;
 
     _textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel withWidth:size.width];
     _footerView = [[BCCellTopLayerFooterView alloc] init:secretModel.timeStr withWidth:size.width];
@@ -767,7 +767,7 @@ static const int kOldPostsBatchSize = 10;
     
     if (gesture.state == UIGestureRecognizerStateBegan)
     {
-        _isDragging = YES;
+        //_isDragging = YES;
         _thresholdCrossed = NO;
         _swipeCellStartX = gesture.view.frame.origin.x;
         [_animator removeAllBehaviors];
@@ -833,7 +833,7 @@ static const int kOldPostsBatchSize = 10;
 
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-    return YES;//!_isDragging;
+    return !_isDragging;
 }
 
 @end
