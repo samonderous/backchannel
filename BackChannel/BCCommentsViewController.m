@@ -284,13 +284,7 @@ static const CGFloat kCommentPadding = 30.0;
     [backButton addTarget:self action:@selector(handleBackButtonTap:) forControlEvents: UIControlEventTouchUpInside];
     
     // Handle share logic
-    _shareItem = [[UIBarButtonItem alloc] initWithTitle:@"Share"
-                                                  style:UIBarButtonItemStylePlain
-                                                 target:self
-                                                 action:@selector(shareButtonTap)];
-    [_shareItem setTitleTextAttributes:@{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:16.0],
-                                         NSForegroundColorAttributeName: [UIColor whiteColor]}
-                              forState:UIControlStateNormal];
+    _shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonTap)];
     
     NSArray *actionButtonItems = @[_shareItem];
     self.navigationItem.rightBarButtonItems = actionButtonItems;
