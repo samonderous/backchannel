@@ -754,8 +754,8 @@ static BOOL isSwipeLocked = NO;
     if (isSwipeLocked) {
         return;
     }
-
-    CGFloat dragThreshold = 10.0f;
+    
+    CGFloat dragThreshold = 1.0f;
     CGFloat voteThreshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset + kVoteThresholdMargin;
 
     CGPoint delta = [gesture translationInView:gesture.view.superview];
@@ -767,15 +767,12 @@ static BOOL isSwipeLocked = NO;
     
     if (gesture.state == UIGestureRecognizerStateBegan)
     {
-        //_isDragging = YES;
         _thresholdCrossed = NO;
         _swipeCellStartX = gesture.view.frame.origin.x;
         [_animator removeAllBehaviors];
     }
     else if (gesture.state == UIGestureRecognizerStateChanged)
-    {
-        if (fabs(delta.x) < dragThreshold) return;
-        
+    {        
         _isDragging = YES;
         // move cell to track swipe
         CGFloat xDirection = (velocity.x > 0) ? 1.0f : -1.0f;
@@ -1368,7 +1365,7 @@ static BOOL isSwipeLocked = NO;
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 {
-    [BCCellTopLayerContainerView setSwipeLocked:NO];
+    [BCCellTopLayerContainerView setSwipeLocked:YES];
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
@@ -1377,8 +1374,6 @@ static BOOL isSwipeLocked = NO;
     if (_messageTable.contentOffset.y > 0.0) {
         [BCCellTopLayerContainerView setSwipeLocked:YES];
     }
-    
-    
 
     //NSLog(@"The size of the content = %f", _messageTable.contentSize.height);
     //NSLog(@"The content offset = %f", _messageTable.contentOffset.y);
