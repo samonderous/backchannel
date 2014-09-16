@@ -659,19 +659,19 @@ static const CGFloat kCommentPadding = 30.0;
     {
         case MFMailComposeResultCancelled:
             NSLog(@"Mail sending canceled");
-            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareCancel withParams:nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareCommentsCancel withParams:nil];
             break;
         case MFMailComposeResultSaved:
             NSLog(@"Mail sending saved");
-            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareSaved withParams:nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareCommentsSaved withParams:nil];
             break;
         case MFMailComposeResultSent:
             NSLog(@"Mail sending sent");
-            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareSent withParams:nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareCommentsSent withParams:nil];
             break;
         case MFMailComposeResultFailed:
             NSLog(@"Mail sending failed");
-            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareFailed withParams:nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareCommentsFailed withParams:nil];
             break;
         default:
             break;
