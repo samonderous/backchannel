@@ -187,14 +187,28 @@ def getlatestposts(request):
     response = {'status': 1}
     udid = request.GET.get('udid')
     stid = request.GET.get('tsid')
+    ist = request.GET.get('ist')
  
     try:
         user = User.objects.get(udid=udid)
     except Exception, e:
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
+    #raise Exception("HELLO")
     # TODO: Fix this up if traffic ever warrants [:50] will be an issue
-    secrets = Secret.objects.filter(org=user.org, id__gt=stid).order_by('-id')[:50]
+    #secrets = Secret.objects.filter(org=user.org, id__gt=stid).order_by('-id')[:50]
+    secrets = Secret.objects.filter(org=user.org).order_by('-id')[:50]
+ 
+    if ist == '1':
+        secret_with_tutorial = Secret.objects.filter(org=user.org, is_tutorial=True)
+        st = None
+        if secret_with_tutorial:
+            st = secret_with_tutorial[0]
+            secrets = list(secrets)
+            for s in secrets:
+                if s.id == st.id:
+                    secrets.remove(s)
+            secrets = [st] + secrets
 
     secrets_list = []
     for s in secrets:
@@ -351,3 +365,8 @@ def comments(request):
 
     response = {'status': 0, 'comments': comments_list}
     return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
+@csrf_exempt
+def setdevicetoken(request):
+    pass
+

@@ -23,6 +23,7 @@ urlpatterns = patterns('',
     url(r'^invite/', views.invite, name='invite'),
     url(r'^comments/', views.comments, name='comments'),
     url(r'^createcomment/', views.createcomment, name='createcomment'),
+    url(r'^setdevicetoken/', views.setdevicetoken, name='setdevicetoken'),
 )
 
 urlpatterns += staticfiles_urlpatterns()
