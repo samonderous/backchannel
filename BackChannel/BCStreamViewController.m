@@ -1085,13 +1085,8 @@ static BOOL isSwipeLocked = NO;
     _messageTable.infiniteScrollingView.enabled = NO;
     
     // Handle share logic
-    _shareItem = [[UIBarButtonItem alloc] initWithTitle:@"Share"
-                                                  style:UIBarButtonItemStylePlain
-                                                 target:self
-                                                 action:@selector(shareButtonTap)];
-    [_shareItem setTitleTextAttributes:@{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:16.0],
-                                         NSForegroundColorAttributeName: [UIColor whiteColor]}
-                             forState:UIControlStateNormal];
+    _shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonTap)];
+    _shareItem.tintColor = [UIColor whiteColor];
     
     NSArray *actionButtonItems = @[_shareItem];
     self.navigationItem.rightBarButtonItems = actionButtonItems;
@@ -1627,7 +1622,7 @@ static BOOL isSwipeLocked = NO;
     NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     
-    self.navigationItem.rightBarButtonItems = @[];
+    _shareItem.enabled = NO;
     float duration = (kCellHeight - kPublishBarHeight) / 864.0; // nasty calc off keboard rate 216pt / 0.25s
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
                      animations:^{
@@ -1646,7 +1641,7 @@ static BOOL isSwipeLocked = NO;
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCCellComposeView *cv = (BCCellComposeView*)cell.cv;
     
-    self.navigationItem.rightBarButtonItems = @[_shareItem];
+    _shareItem.enabled = YES;
     
     float duration = (kCellHeight - kPublishBarHeight) / 864.0;
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut

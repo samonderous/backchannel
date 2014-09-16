@@ -83,6 +83,7 @@ NSString *errorMessage = @"Be sure to enter a valid work email address";
     _email.autocorrectionType = UITextAutocorrectionTypeNo;
     _email.attributedText = emailAttributedString;
     _email.placeholder = @"Enter your work email";
+    _email.tintColor = [[BCGlobalsManager globalsManager] blueColor];
     if ([_email respondsToSelector:@selector(setAttributedPlaceholder:)]) {
         UIColor *color = [[BCGlobalsManager globalsManager] emptyPostCellColor];;
         _email.attributedPlaceholder = [[NSAttributedString alloc] initWithString:@"Enter your work email" attributes:@{NSForegroundColorAttributeName: color}];

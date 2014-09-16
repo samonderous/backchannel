@@ -6,6 +6,8 @@
 //  Copyright (c) 2014 Saureen Shah. All rights reserved.
 //
 
+#import <MessageUI/MessageUI.h>
+
 #import "BCCommentsViewController.h"
 #import "BCStreamViewController.h"
 #import "BCGlobalsManager.h"
@@ -29,7 +31,7 @@ static const CGFloat kCommentPadding = 30.0;
     if (self) {
         _noCommentsYet = [[UILabel alloc] init];
         [self addSubview:_noCommentsYet];
-        _noCommentsYet.text = @"No comments yet. Any thoughts?";
+        _noCommentsYet.text = @"No comments yet.";
         _noCommentsYet.textColor = [[BCGlobalsManager globalsManager] blackDividerColor];
         _noCommentsYet.font = [UIFont fontWithName:@"Poly" size:16.0];
         [_noCommentsYet sizeToFit];
@@ -165,10 +167,11 @@ static const CGFloat kCommentPadding = 30.0;
 @end
 
 
-@interface BCCommentsViewController ()<UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, HPGrowingTextViewDelegate>
+@interface BCCommentsViewController ()<UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, HPGrowingTextViewDelegate, MFMailComposeViewControllerDelegate>
 @property (strong, nonatomic) UICollectionView *comments;
 @property (strong, nonatomic) BCCommentsBar *bar;
 @property (strong, nonatomic) BCCommentPlaceHolder *placeHolder;
+@property (strong, nonatomic) UIBarButtonItem *shareItem;
 
 @property (assign) BOOL inEditMode;
 @property (assign) CGFloat lastContentOffset;
@@ -280,6 +283,12 @@ static const CGFloat kCommentPadding = 30.0;
     [backButton setTitleColor:[[BCGlobalsManager globalsManager] blueColor] forState:UIControlStateNormal];
     [backButton addTarget:self action:@selector(handleBackButtonTap:) forControlEvents: UIControlEventTouchUpInside];
     
+    // Handle share logic
+    _shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonTap)];
+    
+    NSArray *actionButtonItems = @[_shareItem];
+    self.navigationItem.rightBarButtonItems = actionButtonItems;
+    
     _inEditMode = NO;
     _lastContentOffset = _comments.contentOffset.y;
 
@@ -291,6 +300,35 @@ static const CGFloat kCommentPadding = 30.0;
     [self setupCommentsBar];
     
     _bar.commentsTextView.frame = CGRectMake(30.0 - 4.0, (_bar.frame.size.height - _bar.commentsTextView.frame.size.height) / 2.0, _bar.commentsTextView.frame.size.width, _bar.commentsTextView.frame.size.height);
+}
+
+- (void)shareButtonTap
+{
+    if (![MFMailComposeViewController canSendMail]) {
+        return;
+    }
+    
+    MFMailComposeViewController *picker = [[MFMailComposeViewController alloc] init];
+    picker.mailComposeDelegate = self;
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *subject = [NSString stringWithFormat:@"Anonymous post on %@'s Backchannel", [defaults objectForKey:kOrgNameKey]];
+    [picker setSubject:subject];
+    
+    // Attach an image to the email
+    UIGraphicsBeginImageContextWithOptions(self.view.window.bounds.size, NO, 1.5);
+    [self.view.window.layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    NSData *data = UIImagePNGRepresentation(image);
+    [picker addAttachmentData:data mimeType:@"image/jpeg" fileName:@"backchannel"];
+    
+    // Fill out the email body text
+    NSString *emailBody = @"I thought you'd find this anonymous post interesting!<br /><br />It's from Backchannel, an app to share workplace thoughts anonymously with coworkers.<br/><br/><a href='http://www.backchannel.it/?utm_source=share&utm_medium=email&utm_campaign=appshare'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
+    emailBody = [NSString stringWithFormat:emailBody, [defaults objectForKey:kOrgNameKey]];
+    [picker setMessageBody:emailBody isHTML:YES];
+    
+    [self presentViewController:picker animated:YES completion:NULL];
 }
 
 - (void)getComments:(void (^)(void))callback
@@ -604,6 +642,35 @@ static const CGFloat kCommentPadding = 30.0;
         
         return (CGSize){CGRectGetWidth(collectionView.bounds), fmax(rect.size.height, 25.0)};
     }
+}
+
+# pragma MFMail Compose Delegate
+- (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
+{
+    // Notifies users about errors associated with the interface
+    switch (result)
+    {
+        case MFMailComposeResultCancelled:
+            NSLog(@"Mail sending canceled");
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareCommentsCancel withParams:nil];
+            break;
+        case MFMailComposeResultSaved:
+            NSLog(@"Mail sending saved");
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareCommentsSaved withParams:nil];
+            break;
+        case MFMailComposeResultSent:
+            NSLog(@"Mail sending sent");
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareCommentsSent withParams:nil];
+            break;
+        case MFMailComposeResultFailed:
+            NSLog(@"Mail sending failed");
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareCommentsFailed withParams:nil];
+            break;
+        default:
+            break;
+    }
+    
+    [self dismissViewControllerAnimated:YES completion:NULL];
 }
 
 @end
