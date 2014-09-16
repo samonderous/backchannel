@@ -831,8 +831,9 @@ static const int kOldPostsBatchSize = 10;
     }
 }
 
+
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-    return !_isDragging;
+    return YES;//!_isDragging;
 }
 
 @end
