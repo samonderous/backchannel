@@ -80,7 +80,7 @@
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 {
-    NSLog(@"Failed to reigster with APN");
+    NSLog(@"Failed to reigster with APN %@", error);
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application

@@ -541,16 +541,16 @@ static const int kOldPostsBatchSize = 10;
 
 @implementation BCCellTopLayerContainerView
 
-static BOOL isSwipeLocked = NO;
+//static BOOL isSwipeLocked = NO;
 
 - (id)init:(BCSecretModel*)secretModel withSize:(CGSize)size withBottomContainer:(BCCellBottomLayerContainerView*)bottomLayerContainerView
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, size.width, size.height)];
-    static dispatch_once_t oncePredicate;
+    //static dispatch_once_t oncePredicate;
     
-    dispatch_once(&oncePredicate, ^{
-        static BOOL isSwipeLocked = NO;
-    });
+    //dispatch_once(&oncePredicate, ^{
+        //static BOOL isSwipeLocked = NO;
+    //});
     
     _size = size;
     _secretModel = secretModel;
@@ -668,6 +668,7 @@ static BOOL isSwipeLocked = NO;
     [_headerView setY:kComposeTextViewHeaderViewMargin];
 }
 
+/*
 + (void)setSwipeLocked:(BOOL)isLock
 {
     isSwipeLocked = isLock;
@@ -677,6 +678,7 @@ static BOOL isSwipeLocked = NO;
 {
     return isSwipeLocked;
 }
+*/
 
 - (void)addSwipes
 {
@@ -749,9 +751,9 @@ static BOOL isSwipeLocked = NO;
     // delegate gets called to log vote. We want to block swipe only if they crossed
     // threshold but still want to enter into END state so check on isDragging as well.
     //if ((_isDragging == NO && _thresholdCrossed) || isSwipeLocked) return;
-    if (isSwipeLocked) {
-        return;
-    }
+    //if (isSwipeLocked) {
+        //return;
+    //}
 
     CGFloat dragThreshold = 10.0f;
     CGFloat voteThreshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset + kVoteThresholdMargin;
@@ -1071,7 +1073,7 @@ static BOOL isSwipeLocked = NO;
     _messageTable.backgroundColor = [UIColor whiteColor];
     _messageTable.alwaysBounceVertical = YES;
 
-    [BCCellTopLayerContainerView setSwipeLocked:NO];
+    //[BCCellTopLayerContainerView setSwipeLocked:NO];
 
     // Handle pull to refresh
     _refreshControl = [[UIRefreshControl alloc] init];
@@ -1220,6 +1222,7 @@ static BOOL isSwipeLocked = NO;
         [_bluebar removeFromSuperview];
         [_text removeFromSuperview];
         _top = _bluebar = _text = nil;
+        [_gotit removeFromSuperview];
         _gotit = nil;
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         [defaults setObject:[NSNumber numberWithBool:YES] forKey:kStreamTutorialKey];
@@ -1359,19 +1362,19 @@ static BOOL isSwipeLocked = NO;
 #pragma mark Collection View Scroll
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
-    [BCCellTopLayerContainerView setSwipeLocked:YES];
+    //[BCCellTopLayerContainerView setSwipeLocked:YES];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 {
-    [BCCellTopLayerContainerView setSwipeLocked:NO];
+    //[BCCellTopLayerContainerView setSwipeLocked:NO];
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     // This delegate gets called on init for some weird reason
     if (_messageTable.contentOffset.y > 0.0) {
-        [BCCellTopLayerContainerView setSwipeLocked:YES];
+        //[BCCellTopLayerContainerView setSwipeLocked:YES];
     }
     
     
@@ -1382,12 +1385,12 @@ static BOOL isSwipeLocked = NO;
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
 {
-    [BCCellTopLayerContainerView setSwipeLocked:NO];
+    //[BCCellTopLayerContainerView setSwipeLocked:NO];
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
-    [BCCellTopLayerContainerView setSwipeLocked:NO];
+    //[BCCellTopLayerContainerView setSwipeLocked:NO];
 }
 
 #pragma mark Collection View Flow Layout Delegates
@@ -1656,19 +1659,6 @@ static BOOL isSwipeLocked = NO;
     
 }
 
-- (void)setupDetailView:(NSIndexPath*)indexPath
-{
-    [_messageTable scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionTop animated:YES];
-    UICollectionViewCell *cell = [_messageTable cellForItemAtIndexPath:indexPath];
-
-    [UIView animateWithDuration:1.0 delay:0.0 options:UIViewAnimationOptionCurveLinear
-                     animations:^{
-                         cell.alpha = 0.2;
-                     }
-                     completion:^(BOOL finished) {
-                     }];
-}
-
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
     if (_isComposeMode) {
@@ -1682,8 +1672,6 @@ static BOOL isSwipeLocked = NO;
             [self setupCompose:collectionView indexPath:indexPath];
         } completion:^(BOOL finished) {
         }];
-    } else {
-        [self setupDetailView:indexPath];
     }
 
     [[BCGlobalsManager globalsManager] logFlurryEvent:kEventCreatePost withParams:nil];
