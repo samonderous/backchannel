@@ -22,12 +22,11 @@ typedef  void (^FailureCallback)(AFHTTPRequestOperation *operation, NSError *err
 + (id)sharedClient;
 
 - (void)sendAuth:(NSString*)email success:(SuccessCallback)success failure:(FailureCallback)failure;
-- (void)getStream:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure;
 - (void)setVote:(BCSecretModel*)model withVote:(NSInteger)vote success:(SuccessCallback)success failure:(FailureCallback)failure;
 - (void)sendVerificationEmail:(SuccessCallback)success failure:(FailureCallback)failure;
 - (void)createSecret:(NSString*)text success:(SuccessCallback)success failure:(FailureCallback)failure;
 - (void)sendVerification:(SuccessCallback)success failure:(FailureCallback)failure;
-- (void)getLatestPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withTopSid:(int)topSid withForTutorial:(BOOL)isForTutorial;
+- (void)getLatestPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withForTutorial:(BOOL)isForTutorial;
 - (void)getOlderPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withLastSid:(int)lastSid;
 - (void)fetchCommentsFor:(BCSecretModel*)model success:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure;
 - (void)createComment:(NSString*)text onSecret:(BCSecretModel*)model success:(SuccessCallback)success failure:(FailureCallback)failure;

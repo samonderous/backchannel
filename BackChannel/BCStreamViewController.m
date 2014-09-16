@@ -894,7 +894,7 @@ static BOOL isSwipeLocked = NO;
     
     SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"Create success");
-        secret.sid = (NSUInteger)responseObject[@"sid"];
+        secret.sid = [((NSString*)responseObject[@"sid"]) integerValue];
     };
 
     FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -930,6 +930,13 @@ static BOOL isSwipeLocked = NO;
 {
     void (^success)(NSMutableArray*) = ^(NSMutableArray *newSecrets) {
         NSLog(@"Get new posts");
+        
+        NSMutableArray *deleteIndexPaths = [NSMutableArray array];
+        NSLog(@"new secrets coming in = %d", newSecrets.count);
+        NSLog(@"the total number of items = %d", _messages.count);
+        for (int i=0; i < _messages.count; i++) {
+            [deleteIndexPaths addObject:[NSIndexPath indexPathForItem:i+1 inSection:0]];
+        }
 
         NSMutableArray *secretIndexPaths = [NSMutableArray array];
         for (int i=0; i < newSecrets.count; i++) {
@@ -937,14 +944,14 @@ static BOOL isSwipeLocked = NO;
         }
 
         NSMutableArray *newMessages = [NSMutableArray arrayWithArray:[newSecrets copy]];
-        [newMessages addObjectsFromArray:[_messages copy]];
         _messages = newMessages;
         
         [_messageTable performBatchUpdates:^{
+            [_messageTable deleteItemsAtIndexPaths:deleteIndexPaths];
             [_messageTable insertItemsAtIndexPaths:secretIndexPaths];
         } completion:^(BOOL finished) {
         }];
-
+        
         [_refreshControl endRefreshing];
         
         if (callback) {
@@ -967,7 +974,7 @@ static BOOL isSwipeLocked = NO;
         topSid = (int)((BCSecretModel*)[_messages objectAtIndex:0]).sid;
     }
     
-    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withTopSid:topSid withForTutorial:isForTutorial];
+    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withForTutorial:isForTutorial];
 }
 
 - (void)getLatestNoscrollPosts
@@ -983,7 +990,7 @@ static BOOL isSwipeLocked = NO;
         [newMessages addObjectsFromArray:[_messages copy]];
         _messages = newMessages;
         
-        CGFloat oldOffset = _messageTable.contentOffset.y;
+        CGFloat oldOffset = _messageTable.contentOffset.y > _messageTable.contentSize.height ? 0.0: _messageTable.contentOffset.y;
         //NSLog(@"The old offset = %f", oldOffset);
         
         // Set content offset first before insert. This avoids the ui layout update back to the offset.
@@ -998,12 +1005,8 @@ static BOOL isSwipeLocked = NO;
         NSLog(@"error code %d", (int)operation.response.statusCode);
         [_messageTable.pullToRefreshView stopAnimating];
     };
-    
-    int topSid = 0;
-    if (_messages.count) {
-        topSid = (int)((BCSecretModel*)[_messages objectAtIndex:0]).sid;
-    }
-    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withTopSid:topSid withForTutorial:_inTutorialMode];
+
+    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withForTutorial:_inTutorialMode];
 }
 
 - (void)getOlderPosts

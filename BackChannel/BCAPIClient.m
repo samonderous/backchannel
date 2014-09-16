@@ -81,16 +81,9 @@ static NSString *kCommentCreatePath = @"backend/createcomment/";
                             }];
 }
 
-- (void)getStream:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure
-{
-    NSDictionary *params = @{@"udid": [[UIDevice currentDevice].identifierForVendor UUIDString]};
-    [self fetchSecrets:kStreamPath success:success failure:failure withParams:params];
-}
-
-- (void)getLatestPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withTopSid:(int)topSid withForTutorial:(BOOL)isForTutorial
+- (void)getLatestPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withForTutorial:(BOOL)isForTutorial
 {
     NSDictionary *params = @{@"udid": [[UIDevice currentDevice].identifierForVendor UUIDString],
-                             @"tsid": [NSString stringWithFormat:@"%d", topSid],
                              @"ist": [NSNumber numberWithBool:isForTutorial]};
     [self fetchSecrets:kLatestPostsPath success:success failure:failure withParams:params];
 }
