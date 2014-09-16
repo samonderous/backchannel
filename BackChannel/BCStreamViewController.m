@@ -753,7 +753,7 @@ static BOOL isSwipeLocked = NO;
         return;
     }
 
-    CGFloat dragThreshold = 1.0f;
+    CGFloat dragThreshold = 10.0f;
     CGFloat voteThreshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset + kVoteThresholdMargin;
 
     CGPoint delta = [gesture translationInView:gesture.view.superview];
@@ -772,6 +772,8 @@ static BOOL isSwipeLocked = NO;
     }
     else if (gesture.state == UIGestureRecognizerStateChanged)
     {
+        if (fabs(delta.x) < dragThreshold) return;
+        
         _isDragging = YES;
         // move cell to track swipe
         CGFloat xDirection = (velocity.x > 0) ? 1.0f : -1.0f;
