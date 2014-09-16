@@ -24,7 +24,7 @@
 {
     [super prepareForReuse];
     
-    /*for (UIGestureRecognizer *recognizer in self.gestureRecognizers) {
+    for (UIGestureRecognizer *recognizer in self.gestureRecognizers) {
         [self removeGestureRecognizer:recognizer];
     }
     
@@ -39,7 +39,7 @@
     for (CALayer *layer in self.contentView.layer.sublayers) {
         [layer removeFromSuperlayer];
     }
-    */
+
     [_cv removeFromSuperview];
     [_ccv removeFromSuperview];
     [_separator removeFromSuperview];
