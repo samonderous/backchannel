@@ -31,7 +31,7 @@ static const CGFloat kCommentPadding = 30.0;
     if (self) {
         _noCommentsYet = [[UILabel alloc] init];
         [self addSubview:_noCommentsYet];
-        _noCommentsYet.text = @"No comments yet. Any thoughts?";
+        _noCommentsYet.text = @"No comments yet.";
         _noCommentsYet.textColor = [[BCGlobalsManager globalsManager] blackDividerColor];
         _noCommentsYet.font = [UIFont fontWithName:@"Poly" size:16.0];
         [_noCommentsYet sizeToFit];
