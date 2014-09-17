@@ -14,7 +14,10 @@
 #import "BCViewController.h"
 #import "BCStreamViewController.h"
 #import "BCWaitingViewController.h"
+#import "BCAPIClient.h"
+#import "BCPushNotificationFlow.h"
 
+#import "Utils.h"
 #import "AFNetworkActivityLogger.h"
 
 @implementation BCAppDelegate
@@ -55,7 +58,9 @@
     [Crashlytics startWithAPIKey:@"f59d6a71a710bdff855cd287d71b64b426d0e957"];
     
     //[Flurry setCrashReportingEnabled:YES];
+    #if !TARGET_IPHONE_SIMULATOR
     [Flurry startSession:@"MWV2G8ZG3JTK75ZPRNMC"];
+    #endif
     
     [[BCGlobalsManager globalsManager] loadConfig];
     //[[AFNetworkActivityLogger sharedLogger] startLogging];
@@ -65,9 +70,66 @@
     self.window.rootViewController = [BCViewController performSegue];
     [self.window makeKeyAndVisible];
     
+    _pushFlow = [[BCPushNotificationFlow alloc] init];
+    
+    NSDictionary *notificationPayload = launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey];
+    if(notificationPayload) {
+        NSLog(@"got a notification payload");
+        UIViewController *vc = [BCViewController performSegueOnPushNotification:notificationPayload];
+        self.window.rootViewController = vc;
+    }
+    
+    // Scenario where user went to settings, allowed push. Launch dialog flow so delegate gets called
+    // to write device token to server.
+    UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+    if (types != UIRemoteNotificationTypeNone) {
+        [_pushFlow showPushNotificationDialog];
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceTokenFromDelegates withParams:nil];
+    }
+    
     return YES;
 }
-							
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    if(application.applicationState == UIApplicationStateInactive)
+    {
+        NSDictionary *params = [[NSDictionary alloc] init];
+        NSString *pushType = [userInfo valueForKey:@"push_type"];
+        if (pushType) {
+            [params setValue:pushType forKey:@"push_type"];
+            [params setValue:@"active" forKey:@"app_state"];
+        }
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationPayload withParams:params];
+        UIViewController *vc = [BCViewController performSegueOnPushNotification:userInfo];
+        self.window.rootViewController = vc;
+    }
+}
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+    NSLog(@"Succeeded in registering with APN");
+    
+    SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"device token success");
+    };
+    
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error in vote: %@", error);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
+    };
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:@"YES" forKey:kdeviceTokenAcceptedKey];
+    [[BCAPIClient sharedClient] setDeviceToken:success failure:failure withToken:[Utils deviceTokenToString:deviceToken]];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceToken withParams:nil];
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+    NSLog(@"Failed to reigster with APN %@", error);
+}
+
 - (void)applicationWillResignActive:(UIApplication *)application
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -83,16 +145,23 @@
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-    if ([self.window.rootViewController isKindOfClass:[UINavigationController class]] &&
-        [((UINavigationController*)self.window.rootViewController).topViewController isKindOfClass:[BCStreamViewController class]]) {
-        BCStreamViewController *svc = (BCStreamViewController*)((UINavigationController*)self.window.rootViewController).topViewController;
-        [svc getLatestNoscrollPosts];
+    
+    NSLog(@"Came into will enter fg");
+    // Scenario where user went to settings, allowed push. App is in bg and WILL NOT call viewWillAppear
+    // or call didFinishLaunching... delegate. So write out device token to server.
+    UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+    if (types != UIRemoteNotificationTypeNone) {
+        [_pushFlow showPushNotificationDialog];
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceTokenFromDelegates withParams:nil];
     }
+    
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventBackgroundToForeground withParams:nil];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application

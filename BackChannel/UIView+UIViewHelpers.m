@@ -69,7 +69,7 @@
         case BOTTOM:
         {
             CGRect selfFrame = self.frame;
-            selfFrame.origin = CGPointMake(CGRectGetMinX(view.bounds), CGRectGetHeight(view.bounds) - CGRectGetHeight(self.bounds));
+            selfFrame.origin = CGPointMake((CGRectGetWidth(view.bounds) - CGRectGetWidth(self.bounds)) / 2.0, CGRectGetHeight(view.bounds) - CGRectGetHeight(self.bounds) - margin);
             self.frame = selfFrame;
             break;
         }
