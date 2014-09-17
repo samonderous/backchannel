@@ -149,7 +149,13 @@ typedef enum TransitionType {
     
     vc.title = @"Backchannel";
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-
+    NSDictionary *params = [[NSDictionary alloc] init];
+    NSString *pushType = [pushPayload valueForKey:@"push_type"];
+    if (pushType) {
+        [params setValue:pushType forKey:@"push_type"];
+        [params setValue:@"not active" forKey:@"app_state"];
+    }
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationPayload withParams:params];
     return nc;
 }
 

@@ -66,6 +66,16 @@ extern NSString *kEventAccessLinkClickAlreadyVerified;
 extern NSString *kEventAccessLinkClickUdidNotEqual;
 extern NSString *kEventAccessLinkClickVerifyErrorNoUser;
 extern NSString *kEventAccessLinkClickVerifySuccess;
+extern NSString *kEventBackgroundToForeground;
+extern NSString *kEventNotificationPayload;
+extern NSString *kEventNotificationPostFlow;
+extern NSString *kEventNotificationPostFallbackFlow;
+extern NSString *kEventNotificationCommentFlow;
+extern NSString *kEventNotificationCommentFallbackFlow;
+extern NSString *kEventNotificationSystemDialog;
+extern NSString *kEventNotificationDeviceToken;
+extern NSString *kEventNotificationDeviceTokenFromDelegates;
+
 
 
 @interface BCGlobalsManager : NSObject

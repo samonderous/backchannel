@@ -61,6 +61,22 @@ NSString *kEventAccessLinkClickAlreadyVerified = @"access_link_already_verified_
 NSString *kEventAccessLinkClickUdidNotEqual = @"access_link_udid_not_equal_back_to_auth";
 NSString *kEventAccessLinkClickVerifyErrorNoUser = @"access_link_verify_server_error";
 NSString *kEventAccessLinkClickVerifySuccess = @"access_link_verify_server_success_to_stream_view";
+NSString *kEventBackgroundToForeground = @"bg_to_fg_app_open";
+
+NSString *kEventNotificationPayload = @"notification_payload";
+NSString *kEventNotificationPostFlow = @"notification_post_flow";
+NSString *kEventNotificationPostFallbackFlow = @"notification_post_fallback_flow";
+NSString *kEventNotificationCommentFlow = @"notification_comment_flow";
+NSString *kEventNotificationCommentFallbackFlow = @"notification_comment_fallback_flow";
+NSString *kEventNotificationSystemDialog = @"notification_system_dialog_shown_from_opt_in_flow";
+NSString *kEventNotificationDeviceToken = @"notification_system_device_token_received";
+NSString *kEventNotificationDeviceTokenFromDelegates = @"notification_device_token_requested_from_delegates";
+
+
+
+
+
+
 
 
 

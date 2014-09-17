@@ -7,6 +7,8 @@
 //
 
 #import "BCPushNotificationFlow.h"
+#import "BCGlobalsManager.h"
+
 
 static NSString *kFallbackMessage = @"Go to Settings > Notifications and enable Backchannel to notify you when your coworkers join Backchannel and interact with your posts.";
 static NSString *kFallbackButtonText = @"Got it";
@@ -18,7 +20,6 @@ static NSString *kCommentPushKey = @"commentKey";
 
 
 @implementation BCPushNotificationFlow
-
 
 - (BOOL)hasUserAcceptedPermission
 {
@@ -43,6 +44,7 @@ static NSString *kCommentPushKey = @"commentKey";
 {
     [_alertView dismissWithClickedButtonIndex:buttonIndex animated:YES];
     [self showPushNotificationDialog];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationSystemDialog withParams:nil];
 }
 
 - (void)showOnCreatePostFlow
@@ -66,6 +68,9 @@ static NSString *kCommentPushKey = @"commentKey";
     if ([self hasUserDeniedPermission]) {
         message = kFallbackMessage;
         buttonText = kFallbackButtonText;
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationPostFallbackFlow withParams:nil];
+    } else {
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationPostFlow withParams:nil];
     }
     
     [defaults setObject:@"YES" forKey:kModalSeenKey];
@@ -76,7 +81,7 @@ static NSString *kCommentPushKey = @"commentKey";
 
 - (void)showOnCommentFlow
 {
-    NSString *title = @"Know when a coworker replies to you";
+    NSString *title = @"Know when a coworker adds to your comment";
     NSString *message = @"Tap OK when prompted about Push Notifications to know when coworkers interact with posts that you comment on or create.";
     NSString *buttonText = @"Next";
 
@@ -92,6 +97,9 @@ static NSString *kCommentPushKey = @"commentKey";
     if ([self hasUserDeniedPermission]) {
         message = kFallbackMessage;
         buttonText = kFallbackButtonText;
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationCommentFallbackFlow withParams:nil];
+    } else {
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationCommentFlow withParams:nil];
     }
     
     [defaults setObject:@"YES" forKey:kCommentPushKey];

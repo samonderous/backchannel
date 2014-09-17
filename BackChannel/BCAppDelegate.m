@@ -84,6 +84,7 @@
     UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
     if (types != UIRemoteNotificationTypeNone) {
         [_pushFlow showPushNotificationDialog];
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceTokenFromDelegates withParams:nil];
     }
     
     return YES;
@@ -93,6 +94,13 @@
 {
     if(application.applicationState == UIApplicationStateInactive)
     {
+        NSDictionary *params = [[NSDictionary alloc] init];
+        NSString *pushType = [userInfo valueForKey:@"push_type"];
+        if (pushType) {
+            [params setValue:pushType forKey:@"push_type"];
+            [params setValue:@"active" forKey:@"app_state"];
+        }
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationPayload withParams:params];
         UIViewController *vc = [BCViewController performSegueOnPushNotification:userInfo];
         self.window.rootViewController = vc;
     }
@@ -114,6 +122,7 @@
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:@"YES" forKey:kdeviceTokenAcceptedKey];
     [[BCAPIClient sharedClient] setDeviceToken:success failure:failure withToken:[Utils deviceTokenToString:deviceToken]];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceToken withParams:nil];
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
@@ -143,7 +152,10 @@
     UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
     if (types != UIRemoteNotificationTypeNone) {
         [_pushFlow showPushNotificationDialog];
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceTokenFromDelegates withParams:nil];
     }
+    
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventBackgroundToForeground withParams:nil];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
