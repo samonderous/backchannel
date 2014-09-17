@@ -1354,10 +1354,9 @@ static BOOL isSwipeLocked = NO;
     }
     
     NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i+1 inSection:0];
-    BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     [_messageTable scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionTop animated:YES];
     
-    [self showDetailedView:cell];
+    [self showDetailedView:(BCSecretModel*)_messages[i]];
 }
 
 - (void)cellTapped:(UITapGestureRecognizer*)sender
@@ -1369,19 +1368,20 @@ static BOOL isSwipeLocked = NO;
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)sender.view;
     [[BCGlobalsManager globalsManager] logFlurryEvent:kEventTappedToComments withParams:nil];
     
-    [self showDetailedView:cell];
+    [self showDetailedView:(BCSecretModel*)[_messages objectAtIndex:[_messageTable indexPathForCell:cell].row - 1]];
 }
 
-- (void)showDetailedView:(BCStreamCollectionViewCell*)cell
+- (void)showDetailedView:(BCSecretModel*)model
 {
     BCCommentsViewController *vc = [[BCCommentsViewController alloc] init];
-    vc.secretModel = (BCSecretModel*)[_messages objectAtIndex:[_messageTable indexPathForCell:cell].row - 1];
-    float width = CGRectGetWidth(cell.bounds);
-    CGSize size = (CGSize){width, CGRectGetHeight(cell.contentView.bounds)};
+    vc.secretModel = model;
+    UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout*)_messageTable.collectionViewLayout;
+    float width = CGRectGetWidth([UIScreen mainScreen].bounds) - flowLayout.sectionInset.left - flowLayout.sectionInset.right;
+    CGSize size = (CGSize){width, kCellHeight};
     BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:vc.secretModel withSize:size withBottomContainer:nil];
     vc.content = tcv;
     vc.postUpdateCallback = ^{
-        [cell.cv setNeedsLayout];
+        //[cell.cv setNeedsLayout];
     };
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     vc.title = @"Backchannel";
