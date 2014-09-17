@@ -36,7 +36,6 @@ static NSString *kCommentPushKey = @"commentKey";
 
 - (void)showPushNotificationDialog
 {
-    return;
     [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound];
 }
 
