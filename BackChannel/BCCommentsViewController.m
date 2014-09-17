@@ -285,6 +285,7 @@ static const CGFloat kCommentPadding = 30.0;
     
     // Handle share logic
     _shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonTap)];
+    _shareItem.tintColor = [UIColor whiteColor];
     
     NSArray *actionButtonItems = @[_shareItem];
     self.navigationItem.rightBarButtonItems = actionButtonItems;
