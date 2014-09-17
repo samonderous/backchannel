@@ -15,6 +15,7 @@
 #import "BCStreamViewController.h"
 #import "BCWaitingViewController.h"
 #import "BCAPIClient.h"
+#import "BCPushNotificationFlow.h"
 
 #import "Utils.h"
 #import "AFNetworkActivityLogger.h"
@@ -78,6 +79,13 @@
         self.window.rootViewController = vc;
     }
     
+    // Scenario where user went to settings, allowed push. Launch dialog flow so delegate gets called
+    // to write device token to server.
+    UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+    if (types != UIRemoteNotificationTypeNone) {
+        [_pushFlow showPushNotificationDialog];
+    }
+    
     return YES;
 }
 
@@ -128,10 +136,13 @@
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-    if ([self.window.rootViewController isKindOfClass:[UINavigationController class]] &&
-        [((UINavigationController*)self.window.rootViewController).topViewController isKindOfClass:[BCStreamViewController class]]) {
-        BCStreamViewController *svc = (BCStreamViewController*)((UINavigationController*)self.window.rootViewController).topViewController;
-        [svc getLatestPosts:nil forFirstTimeTutorial:NO];
+    
+    NSLog(@"Came into will enter fg");
+    // Scenario where user went to settings, allowed push. App is in bg and WILL NOT call viewWillAppear
+    // or call didFinishLaunching... delegate. So write out device token to server.
+    UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+    if (types != UIRemoteNotificationTypeNone) {
+        [_pushFlow showPushNotificationDialog];
     }
 }
 

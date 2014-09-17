@@ -16,4 +16,6 @@ extern NSString *kdeviceTokenAcceptedKey;
 
 - (void)showOnCommentFlow;
 - (void)showOnCreatePostFlow;
+- (void)showPushNotificationDialog;
+
 @end
