@@ -25,15 +25,17 @@ except:
 	pass
 
 def pushonce():
-	apns = APNs(use_sandbox=True, cert_file='/home/ubuntu/apns/BackchannelCert.pem', key_file='/home/ubuntu/apns/BackchannelKey.pem')
-	user = User.objects.get(id=1)
+	apns = APNs(use_sandbox=True, cert_file='/home/ubuntu/apns/BackchannelCert.pem', 
+				key_file='/home/ubuntu/apns/BackchannelKey.pem')
+	user = User.objects.get(id=172)
 	token = user.device_token
+	print "%s" % token 
 
-
-	payload = Payload(alert="A post you voted on got more votes", 
-						sound="default")
+	payload = Payload(alert="TEST: A few more coworkers joined your Backchannel", 
+						sound="default", 
+						custom={'type': 'detail_view', 'sid': 294})
 	apns.gateway_server.send_notification(token, payload)
 
 
 if __name__ == '__main__':
-    pass
+    pushonce()

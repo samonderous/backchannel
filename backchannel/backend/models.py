@@ -35,7 +35,7 @@ class Secret(models.Model):
     org = models.ForeignKey('Org')
     agrees = models.IntegerField()
     disagrees = models.IntegerField()
-    comment_count = models.IntegerField()
+    comment_count = models.IntegerField(default=0)
     is_tutorial = models.BooleanField()
 
     class Meta:

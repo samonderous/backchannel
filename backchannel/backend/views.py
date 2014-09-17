@@ -146,47 +146,10 @@ def _time_str(time_delta):
 
     return time_str
 
-def stream(request):
-
-    response = {'status': 1}
-    udid = request.GET.get('udid')
-    
-    try:
-        user = User.objects.get(udid=udid)
-    except Exception, e:
-        return HttpResponse(simplejson.dumps(response), content_type="application/json")
-
-    secrets = Secret.objects.filter(org=user.org).order_by('-id')[:50]
-
-    secrets_list = []
-    for s in secrets:
-        try:
-            us = UserSecret.objects.get(secret=s, user=user)
-            vote = us.vote
-        except Exception, e:
-            vote = UserSecret.VOTE_NONE
-
-        time_ago = int(time.time()) - s.time_created
-        secret_dict = {
-            'sid': s.id,
-            'secrettext': s.secrettext,
-            'time_created': s.time_created,
-            'time_ago': _time_str(time_ago),
-            'agrees': s.agrees,
-            'disagrees': s.disagrees,
-            'vote': vote,
-            'comment_count': s.comment_count,
-        }
-        secrets_list.append(secret_dict)
-
-    response = {'status': 0, 'secrets': secrets_list}
-    return HttpResponse(simplejson.dumps(response), content_type="application/json")
-
 def getlatestposts(request):
 
     response = {'status': 1}
     udid = request.GET.get('udid')
-    stid = request.GET.get('tsid')
     ist = request.GET.get('ist')
  
     try:
@@ -194,10 +157,8 @@ def getlatestposts(request):
     except Exception, e:
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
-    #raise Exception("HELLO")
-    # TODO: Fix this up if traffic ever warrants [:50] will be an issue
-    #secrets = Secret.objects.filter(org=user.org, id__gt=stid).order_by('-id')[:50]
-    secrets = Secret.objects.filter(org=user.org).order_by('-id')[:50]
+    # TODO: Fix this up if traffic ever warrants [:100] will be an issue
+    secrets = Secret.objects.filter(org=user.org).order_by('-id')[:100]
  
     if ist == '1':
         secret_with_tutorial = Secret.objects.filter(org=user.org, is_tutorial=True)
@@ -368,5 +329,12 @@ def comments(request):
 
 @csrf_exempt
 def setdevicetoken(request):
-    pass
+    udid = request.POST.get('udid')
+    token = request.POST.get('token')
 
+    user = User.objects.get(udid=udid)
+    user.device_token = token
+    user.save()
+
+    response = {'status': 0}
+    return HttpResponse(simplejson.dumps(response), content_type="application/json")
