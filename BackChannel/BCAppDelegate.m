@@ -14,7 +14,9 @@
 #import "BCViewController.h"
 #import "BCStreamViewController.h"
 #import "BCWaitingViewController.h"
+#import "BCAPIClient.h"
 
+#import "Utils.h"
 #import "AFNetworkActivityLogger.h"
 
 @implementation BCAppDelegate
@@ -66,16 +68,44 @@
     
     self.window.rootViewController = [BCViewController performSegue];
     [self.window makeKeyAndVisible];
-    [application registerForRemoteNotificationTypes:UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound];
+    
+    _pushFlow = [[BCPushNotificationFlow alloc] init];
+    
+    NSDictionary *notificationPayload = launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey];
+    if(notificationPayload) {
+        NSLog(@"got a notification payload");
+        UIViewController *vc = [BCViewController performSegueOnPushNotification:notificationPayload];
+        self.window.rootViewController = vc;
+    }
     
     return YES;
 }
 
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    if(application.applicationState == UIApplicationStateInactive)
+    {
+        UIViewController *vc = [BCViewController performSegueOnPushNotification:userInfo];
+        self.window.rootViewController = vc;
+    }
+}
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
     NSLog(@"Succeeded in registering with APN");
     
+    SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"device token success");
+    };
+    
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error in vote: %@", error);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
+    };
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:@"YES" forKey:kdeviceTokenAcceptedKey];
+    [[BCAPIClient sharedClient] setDeviceToken:success failure:failure withToken:[Utils deviceTokenToString:deviceToken]];
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error

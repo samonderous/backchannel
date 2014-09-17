@@ -20,7 +20,7 @@ static NSString *kLatestPostsPath = @"backend/getlatestposts/";
 static NSString *kOlderPostsPath = @"backend/getolderposts/";
 static NSString *kCommentsPath = @"backend/comments/";
 static NSString *kCommentCreatePath = @"backend/createcomment/";
-
+static NSString *kSetDeviceTokenPath = @"backend/setdevicetoken/";
 
 @implementation BCAPIClient
 
@@ -146,6 +146,15 @@ static NSString *kCommentCreatePath = @"backend/createcomment/";
                                 
                                 failure(operation, error);
                             }];
+}
+
+- (void)setDeviceToken:(SuccessCallback)success failure:(FailureCallback)failure withToken:(NSString*)token
+{
+    NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
+    [params setObject:(NSString*)[[UIDevice currentDevice].identifierForVendor UUIDString] forKey:@"udid"];
+    [params setObject:token forKey:@"token"];
+    
+    [[BCAPIClient sharedClient] POST:kSetDeviceTokenPath parameters:params success:success failure:failure];
 }
 
 

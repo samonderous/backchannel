@@ -13,6 +13,7 @@
 #import "BCVerificationViewController.h"
 #import "BCGlobalsManager.h"
 #import "BCAPIClient.h"
+#import "BCCommentsViewController.h"
 
 typedef enum TransitionType {
     TRANSITION_AUTH = 1,
@@ -130,6 +131,26 @@ typedef enum TransitionType {
         vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
         return nc;
     }
+}
+
++ (UIViewController*)performSegueOnPushNotification:(NSDictionary*)pushPayload
+{
+    UINavigationController *nc;
+    BCStreamViewController *vc = [[BCStreamViewController alloc] init];
+    
+    // figure out what's in the notificationPayload dictionary
+    if ([pushPayload[@"type"] isEqualToString:@"stream_view"]) {
+        nc = [[UINavigationController alloc] initWithRootViewController:vc];
+    } else if ([pushPayload[@"type"] isEqualToString:@"detail_view"]) {
+        NSInteger sid = [(NSNumber*)pushPayload[@"sid"] integerValue];
+        vc = [[BCStreamViewController alloc] initWithTransition:sid];
+        nc = [[UINavigationController alloc] initWithRootViewController:vc];
+    }
+    
+    vc.title = @"Backchannel";
+    vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+
+    return nc;
 }
 
 @end

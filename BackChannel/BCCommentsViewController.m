@@ -8,12 +8,12 @@
 
 #import <MessageUI/MessageUI.h>
 
+#import "BCAppDelegate.h"
 #import "BCCommentsViewController.h"
 #import "BCStreamViewController.h"
 #import "BCGlobalsManager.h"
 #import "Utils.h"
 #import "BCAPIClient.h"
-
 
 static const CGFloat kCommentPadding = 30.0;
 
@@ -324,7 +324,7 @@ static const CGFloat kCommentPadding = 30.0;
     [picker addAttachmentData:data mimeType:@"image/jpeg" fileName:@"backchannel"];
     
     // Fill out the email body text
-    NSString *emailBody = @"I thought you'd find this anonymous post interesting!<br /><br />It's from Backchannel, an app to share workplace thoughts anonymously with coworkers.<br/><br/><a href='http://www.backchannel.it/?utm_source=share&utm_medium=email&utm_campaign=appshare'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
+    NSString *emailBody = @"I thought you'd find this anonymous post interesting!<br /><br />It's from Backchannel, an app to share workplace thoughts anonymously with coworkers.<br/><br/><a href='http://www.backchannel.it/?utm_source=app&utm_medium=email&utm_campaign=commentsshare'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
     emailBody = [NSString stringWithFormat:emailBody, [defaults objectForKey:kOrgNameKey]];
     [picker setMessageBody:emailBody isHTML:YES];
     
@@ -424,6 +424,8 @@ static const CGFloat kCommentPadding = 30.0;
             [_content setNeedsLayout];
              _postUpdateCallback();
 
+            [[BCAppDelegate sharedAppDelegate].pushFlow showOnCommentFlow];
+            
             [[BCGlobalsManager globalsManager] logFlurryEvent:kEventPostedComment withParams:nil];
         }];
     };

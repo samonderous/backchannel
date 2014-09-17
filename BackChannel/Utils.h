@@ -14,5 +14,6 @@
 + (CGSize)calculateTextBoundsSize:(NSString*)inputText withFontSize:(float)fontSize withTargetWidth:(float)targetWidth withBoldFont:(BOOL)isBold;
 + (void)debugRect:(UIView*)view withName:(NSString*)name;
 + (void)debugRectWithRect:(CGRect)rect withName:(NSString*)name;
++ (NSString*)deviceTokenToString:(NSData*)deviceToken;
 
 @end

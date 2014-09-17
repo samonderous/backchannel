@@ -20,6 +20,7 @@
 #import "BCGlobalsManager.h"
 #import "BCAPIClient.h"
 #import "BCCommentsViewController.h"
+#import "BCPushNotificationFlow.h"
 
 static const float kSecretFontSize = 16.0;
 static const float kCellComposeHeight = 64.0;
@@ -825,7 +826,6 @@ static BOOL isSwipeLocked = NO;
         if (_thresholdCrossed) {
             _panRecognizer.enabled = NO; // puts gesture recognizer in CANCEL state but we still want to finish the motion
         }
-
     }
 }
 
@@ -855,6 +855,8 @@ static BOOL isSwipeLocked = NO;
 @property (strong, nonatomic) UIImageView *bluebar;
 @property (strong, nonatomic) UIButton *gotit;
 
+@property (assign) NSInteger toSid;
+
 @end
 
 @implementation BCStreamViewController
@@ -871,6 +873,14 @@ static BOOL isSwipeLocked = NO;
     if (self) {
         // Custom initialization
     }
+    return self;
+}
+
+- (id)initWithTransition:(NSInteger)toSid
+{
+    self = [super init];
+    _toSid = toSid;
+    
     return self;
 }
 
@@ -1119,7 +1129,7 @@ static BOOL isSwipeLocked = NO;
     [picker addAttachmentData:data mimeType:@"image/jpeg" fileName:@"backchannel"];
     
     // Fill out the email body text
-    NSString *emailBody = @"I thought you'd find this anonymous post interesting!<br /><br />It's from Backchannel, an app to share workplace thoughts anonymously with coworkers.<br/><br/><a href='http://www.backchannel.it/?utm_source=share&utm_medium=email&utm_campaign=appshare'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
+    NSString *emailBody = @"I thought you'd find this anonymous post interesting!<br /><br />It's from Backchannel, an app to share workplace thoughts anonymously with coworkers.<br/><br/><a href='http://www.backchannel.it/?utm_source=app&utm_medium=email&utm_campaign=streamshare'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
     emailBody = [NSString stringWithFormat:emailBody, [defaults objectForKey:kOrgNameKey]];
     [picker setMessageBody:emailBody isHTML:YES];
     
@@ -1239,10 +1249,14 @@ static BOOL isSwipeLocked = NO;
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    NSLog(@"Enterred view will appear");
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     BOOL isShowStreamTutorial = [[defaults objectForKey:kStreamTutorialKey] boolValue];
     [self getLatestPosts:^{
         [self showStreamTutorial];
+        if (_toSid) {
+            [self transitionToDetailedView];
+        }
     } forFirstTimeTutorial:!isShowStreamTutorial];
 }
 
@@ -1321,6 +1335,31 @@ static BOOL isSwipeLocked = NO;
     }
 }
 
+- (void)transitionToDetailedView
+{
+    NSInteger sid = _toSid;
+    _toSid = 0; // clear it for next time
+    int i = 0;
+    BOOL found = NO;
+
+    for (; i < _messages.count; i++) {
+        if (((BCSecretModel*)_messages[i]).sid == sid) {
+            found = YES;
+            break;
+        }
+    }
+    
+    if (!found) {
+        return;
+    }
+    
+    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i+1 inSection:0];
+    BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
+    [_messageTable scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionTop animated:YES];
+    
+    [self showDetailedView:cell];
+}
+
 - (void)cellTapped:(UITapGestureRecognizer*)sender
 {
     if (_inTutorialMode) {
@@ -1328,6 +1367,13 @@ static BOOL isSwipeLocked = NO;
     }
     
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)sender.view;
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventTappedToComments withParams:nil];
+    
+    [self showDetailedView:cell];
+}
+
+- (void)showDetailedView:(BCStreamCollectionViewCell*)cell
+{
     BCCommentsViewController *vc = [[BCCommentsViewController alloc] init];
     vc.secretModel = (BCSecretModel*)[_messages objectAtIndex:[_messageTable indexPathForCell:cell].row - 1];
     float width = CGRectGetWidth(cell.bounds);
@@ -1341,7 +1387,6 @@ static BOOL isSwipeLocked = NO;
     vc.title = @"Backchannel";
     vc.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"←" style:UIBarButtonItemStylePlain target:self action:@selector(popCommentsViewController)];
     [self.navigationController pushViewController:vc animated:YES];
-    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventTappedToComments withParams:nil];
 }
 
 - (void)popCommentsViewController
@@ -1533,6 +1578,9 @@ static BOOL isSwipeLocked = NO;
             ccv.bar.publishMeter.hidden = YES;
             [ccv.bar setPublishTutorialShown];
             [self addNewSecretToStream];
+            
+            [[BCAppDelegate sharedAppDelegate].pushFlow showOnCreatePostFlow];
+            
             NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"state", @"finished", nil];
             [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:kEventPublishTapped withParams:params];
         } else {

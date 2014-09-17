@@ -70,6 +70,7 @@
 		C14DB9E919B686860049AD4B /* HPTextViewInternal.m in Sources */ = {isa = PBXBuildFile; fileRef = C14DB9E719B686860049AD4B /* HPTextViewInternal.m */; };
 		C14DB9EC19B6AC750049AD4B /* BCCommentsCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C14DB9EB19B6AC750049AD4B /* BCCommentsCell.xib */; };
 		C14DB9EE19B6B87B0049AD4B /* avatar.png in Resources */ = {isa = PBXBuildFile; fileRef = C14DB9ED19B6B87B0049AD4B /* avatar.png */; };
+		C15BF8DD19C8F77200A20F61 /* BCPushNotificationFlow.m in Sources */ = {isa = PBXBuildFile; fileRef = C15BF8DC19C8F77200A20F61 /* BCPushNotificationFlow.m */; };
 		C16D092318EA358400BB88FB /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C16D092218EA358400BB88FB /* Crashlytics.framework */; };
 		C182A7E7191A25ED007037F2 /* Poly-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C13708B4190F613B00DC7175 /* Poly-Regular.ttf */; };
 		C182A7E8191A2614007037F2 /* Poly-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C13708B4190F613B00DC7175 /* Poly-Regular.ttf */; };
@@ -216,6 +217,8 @@
 		C14DB9E719B686860049AD4B /* HPTextViewInternal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HPTextViewInternal.m; sourceTree = "<group>"; };
 		C14DB9EB19B6AC750049AD4B /* BCCommentsCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BCCommentsCell.xib; sourceTree = "<group>"; };
 		C14DB9ED19B6B87B0049AD4B /* avatar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar.png; sourceTree = "<group>"; };
+		C15BF8DB19C8F77200A20F61 /* BCPushNotificationFlow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BCPushNotificationFlow.h; sourceTree = "<group>"; };
+		C15BF8DC19C8F77200A20F61 /* BCPushNotificationFlow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BCPushNotificationFlow.m; sourceTree = "<group>"; };
 		C16D092218EA358400BB88FB /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		C1DCC5FE19C3A09B00BA6310 /* icon_comments.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_comments.png; sourceTree = "<group>"; };
 		C1DCC5FF19C3A09B00BA6310 /* icon_comments@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_comments@2x.png"; sourceTree = "<group>"; };
@@ -382,10 +385,12 @@
 				C100167418BD743800347A31 /* BCStreamCollectionViewCell.m */,
 				C1316E2018B570FA005A85B8 /* BCModels.h */,
 				C1316E2118B570FA005A85B8 /* BCModels.m */,
-				C124064D19BE4AA1007C1C7A /* BCCommentsBar.xib */,
-				C14DB9EB19B6AC750049AD4B /* BCCommentsCell.xib */,
 				C14DB9E119B67B180049AD4B /* BCCommentsViewController.h */,
 				C14DB9E219B67B180049AD4B /* BCCommentsViewController.m */,
+				C15BF8DB19C8F77200A20F61 /* BCPushNotificationFlow.h */,
+				C15BF8DC19C8F77200A20F61 /* BCPushNotificationFlow.m */,
+				C124064D19BE4AA1007C1C7A /* BCCommentsBar.xib */,
+				C14DB9EB19B6AC750049AD4B /* BCCommentsCell.xib */,
 				C1316DED18B3F741005A85B8 /* Main_iPhone.storyboard */,
 				C1316DF018B3F741005A85B8 /* Main_iPad.storyboard */,
 				C1316DF618B3F741005A85B8 /* Images.xcassets */,
@@ -725,6 +730,7 @@
 				C1316E2918B57318005A85B8 /* TTTAttributedLabel.m in Sources */,
 				C14C9D7E18CFC92F00A79BFD /* AFURLResponseSerialization.m in Sources */,
 				C14C9D9218CFC95A00A79BFD /* AFNetworkActivityIndicatorManager.m in Sources */,
+				C15BF8DD19C8F77200A20F61 /* BCPushNotificationFlow.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
