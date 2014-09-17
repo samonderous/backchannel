@@ -18,6 +18,9 @@ static NSString *kCreatePostPath = @"backend/createsecret/";
 static NSString *kVerificationPath = @"backend/verify/";
 static NSString *kLatestPostsPath = @"backend/getlatestposts/";
 static NSString *kOlderPostsPath = @"backend/getolderposts/";
+static NSString *kCommentsPath = @"backend/comments/";
+static NSString *kCommentCreatePath = @"backend/createcomment/";
+static NSString *kSetDeviceTokenPath = @"backend/setdevicetoken/";
 
 @implementation BCAPIClient
 
@@ -65,7 +68,9 @@ static NSString *kOlderPostsPath = @"backend/getolderposts/";
                                                                                  withTimeStr:(NSString*)secret[@"time_ago"]
                                                                                   withAgrees:[((NSString*)secret[@"agrees"]) integerValue]
                                                                                 withDisagree:[((NSString*)secret[@"disagrees"]) integerValue]
-                                                                                    withVote:[((NSString*)secret[@"vote"]) integerValue]];
+                                                                                    withVote:[((NSString*)secret[@"vote"]) integerValue]
+                                                                                    withCommentCount:
+                                                                            [((NSString*)secret[@"comment_count"]) integerValue]];
                                     [secrets addObject:secretModel];
                                 }
                                 success(secrets);
@@ -76,16 +81,10 @@ static NSString *kOlderPostsPath = @"backend/getolderposts/";
                             }];
 }
 
-- (void)getStream:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure
-{
-    NSDictionary *params = @{@"udid": [[UIDevice currentDevice].identifierForVendor UUIDString]};
-    [self fetchSecrets:kStreamPath success:success failure:failure withParams:params];
-}
-
-- (void)getLatestPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withTopSid:(int)topSid
+- (void)getLatestPosts:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure withForTutorial:(BOOL)isForTutorial
 {
     NSDictionary *params = @{@"udid": [[UIDevice currentDevice].identifierForVendor UUIDString],
-                             @"tsid": [NSString stringWithFormat:@"%d", topSid]};
+                             @"ist": [NSNumber numberWithBool:isForTutorial]};
     [self fetchSecrets:kLatestPostsPath success:success failure:failure withParams:params];
 }
 
@@ -122,5 +121,41 @@ static NSString *kOlderPostsPath = @"backend/getolderposts/";
                              @"email": [defaults objectForKey:kEmailKey]};
     [[BCAPIClient sharedClient] POST:kVerificationPath parameters:params success:success failure:failure];
 }
+
+- (void)createComment:(NSString*)text onSecret:(BCSecretModel*)model success:(SuccessCallback)success failure:(FailureCallback)failure
+{
+    NSDictionary *params = @{@"udid": [[UIDevice currentDevice].identifierForVendor UUIDString],
+                             @"text": text,
+                             @"sid": [NSNumber numberWithInteger:model.sid]};
+    [[BCAPIClient sharedClient] POST:kCommentCreatePath parameters:params success:success failure:failure];
+}
+
+- (void)fetchCommentsFor:(BCSecretModel*)model success:(void (^)(NSMutableArray*))success failure:(FailureCallback)failure
+{
+    [[BCAPIClient sharedClient] GET:kCommentsPath
+                         parameters:@{@"sid": [NSNumber numberWithInteger:model.sid]}
+                            success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                                NSMutableArray *comments = [[NSMutableArray alloc] init];
+                                for (NSDictionary *comment in responseObject[@"comments"]) {
+                                    BCCommentModel *commentModel = [[BCCommentModel alloc] init:comment[@"text"]];
+                                    [comments addObject:commentModel];
+                                }
+                                success(comments);
+                            }
+                            failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                                
+                                failure(operation, error);
+                            }];
+}
+
+- (void)setDeviceToken:(SuccessCallback)success failure:(FailureCallback)failure withToken:(NSString*)token
+{
+    NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
+    [params setObject:(NSString*)[[UIDevice currentDevice].identifierForVendor UUIDString] forKey:@"udid"];
+    [params setObject:token forKey:@"token"];
+    
+    [[BCAPIClient sharedClient] POST:kSetDeviceTokenPath parameters:params success:success failure:failure];
+}
+
 
 @end
