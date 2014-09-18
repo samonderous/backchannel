@@ -8,6 +8,7 @@ class User(models.Model):
     udid = models.CharField(max_length=200)
     email = models.CharField(max_length=500)
     org = models.ForeignKey('Org')
+    device_token = models.CharField(max_length=512)
 
     class Meta:
         db_table = 'user'
@@ -34,7 +35,8 @@ class Secret(models.Model):
     org = models.ForeignKey('Org')
     agrees = models.IntegerField()
     disagrees = models.IntegerField()
-    comment_count = models.IntegerField()
+    comment_count = models.IntegerField(default=0)
+    is_tutorial = models.BooleanField()
 
     class Meta:
         db_table = 'secret'

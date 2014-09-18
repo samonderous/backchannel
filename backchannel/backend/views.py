@@ -146,55 +146,30 @@ def _time_str(time_delta):
 
     return time_str
 
-def stream(request):
-
-    response = {'status': 1}
-    udid = request.GET.get('udid')
-    
-    try:
-        user = User.objects.get(udid=udid)
-    except Exception, e:
-        return HttpResponse(simplejson.dumps(response), content_type="application/json")
-
-    secrets = Secret.objects.filter(org=user.org).order_by('-id')[:50]
-
-    secrets_list = []
-    for s in secrets:
-        try:
-            us = UserSecret.objects.get(secret=s, user=user)
-            vote = us.vote
-        except Exception, e:
-            vote = UserSecret.VOTE_NONE
-
-        time_ago = int(time.time()) - s.time_created
-        secret_dict = {
-            'sid': s.id,
-            'secrettext': s.secrettext,
-            'time_created': s.time_created,
-            'time_ago': _time_str(time_ago),
-            'agrees': s.agrees,
-            'disagrees': s.disagrees,
-            'vote': vote,
-            'comment_count': s.comment_count,
-        }
-        secrets_list.append(secret_dict)
-
-    response = {'status': 0, 'secrets': secrets_list}
-    return HttpResponse(simplejson.dumps(response), content_type="application/json")
-
 def getlatestposts(request):
 
     response = {'status': 1}
     udid = request.GET.get('udid')
-    stid = request.GET.get('tsid')
+    ist = request.GET.get('ist')
  
     try:
         user = User.objects.get(udid=udid)
     except Exception, e:
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
-    # TODO: Fix this up if traffic ever warrants [:50] will be an issue
-    secrets = Secret.objects.filter(org=user.org, id__gt=stid).order_by('-id')[:50]
+    # TODO: Fix this up if traffic ever warrants [:100] will be an issue
+    secrets = Secret.objects.filter(org=user.org).order_by('-id')[:100]
+ 
+    if ist == '1':
+        secret_with_tutorial = Secret.objects.filter(org=user.org, is_tutorial=True)
+        st = None
+        if secret_with_tutorial:
+            st = secret_with_tutorial[0]
+            secrets = list(secrets)
+            for s in secrets:
+                if s.id == st.id:
+                    secrets.remove(s)
+            secrets = [st] + secrets
 
     secrets_list = []
     for s in secrets:
@@ -350,4 +325,16 @@ def comments(request):
         comments_list.append(comment) 
 
     response = {'status': 0, 'comments': comments_list}
+    return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
+@csrf_exempt
+def setdevicetoken(request):
+    udid = request.POST.get('udid')
+    token = request.POST.get('token')
+
+    user = User.objects.get(udid=udid)
+    user.device_token = token
+    user.save()
+
+    response = {'status': 0}
     return HttpResponse(simplejson.dumps(response), content_type="application/json")

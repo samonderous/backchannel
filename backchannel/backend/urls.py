@@ -12,10 +12,8 @@ urlpatterns = patterns('',
     url(r'^auth/', views.auth, name='auth'),
     url(r'^verify/', views.verify, name='verify'),
     url(r'^vote/', views.vote, name='vote'),
-    url(r'^stream/', views.stream, name='stream'),
     url(r'^resendemail/', views.resendemail, name='resendemail'),
     url(r'^createsecret/', views.createsecret, name='createsecret'),
-    url(r'^getlatestsecrets/', views.getlatestposts, name='getlatestposts'),
     url(r'^getlatestposts/', views.getlatestposts, name='getlatestposts'),
     url(r'^getolderposts/', views.getolderposts, name='getolderposts'),
     url(r'^signup/', views.signup, name='signup'),
@@ -23,6 +21,7 @@ urlpatterns = patterns('',
     url(r'^invite/', views.invite, name='invite'),
     url(r'^comments/', views.comments, name='comments'),
     url(r'^createcomment/', views.createcomment, name='createcomment'),
+    url(r'^setdevicetoken/', views.setdevicetoken, name='setdevicetoken'),
 )
 
 urlpatterns += staticfiles_urlpatterns()

@@ -111,9 +111,6 @@ class EmailMultiRelated(EmailMultiAlternatives):
 
 
 
-
-
-
 def send_verify_email(org, email, udid):
 
 	to_email = email or 'saureen@gmail.com'
@@ -123,7 +120,7 @@ def send_verify_email(org, email, udid):
 	item_html = "Thanks for joining!<br /><br />On your iPhone, tap %s your Backchannel and start sharing workplace thoughts anonymously with your coworkers." % link
 
 	footer = "<br /><br />The Backchannel Team<br /><a href='http://backchannel.it'>backchannel.it</a>"
-	msg = EmailMultiAlternatives(subject, "", from_email = "Backchannel <info@backchannel.it>", to=[to_email])
+	msg = EmailMultiAlternatives(subject, "", from_email = "Backchannel <info@backchannel.it>", to=[to_email], headers={"X-SMTPAPI": '{"category": "' + str(org.name) + '"}'})
 	msg.attach_alternative(item_html + footer, "text/html")
 
 	try:
