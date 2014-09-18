@@ -13,7 +13,7 @@
 
 @implementation BCSecretModel
 
-- (id)init:(NSString*)text withSid:(NSUInteger)sid withTime:(NSInteger)time withTimeStr:(NSString*)timeStr withAgrees:(NSInteger)agrees withDisagree:(NSInteger)disagrees withVote:(Vote)vote
+- (id)init:(NSString*)text withSid:(NSUInteger)sid withTime:(NSInteger)time withTimeStr:(NSString*)timeStr withAgrees:(NSInteger)agrees withDisagree:(NSInteger)disagrees withVote:(Vote)vote withCommentCount:(NSInteger)commentCount
 {
     self = [super init];
     _sid = sid;
@@ -25,6 +25,22 @@
     _vote = vote;
     _isNew = NO;
     _isVoted = NO;
+    _commentCount = commentCount;
+    
+    return self;
+}
+
+@end
+
+@interface BCCommentModel ()
+@end
+
+@implementation BCCommentModel
+
+- (id)init:(NSString*)comment
+{
+    self = [super init];
+    _comment = comment;
     
     return self;
 }

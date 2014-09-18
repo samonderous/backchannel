@@ -11,7 +11,6 @@
 
 #import "UIScrollView+SVPullToRefresh.h"
 #import "UIScrollView+SVInfiniteScrolling.h"
-#import "MCSwipeTableViewCell.h"
 #import "TTTAttributedLabel.h"
 #import "Utils.h"
 
@@ -20,8 +19,9 @@
 #import "BCModels.h"
 #import "BCGlobalsManager.h"
 #import "BCAPIClient.h"
+#import "BCCommentsViewController.h"
+#import "BCPushNotificationFlow.h"
 
-static const float kCellHeight = 251.0f;
 static const float kSecretFontSize = 16.0;
 static const float kCellComposeHeight = 64.0;
 static const float kHeaderFooterHeight = 30.0;
@@ -364,34 +364,44 @@ static const int kOldPostsBatchSize = 10;
 
 @implementation BCCellTopLayerHeaderView
 
-- (id)init:(BCSecretModel*)model withWidth:(float)width
+- (id)init:(BCSecretModel*)model withWidth:(float)width withVote:(BOOL)isVoted
 {
     self = [super initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
+    
+    NSMutableAttributedString *attributedText;
     UIFont *font = [UIFont fontWithName:@"Poly" size:15.0];
-    NSString *voteText = [NSString stringWithFormat:@"+%d / -%d", (int)model.agrees, (int)model.disagrees];
-    NSRange range = [voteText rangeOfString:@"/"];
-    NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc]
-                                                 initWithString:voteText
-                                                 attributes:@{ NSFontAttributeName:font,
-                                                               NSForegroundColorAttributeName: [[BCGlobalsManager globalsManager] creamColor]}];
-    
-    [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] blackTaglineColor]
-                           range: NSMakeRange(range.location, range.location)];
-    
-    if (model.agrees > model.disagrees) {
-        [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] greenColor]
-                               range: NSMakeRange(0, range.location - 1)];
-    } else if (model.agrees < model.disagrees) {
-        [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] redColor]
-                               range: NSMakeRange(range.location + 1, voteText.length - 1 - range.location)];
+    if (isVoted) {
+        NSString *voteText = [NSString stringWithFormat:@"+%d / -%d", (int)model.agrees, (int)model.disagrees];
+        NSRange range = [voteText rangeOfString:@"/"];
+        attributedText = [[NSMutableAttributedString alloc]
+                                                     initWithString:voteText
+                                                     attributes:@{ NSFontAttributeName:font,
+                                                                   NSForegroundColorAttributeName: [[BCGlobalsManager globalsManager] creamColor]}];
+        
+        [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] blackTaglineColor]
+                               range: NSMakeRange(range.location, range.location)];
+        
+        if (model.agrees > model.disagrees) {
+            [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] greenColor]
+                                   range: NSMakeRange(0, range.location - 1)];
+        } else if (model.agrees < model.disagrees) {
+            [attributedText addAttribute: NSForegroundColorAttributeName value: [[BCGlobalsManager globalsManager] redColor]
+                                   range: NSMakeRange(range.location + 1, voteText.length - 1 - range.location)];
+        }
+    } else {
+        NSString *voteText = [NSString stringWithFormat:@"%d votes", (int)model.agrees + (int)model.disagrees];
+        attributedText = [[NSMutableAttributedString alloc]
+                          initWithString:voteText
+                          attributes:@{ NSFontAttributeName:font,
+                                        NSForegroundColorAttributeName: [[BCGlobalsManager globalsManager] creamColor]}];
     }
-    
+  
+
     TTTAttributedLabel *voteLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(0.0, 0.0, width, kHeaderFooterHeight)];
     voteLabel.attributedText = attributedText;
     voteLabel.numberOfLines = 1;
 
     [self addSubview:voteLabel];
-    
     CGRect rect = [attributedText boundingRectWithSize:(CGSize){CGFLOAT_MAX, CGFLOAT_MAX} options:NSStringDrawingUsesLineFragmentOrigin context:nil];
     [voteLabel setSize:rect.size];
     [voteLabel placeIn:self alignedAt:CENTER];
@@ -423,7 +433,7 @@ static const int kOldPostsBatchSize = 10;
     [self addSubview:timeLabel];
     [timeLabel sizeToFit];
     [timeLabel placeIn:self alignedAt:CENTER_LEFT];
-    
+
     return self;
 }
 
@@ -460,11 +470,60 @@ static const int kOldPostsBatchSize = 10;
 @end
 
 
+
+@interface BCCommentsCountView : UIView
+
+@property (strong, nonatomic) UIImageView *commentsImageView;
+@property (strong, nonatomic) BCSecretModel *secretModel;
+@property (strong, nonatomic) UILabel *commentsCountLabel;
+@end
+
+@implementation BCCommentsCountView
+
+- (id)init:(BCSecretModel*)secretModel
+{
+    self = [super init];
+    
+    if (self) {
+        _secretModel = secretModel;
+        _commentsImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_comments.png"]];
+        _commentsCountLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+        [self layoutSubviews];
+    }
+    
+    return self;
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    if (_secretModel.commentCount == 0) {
+        [self addSubview:_commentsImageView];
+        [self setSize:_commentsImageView.bounds.size];
+    } else {
+        _commentsCountLabel.font = [UIFont fontWithName:@"Poly" size:15.0];
+        _commentsCountLabel.textColor = [[BCGlobalsManager globalsManager] grayVoteCountColor];
+        _commentsCountLabel.text = [NSString stringWithFormat:@"%d", _secretModel.commentCount];
+        [_commentsCountLabel sizeToFit];
+        [self setSize:(CGSize){_commentsCountLabel.bounds.size.width + 5 + _commentsImageView.bounds.size.width,
+            kHeaderFooterHeight}];
+        [self addSubview:_commentsCountLabel];
+        [self addSubview:_commentsImageView];
+        [_commentsImageView placeIn:self alignedAt:CENTER_LEFT];
+        [_commentsCountLabel placeIn:self alignedAt:CENTER_RIGTH];
+    }
+}
+
+@end
+
+
 @interface BCCellTopLayerContainerView ()
 @property (strong, nonatomic) BCCellBottomLayerContainerView *bottomLayerContainerView;
 @property (strong, nonatomic) BCCellTopLayerTextView *textView;
 @property (strong, nonatomic) BCCellTopLayerFooterView *footerView;
 @property (strong, nonatomic) BCCellTopLayerHeaderView *headerView;
+@property (strong, nonatomic) BCCommentsCountView *commentsCountView;
 @property (strong, nonatomic) BCSecretModel *secretModel;
 @property (assign) CGSize size;
 @property (assign) BOOL isDragging;
@@ -472,11 +531,12 @@ static const int kOldPostsBatchSize = 10;
 @property (strong, nonatomic) UIView *disagreeContainer;
 @property (assign) BOOL thresholdCrossed;
 
-@property UIDynamicAnimator *animator;
-@property UIGravityBehavior *gravityBehavior;
-@property UICollisionBehavior *collisionBehavior;
-@property UIPushBehavior *pushBehavior;
-@property CGFloat swipeCellStartX;
+@property (strong, nonatomic) UIPanGestureRecognizer *panRecognizer;
+@property (strong, nonatomic) UIDynamicAnimator *animator;
+@property (strong, nonatomic) UIGravityBehavior *gravityBehavior;
+@property (strong, nonatomic) UICollisionBehavior *collisionBehavior;
+@property (strong, nonatomic) UIPushBehavior *pushBehavior;
+@property (assign) CGFloat swipeCellStartX;
 
 @end
 
@@ -496,13 +556,15 @@ static BOOL isSwipeLocked = NO;
     _size = size;
     _secretModel = secretModel;
     _bottomLayerContainerView = bottomLayerContainerView;
-    _isDragging = YES;
+    _isDragging = NO;
 
     _textView = [[BCCellTopLayerTextView alloc] initWithText:secretModel withWidth:size.width];
     _footerView = [[BCCellTopLayerFooterView alloc] init:secretModel.timeStr withWidth:size.width];
-
+    _commentsCountView = [[BCCommentsCountView alloc] init:secretModel];
+    
     [self addSubview:_textView];
     [self addSubview:_footerView];
+    [self addSubview:_commentsCountView];
     [self addVoteViews];
     
     [_footerView placeIn:self alignedAt:CENTER];
@@ -517,10 +579,13 @@ static BOOL isSwipeLocked = NO;
     [_footerView setY:(CGRectGetMaxY(_textView.frame) + kComposeTextViewFooterViewMargin)];
     
     if (_secretModel.vote != VOTE_NONE) {
-        [self updateVoteView];
         _isDragging = NO;
         _secretModel.isVoted = YES;
+        [self updateVoteView:YES];
+    } else {
+        [self updateVoteView:NO];
     }
+
     self.backgroundColor = [UIColor whiteColor];
     
     _animator = [[UIDynamicAnimator alloc] initWithReferenceView:self.superview];
@@ -530,6 +595,12 @@ static BOOL isSwipeLocked = NO;
     return self;
 }
 
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    [_commentsCountView layoutSubviews];
+    [_commentsCountView placeIn:self alignedAt:BOTTOM withMargin:kComposeTextViewHeaderViewMargin];
+}
 
 - (void)addVoteViews
 {
@@ -589,14 +660,15 @@ static BOOL isSwipeLocked = NO;
     _disagreeContainer.clipsToBounds = NO;
 }
 
-- (void)updateVoteView
+- (void)updateVoteView:(BOOL)withVote
 {
     [_headerView removeFromSuperview];
-    _headerView = [[BCCellTopLayerHeaderView alloc] init:_secretModel withWidth:_size.width];
+    _headerView = [[BCCellTopLayerHeaderView alloc] init:_secretModel withWidth:_size.width withVote:withVote];
     [_headerView placeIn:self alignedAt:CENTER];
     [self addSubview:_headerView];
     [_headerView setY:kComposeTextViewHeaderViewMargin];
 }
+
 
 + (void)setSwipeLocked:(BOOL)isLock
 {
@@ -608,13 +680,18 @@ static BOOL isSwipeLocked = NO;
     return isSwipeLocked;
 }
 
+
 - (void)addSwipes
 {
-    UIPanGestureRecognizer *panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
-    panRecognizer.maximumNumberOfTouches = 1;
-    panRecognizer.minimumNumberOfTouches = 1;
-    panRecognizer.delegate = self;
-	[self addGestureRecognizer:panRecognizer];
+    if (_secretModel.isVoted) {
+        return;
+    }
+    
+    _panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+    _panRecognizer.maximumNumberOfTouches = 1;
+    _panRecognizer.minimumNumberOfTouches = 1;
+    _panRecognizer.delegate = self;
+	[self addGestureRecognizer:_panRecognizer];
 }
 
 - (void)animateVoteInteraction:(UIView*)view inDirection:(Direction)direction
@@ -675,8 +752,10 @@ static BOOL isSwipeLocked = NO;
     // delegate gets called to log vote. We want to block swipe only if they crossed
     // threshold but still want to enter into END state so check on isDragging as well.
     //if ((_isDragging == NO && _thresholdCrossed) || isSwipeLocked) return;
-    if (_secretModel.isVoted || isSwipeLocked) return;
-
+    if (isSwipeLocked) {
+        return;
+    }
+    
     CGFloat dragThreshold = 1.0f;
     CGFloat voteThreshhold = CGRectGetWidth(_agreeContainer.bounds) + kCellEdgeInset + kVoteThresholdMargin;
 
@@ -697,19 +776,25 @@ static BOOL isSwipeLocked = NO;
     else if (gesture.state == UIGestureRecognizerStateChanged)
     {
         _isDragging = YES;
-        // create "resistance" to cell panning immediately
-        //if (fabsf(delta.x) < dragThreshold) return;
-        
         // move cell to track swipe
         CGFloat xDirection = (velocity.x > 0) ? 1.0f : -1.0f;
         CGFloat newX = _swipeCellStartX + delta.x - xDirection * dragThreshold;
         [gesture.view setX:newX];
         
-        // trigger vote if threshold crossed
-        _thresholdCrossed = (fabsf(gesture.view.frame.origin.x) >= voteThreshhold);
-        [self swipeVoteInteractionHandle:_thresholdCrossed inDirection:direction];
+        // This will be called continuously so once we've crossed, we're done recalcing this otherwise END / CANCEL state
+        // screw up
+        if (!_thresholdCrossed) {
+            _thresholdCrossed = (fabsf(gesture.view.frame.origin.x) >= voteThreshhold);
+        }
+        
+        if (_thresholdCrossed && !_secretModel.isVoted)
+        {
+            [self swipeVoteInteractionHandle:_thresholdCrossed inDirection:direction];
+            CGFloat side = delta.x  > 0 ? 1.0f : -1.0f;
+            [self.delegate swipeReleaseAnimationBackComplete:self inDirection:side > 0 ? RIGHT_DIRECTION : LEFT_DIRECTION];
+        }
     }
-    else if (gesture.state == UIGestureRecognizerStateEnded)
+    else if (gesture.state == UIGestureRecognizerStateEnded || gesture.state == UIGestureRecognizerStateCancelled)
     {
         _isDragging = NO;
         _swipeCellStartX = 0;
@@ -737,12 +822,13 @@ static BOOL isSwipeLocked = NO;
         _pushBehavior.active = YES;
         [_animator addBehavior:_pushBehavior];
         
-        if (_thresholdCrossed)
-        {
-            [self.delegate swipeReleaseAnimationBackComplete:self inDirection:side > 0 ? RIGHT_DIRECTION : LEFT_DIRECTION];
+        // If threshold was cross no reason to let the user to hold the cell down again, let the motion finish
+        if (_thresholdCrossed) {
+            _panRecognizer.enabled = NO; // puts gesture recognizer in CANCEL state but we still want to finish the motion
         }
     }
 }
+
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     return !_isDragging;
@@ -767,7 +853,9 @@ static BOOL isSwipeLocked = NO;
 @property (strong, nonatomic) UIImageView *top;
 @property (strong, nonatomic) UIImageView *text;
 @property (strong, nonatomic) UIImageView *bluebar;
-@property (strong, nonatomic) UIImageView *gotit;
+@property (strong, nonatomic) UIButton *gotit;
+
+@property (assign) NSInteger toSid;
 
 @end
 
@@ -788,6 +876,14 @@ static BOOL isSwipeLocked = NO;
     return self;
 }
 
+- (id)initWithTransition:(NSInteger)toSid
+{
+    self = [super init];
+    _toSid = toSid;
+    
+    return self;
+}
+
 - (void)loadView
 {
     self.view = [[UIView alloc] initWithFrame:[UIScreen mainScreen].applicationFrame];
@@ -805,12 +901,13 @@ static BOOL isSwipeLocked = NO;
                                                 withTimeStr:@"now"
                                                  withAgrees:0
                                                withDisagree:0
-                                                   withVote:VOTE_NONE];
+                                                   withVote:VOTE_NONE
+                                     withCommentCount:0];
     secret.isNew = YES;
     
     SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"Create success");
-        secret.sid = (NSUInteger)responseObject[@"sid"];
+        secret.sid = [((NSString*)responseObject[@"sid"]) integerValue];
     };
 
     FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -842,10 +939,17 @@ static BOOL isSwipeLocked = NO;
                                                                       NSFontAttributeName: [UIFont fontWithName:@"Poly" size:18.0]}];
 }
 
-- (void)getLatestPosts:(void (^)(void))callback
+- (void)getLatestPosts:(void (^)(void))callback forFirstTimeTutorial:(BOOL)isForTutorial
 {
     void (^success)(NSMutableArray*) = ^(NSMutableArray *newSecrets) {
         NSLog(@"Get new posts");
+        
+        NSMutableArray *deleteIndexPaths = [NSMutableArray array];
+        NSLog(@"new secrets coming in = %d", newSecrets.count);
+        NSLog(@"the total number of items = %d", _messages.count);
+        for (int i=0; i < _messages.count; i++) {
+            [deleteIndexPaths addObject:[NSIndexPath indexPathForItem:i+1 inSection:0]];
+        }
 
         NSMutableArray *secretIndexPaths = [NSMutableArray array];
         for (int i=0; i < newSecrets.count; i++) {
@@ -853,14 +957,14 @@ static BOOL isSwipeLocked = NO;
         }
 
         NSMutableArray *newMessages = [NSMutableArray arrayWithArray:[newSecrets copy]];
-        [newMessages addObjectsFromArray:[_messages copy]];
         _messages = newMessages;
         
         [_messageTable performBatchUpdates:^{
+            [_messageTable deleteItemsAtIndexPaths:deleteIndexPaths];
             [_messageTable insertItemsAtIndexPaths:secretIndexPaths];
         } completion:^(BOOL finished) {
         }];
-
+        
         [_refreshControl endRefreshing];
         
         if (callback) {
@@ -882,7 +986,8 @@ static BOOL isSwipeLocked = NO;
     if (_messages.count) {
         topSid = (int)((BCSecretModel*)[_messages objectAtIndex:0]).sid;
     }
-    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withTopSid:topSid];
+    
+    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withForTutorial:isForTutorial];
 }
 
 - (void)getLatestNoscrollPosts
@@ -898,7 +1003,7 @@ static BOOL isSwipeLocked = NO;
         [newMessages addObjectsFromArray:[_messages copy]];
         _messages = newMessages;
         
-        CGFloat oldOffset = _messageTable.contentOffset.y;
+        CGFloat oldOffset = _messageTable.contentOffset.y > _messageTable.contentSize.height ? 0.0: _messageTable.contentOffset.y;
         //NSLog(@"The old offset = %f", oldOffset);
         
         // Set content offset first before insert. This avoids the ui layout update back to the offset.
@@ -913,12 +1018,8 @@ static BOOL isSwipeLocked = NO;
         NSLog(@"error code %d", (int)operation.response.statusCode);
         [_messageTable.pullToRefreshView stopAnimating];
     };
-    
-    int topSid = 0;
-    if (_messages.count) {
-        topSid = (int)((BCSecretModel*)[_messages objectAtIndex:0]).sid;
-    }
-    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withTopSid:topSid];
+
+    [[BCAPIClient sharedClient] getLatestPosts:success failure:failure withForTutorial:_inTutorialMode];
 }
 
 - (void)getOlderPosts
@@ -961,7 +1062,7 @@ static BOOL isSwipeLocked = NO;
 
 - (void)getLatestPostsOnInit
 {
-    [self getLatestPosts:nil];
+    [self getLatestPosts:nil forFirstTimeTutorial:NO];
 }
 
 - (void)viewDidLoad
@@ -997,13 +1098,8 @@ static BOOL isSwipeLocked = NO;
     _messageTable.infiniteScrollingView.enabled = NO;
     
     // Handle share logic
-    _shareItem = [[UIBarButtonItem alloc] initWithTitle:@"Share"
-                                                  style:UIBarButtonItemStylePlain
-                                                 target:self
-                                                 action:@selector(shareButtonTap)];
-    [_shareItem setTitleTextAttributes:@{NSFontAttributeName: [UIFont fontWithName:@"Poly" size:16.0],
-                                         NSForegroundColorAttributeName: [UIColor whiteColor]}
-                             forState:UIControlStateNormal];
+    _shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonTap)];
+    _shareItem.tintColor = [UIColor whiteColor];
     
     NSArray *actionButtonItems = @[_shareItem];
     self.navigationItem.rightBarButtonItems = actionButtonItems;
@@ -1033,7 +1129,7 @@ static BOOL isSwipeLocked = NO;
     [picker addAttachmentData:data mimeType:@"image/jpeg" fileName:@"backchannel"];
     
     // Fill out the email body text
-    NSString *emailBody = @"I thought you'd find this anonymous post interesting! It's from Backchannel, an app to share workplace thoughts anonymously with co-workers.<br/><br/><a href='http://backchannel.it'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
+    NSString *emailBody = @"I thought you'd find this anonymous post interesting!<br /><br />It's from Backchannel, an app to share workplace thoughts anonymously with coworkers.<br/><br/><a href='http://www.backchannel.it/?utm_source=app&utm_medium=email&utm_campaign=streamshare'>Learn more</a> or <a href='https://itunes.apple.com/us/app/the-backchannel/id875074225?mt=8'>download the app</a>!";
     emailBody = [NSString stringWithFormat:emailBody, [defaults objectForKey:kOrgNameKey]];
     [picker setMessageBody:emailBody isHTML:YES];
     
@@ -1062,32 +1158,33 @@ static BOOL isSwipeLocked = NO;
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     BOOL isShowStreamTutorial = [[defaults objectForKey:kStreamTutorialKey] boolValue];
     if (!isShowStreamTutorial) {
-        
+
         if (IS_IPHONE_5) {
             _top = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h-top.png"]];
             _text = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h-text.png"]];
             _bluebar = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h-bluebar.png"]];
-            _gotit = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-568h-gotit.png"]];
 
         } else {
             _top = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-top.png"]];
             _text = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-text.png"]];
             _bluebar = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-bluebar.png"]];
-            _gotit = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swipeoverlay-gotit.png"]];
         }
-
-        [self.view.window addSubview:_top];
         
+        [self.view.window addSubview:_top];
         // UIImageView's by default set this to NO which allow touch to go through. By setting to YES
         // the UIImageView will consume the touch and not let it pass through.
         _top.userInteractionEnabled = YES;
         
-        [_gotit setY:CGRectGetMaxY(self.view.window.bounds) - CGRectGetHeight(_gotit.bounds)];
+        UIFont *joinFont = [UIFont fontWithName:@"Poly" size:18.0];
+        _gotit = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth([UIScreen mainScreen].bounds), 60.0)];
         [self.view.window addSubview:_gotit];
-        
-        _gotit.userInteractionEnabled = YES;
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(gotGotItTap)];
-        [_gotit addGestureRecognizer:tap];
+        [_gotit setTitle:@"Skip" forState:UIControlStateNormal];
+        [_gotit setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        _gotit.titleLabel.font = joinFont;
+        _gotit.backgroundColor = [[BCGlobalsManager globalsManager] creamColor];
+        [_gotit addTarget:self action:@selector(gotitTapped:) forControlEvents:UIControlEventTouchUpInside];
+        [_gotit placeIn:self.view.window alignedAt:BOTTOM];
+
         
         [_bluebar setY:CGRectGetMinY(_gotit.frame) - CGRectGetHeight(_bluebar.bounds)];
         [self.view.window addSubview:_bluebar];
@@ -1101,14 +1198,23 @@ static BOOL isSwipeLocked = NO;
         _bluebar.alpha = 0.0;
         _text.alpha = 0.0;
         _gotit.alpha = 0.0;
-        
     }
 }
 
-- (void)gotGotItTap
+- (void)switchToGotIt
+{
+    [_gotit setTitle:@"Got it!" forState:UIControlStateNormal];
+    _gotit.backgroundColor = [UIColor colorWithRed:30.0/255.0 green:155.0/255.0 blue:98.0/255.0 alpha:1.0];
+}
+
+- (void)gotitTapped:(id)sender
 {
     [self unsetupStreamTutorial];
-    [[BCGlobalsManager globalsManager] logFlurryEvent:@"got_it_tapped" withParams:nil];
+    if ([_gotit.titleLabel.text isEqualToString:@"Got it!"]) {
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventGotItTapped withParams:nil];
+    } else {
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventSkipTapped withParams:nil];
+    }
     _inTutorialMode = NO;
     _messageTable.scrollEnabled = YES;
 }
@@ -1124,11 +1230,12 @@ static BOOL isSwipeLocked = NO;
         [_top removeFromSuperview];
         [_bluebar removeFromSuperview];
         [_text removeFromSuperview];
+        _top = _bluebar = _text = nil;
         [_gotit removeFromSuperview];
-        _top = _bluebar = _text = _gotit = nil;
+        _gotit = nil;
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         [defaults setObject:[NSNumber numberWithBool:YES] forKey:kStreamTutorialKey];
-        [[BCGlobalsManager globalsManager] logFlurryEventTimed:@"entered_stream_view" withParams:nil];
+        [[BCGlobalsManager globalsManager] logFlurryEventTimed:kEventEnteredStream withParams:nil];
     }];
 }
 
@@ -1142,15 +1249,21 @@ static BOOL isSwipeLocked = NO;
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    NSLog(@"Enterred view will appear");
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    BOOL isShowStreamTutorial = [[defaults objectForKey:kStreamTutorialKey] boolValue];
     [self getLatestPosts:^{
         [self showStreamTutorial];
-    }];
+        if (_toSid) {
+            [self transitionToDetailedView];
+        }
+    } forFirstTimeTutorial:!isShowStreamTutorial];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-    [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:@"entered_stream_view" withParams:nil];
+    [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:kEventEnteredStream withParams:nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -1216,7 +1329,69 @@ static BOOL isSwipeLocked = NO;
         [bcv placeIn:cell.contentView alignedAt:CENTER];
         
         [self setSeparator:cell indexPath:indexPath];
+        
+        UITapGestureRecognizer *tapCell = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cellTapped:)];
+        [cell addGestureRecognizer:tapCell];
     }
+}
+
+- (void)transitionToDetailedView
+{
+    NSInteger sid = _toSid;
+    _toSid = 0; // clear it for next time
+    int i = 0;
+    BOOL found = NO;
+
+    for (; i < _messages.count; i++) {
+        if (((BCSecretModel*)_messages[i]).sid == sid) {
+            found = YES;
+            break;
+        }
+    }
+    
+    if (!found) {
+        return;
+    }
+    
+    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i+1 inSection:0];
+    [_messageTable scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionTop animated:YES];
+    
+    [self showDetailedView:(BCSecretModel*)_messages[i]];
+}
+
+- (void)cellTapped:(UITapGestureRecognizer*)sender
+{
+    if (_inTutorialMode) {
+        return;
+    }
+    
+    BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)sender.view;
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventTappedToComments withParams:nil];
+    
+    [self showDetailedView:(BCSecretModel*)[_messages objectAtIndex:[_messageTable indexPathForCell:cell].row - 1]];
+}
+
+- (void)showDetailedView:(BCSecretModel*)model
+{
+    BCCommentsViewController *vc = [[BCCommentsViewController alloc] init];
+    vc.secretModel = model;
+    UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout*)_messageTable.collectionViewLayout;
+    float width = CGRectGetWidth([UIScreen mainScreen].bounds) - flowLayout.sectionInset.left - flowLayout.sectionInset.right;
+    CGSize size = (CGSize){width, kCellHeight};
+    BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:vc.secretModel withSize:size withBottomContainer:nil];
+    vc.content = tcv;
+    vc.postUpdateCallback = ^{
+        //[cell.cv setNeedsLayout];
+    };
+    vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    vc.title = @"Backchannel";
+    vc.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"←" style:UIBarButtonItemStylePlain target:self action:@selector(popCommentsViewController)];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)popCommentsViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (BCStreamCollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -1224,6 +1399,7 @@ static BOOL isSwipeLocked = NO;
 {
     BCStreamCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCStreamCollectionViewCell" forIndexPath:indexPath];
     [self prepareCell:cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath];
+
     return cell;
 }
 
@@ -1244,8 +1420,6 @@ static BOOL isSwipeLocked = NO;
     if (_messageTable.contentOffset.y > 0.0) {
         [BCCellTopLayerContainerView setSwipeLocked:YES];
     }
-    
-    
 
     //NSLog(@"The size of the content = %f", _messageTable.contentSize.height);
     //NSLog(@"The content offset = %f", _messageTable.contentOffset.y);
@@ -1384,7 +1558,7 @@ static BOOL isSwipeLocked = NO;
                     animations:^{ ((UIButton*)sender).highlighted = YES; }
                     completion:nil];
     
-    [[BCGlobalsManager globalsManager] logFlurryEvent:@"tap_nevermind" withParams:nil];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNevermindTapped withParams:nil];
 }
 
 - (void)publishHoldDown:(id)sender
@@ -1395,7 +1569,7 @@ static BOOL isSwipeLocked = NO;
     [ccv.bar.publishMeter.layer removeAllAnimations];
     //[ccv.bar setPublishPush];
 
-    [[BCGlobalsManager globalsManager] logFlurryEventTimed:@"tap_publish" withParams:nil];
+    [[BCGlobalsManager globalsManager] logFlurryEventTimed:kEventPublishTapped withParams:nil];
 
     [UIView animateWithDuration:kPublishPushDuration delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
         [ccv.bar.publishMeter setX:0.0];
@@ -1404,11 +1578,14 @@ static BOOL isSwipeLocked = NO;
             ccv.bar.publishMeter.hidden = YES;
             [ccv.bar setPublishTutorialShown];
             [self addNewSecretToStream];
+            
+            [[BCAppDelegate sharedAppDelegate].pushFlow showOnCreatePostFlow];
+            
             NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"state", @"finished", nil];
-            [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:@"tap_publish" withParams:params];
+            [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:kEventPublishTapped withParams:params];
         } else {
             NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:@"state", @"unfinished", nil];
-            [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:@"tap_publish" withParams:params];
+            [[BCGlobalsManager globalsManager] logFlurryEventEndTimed:kEventPublishTapped withParams:params];
             [ccv.bar triggerPublishTutorial];
         }
     }];
@@ -1495,7 +1672,7 @@ static BOOL isSwipeLocked = NO;
     NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     
-    self.navigationItem.rightBarButtonItems = @[];
+    _shareItem.enabled = NO;
     float duration = (kCellHeight - kPublishBarHeight) / 864.0; // nasty calc off keboard rate 216pt / 0.25s
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
                      animations:^{
@@ -1514,7 +1691,7 @@ static BOOL isSwipeLocked = NO;
     BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPath];
     BCCellComposeView *cv = (BCCellComposeView*)cell.cv;
     
-    self.navigationItem.rightBarButtonItems = @[_shareItem];
+    _shareItem.enabled = YES;
     
     float duration = (kCellHeight - kPublishBarHeight) / 864.0;
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
@@ -1529,18 +1706,20 @@ static BOOL isSwipeLocked = NO;
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.item != 0 || _isComposeMode) {
+    if (_isComposeMode) {
         return;
     }
     
-    [collectionView.collectionViewLayout invalidateLayout];
-    [collectionView performBatchUpdates:^{
-        [self animateComposeCellTransitionToCompose];
-        [self setupCompose:collectionView indexPath:indexPath];
-    } completion:^(BOOL finished) {
-    }];
-    
-    [[BCGlobalsManager globalsManager] logFlurryEvent:@"tap_to_create" withParams:nil];
+    if (indexPath.item == 0) {
+        [collectionView.collectionViewLayout invalidateLayout];
+        [collectionView performBatchUpdates:^{
+            [self animateComposeCellTransitionToCompose];
+            [self setupCompose:collectionView indexPath:indexPath];
+        } completion:^(BOOL finished) {
+        }];
+    }
+
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventCreatePost withParams:nil];
 }
 
 # pragma Text View Delegate
@@ -1562,32 +1741,44 @@ static BOOL isSwipeLocked = NO;
         return;
     }
     
+    if (_inTutorialMode) {
+        [self switchToGotIt];
+    }
+    
     if (direction == LEFT_DIRECTION) {
         secretModel.disagrees++;
         secretModel.vote = VOTE_DISAGREE;
-        [[BCGlobalsManager globalsManager] logFlurryEvent:@"vote_plus_one" withParams:nil];
+        if (_inTutorialMode) {
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVoteNegOneTutorial withParams:nil];
+        } else {
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVoteNegOne withParams:nil];
+        }
+        
     } else if (direction == RIGHT_DIRECTION) {
         secretModel.agrees++;
         secretModel.vote = VOTE_AGREE;
-        [[BCGlobalsManager globalsManager] logFlurryEvent:@"vote_neg_one" withParams:nil];
+        if (_inTutorialMode) {
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVotePlusOneTutorial withParams:nil];
+        } else {
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVotePlusOne withParams:nil];
+        }
     }
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
         SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
             NSLog(@"Vote success");
-            secretModel.isVoted = YES;
         };
         
         FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
             NSLog(@"Error in vote: %@", error);
             NSLog(@"error code %d", (int)operation.response.statusCode);
-            secretModel.isVoted = YES;
         };
         
         [[BCAPIClient sharedClient] setVote:secretModel withVote:secretModel.vote success:success failure:failure];
     });
     
-    [containerView updateVoteView];
+    secretModel.isVoted = YES;
+    [containerView updateVoteView:YES];
 }
 
 # pragma MFMail Compose Delegate
@@ -1598,19 +1789,19 @@ static BOOL isSwipeLocked = NO;
     {
         case MFMailComposeResultCancelled:
             NSLog(@"Mail sending canceled");
-            [[BCGlobalsManager globalsManager] logFlurryEvent:@"share_cancel" withParams:nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareCancel withParams:nil];
             break;
         case MFMailComposeResultSaved:
             NSLog(@"Mail sending saved");
-            [[BCGlobalsManager globalsManager] logFlurryEvent:@"share_saved" withParams:nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareSaved withParams:nil];
             break;
         case MFMailComposeResultSent:
             NSLog(@"Mail sending sent");
-            [[BCGlobalsManager globalsManager] logFlurryEvent:@"share_sent" withParams:nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareSent withParams:nil];
             break;
         case MFMailComposeResultFailed:
             NSLog(@"Mail sending failed");
-            [[BCGlobalsManager globalsManager] logFlurryEvent:@"share_failed" withParams:nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventShareFailed withParams:nil];
             break;
         default:
             break;

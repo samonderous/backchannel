@@ -12,5 +12,5 @@
 
 + (UIViewController*)setVerifiedAndTransition:(NSString*)udidIN;
 + (UIViewController*)performSegue;
-
++ (UIViewController*)performSegueOnPushNotification:(NSDictionary*)pushPayload;
 @end

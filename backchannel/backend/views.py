@@ -174,7 +174,8 @@ def stream(request):
             'time_ago': _time_str(time_ago),
             'agrees': s.agrees,
             'disagrees': s.disagrees,
-            'vote': vote
+            'vote': vote,
+            'comment_count': s.comment_count,
         }
         secrets_list.append(secret_dict)
 
@@ -211,7 +212,8 @@ def getlatestposts(request):
             'time_ago': _time_str(time_ago),
             'agrees': s.agrees,
             'disagrees': s.disagrees,
-            'vote': vote
+            'vote': vote,
+            'comment_count': s.comment_count,
         }
         secrets_list.append(secret_dict)
 
@@ -248,7 +250,8 @@ def getolderposts(request):
             'time_ago': _time_str(time_ago),
             'agrees': s.agrees,
             'disagrees': s.disagrees,
-            'vote': vote
+            'vote': vote,
+            'comment_count': s.comment_count,
         }
         secrets_list.append(secret_dict)
 
@@ -306,3 +309,45 @@ def invite(request):
         pass
 
     return redirect('http://itunes.com/apps/thebackchannel')
+
+@csrf_exempt
+def createcomment(request):
+    udid = request.POST.get('udid')
+    sid = request.POST.get('sid')
+    text = request.POST.get('text')
+
+    try:
+        user = User.objects.get(udid=udid)
+        secret = Secret.objects.get(id=sid)
+        co = Comment()
+        co.text = text
+        co.user = user
+        co.secret = secret
+        co.time_created = int(time.time())
+        co.save()
+        secret.comment_count += 1
+        secret.save()
+    except Exception, e:
+        response = {'status': 1}
+        return HttpResponse(simplejson.dumps(response), content_type="application/json")
+    
+    response = {'status': 0, 'cid': co.id, 'comment_count': secret.comment_count}
+    return HttpResponse(simplejson.dumps(response), content_type="application/json")
+
+def comments(request):
+    sid = request.GET.get('sid')
+
+    secret = Secret.objects.get(id=sid)
+    cms = Comment.objects.filter(secret=secret)
+
+    comments_list = [] 
+    for cm in cms:
+        comment = {
+            'cid': cm.id,
+            'text': cm.text,
+            'tc': cm.time_created
+        }
+        comments_list.append(comment) 
+
+    response = {'status': 0, 'comments': comments_list}
+    return HttpResponse(simplejson.dumps(response), content_type="application/json")

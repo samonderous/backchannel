@@ -7,9 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BCPushNotificationFlow.h"
 
 @interface BCAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+@property (strong, nonatomic) BCPushNotificationFlow *pushFlow;
+
++ (BCAppDelegate*)sharedAppDelegate;
 
 @end

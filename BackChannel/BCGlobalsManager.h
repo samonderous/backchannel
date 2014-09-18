@@ -13,6 +13,7 @@
 
 #define IS_IPHONE_5 ( fabs( ( double )[ [ UIScreen mainScreen ] bounds ].size.height - ( double )568 ) < DBL_EPSILON )
 
+extern const float kCellHeight;
 extern const float kKeyboardHeight;
 extern const float kTitleTopMargin;
 extern const float kTitleFontSize;
@@ -26,6 +27,55 @@ extern NSString *kPublishTutorialKey;
 extern NSString *kStreamTutorialKey;
 extern NSString *kOrgNameKey;
 extern NSString *kOrgDomainKey;
+
+extern NSString *kEventJoinTapped;
+extern NSString *kEventJoinTappedErrorResponse;
+extern NSString *kEventJoinTappedWhitelistResponse;
+extern NSString *kEventJoinTappedSuccessResponse;
+extern NSString *kEventGotItTapped;
+extern NSString *kEventSkipTapped;
+extern NSString *kEventEnteredStream;
+extern NSString *kEventNevermindTapped;
+extern NSString *kEventPublishTapped;
+extern NSString *kEventCreatePost;
+extern NSString *kEventVotePlusOne;
+extern NSString *kEventVotePlusOneTutorial;
+extern NSString *kEventVoteNegOne;
+extern NSString *kEventVoteNegOneTutorial;
+extern NSString *kEventShareCancel;
+extern NSString *kEventShareSaved;
+extern NSString *kEventShareSent;
+extern NSString *kEventShareFailed;
+extern NSString *kEventShareCommentsCancel;
+extern NSString *kEventShareCommentsSaved;
+extern NSString *kEventShareCommentsSent;
+extern NSString *kEventShareCommentsFailed;
+extern NSString *kEventInviteCancel;
+extern NSString *kEventInviteSaved;
+extern NSString *kEventInviteSent;
+extern NSString *kEventInviteFailed;
+extern NSString *kEventOpenMailTapped;
+extern NSString *kEventResendMailTapped;
+extern NSString *kEventBackButtonTapFromVerification;
+extern NSString *kEventBackButtonTapFromWaitlist;
+extern NSString *kEventTappedToComments;
+extern NSString *kEventTappedCommentField;
+extern NSString *kEventPostedComment;
+extern NSString *kEventAccessLinkClicked;
+extern NSString *kEventAccessLinkClickAlreadyVerified;
+extern NSString *kEventAccessLinkClickUdidNotEqual;
+extern NSString *kEventAccessLinkClickVerifyErrorNoUser;
+extern NSString *kEventAccessLinkClickVerifySuccess;
+extern NSString *kEventBackgroundToForeground;
+extern NSString *kEventNotificationPayload;
+extern NSString *kEventNotificationPostFlow;
+extern NSString *kEventNotificationPostFallbackFlow;
+extern NSString *kEventNotificationCommentFlow;
+extern NSString *kEventNotificationCommentFallbackFlow;
+extern NSString *kEventNotificationSystemDialog;
+extern NSString *kEventNotificationDeviceToken;
+extern NSString *kEventNotificationDeviceTokenFromDelegates;
+
 
 
 @interface BCGlobalsManager : NSObject
@@ -54,6 +104,7 @@ extern NSString *kOrgDomainKey;
 @property (strong, nonatomic) UIColor *emptyPostCellColor;
 
 @property (strong, nonatomic) UIColor *publishTutorialHintColor;
+@property (strong, nonatomic) UIColor *grayVoteCountColor;
 
 + (id)globalsManager;
 - (void)loadConfig;
