@@ -1385,17 +1385,8 @@ static BOOL isSwipeLocked = NO;
     };
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     vc.title = @"Backchannel";
-    
-    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    UIImage *backButtonImage = [UIImage imageNamed:@"icon_back"]  ;
-    [backButton setBackgroundImage:backButtonImage forState:UIControlStateNormal];
-    [backButton addTarget:self action:@selector(popCommentsViewController) forControlEvents:UIControlEventTouchUpInside];
-    backButton.frame = CGRectMake(0, 0, 44, 44);
-    UIView *backButtonView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 44, 44)];
-    backButtonView.bounds = CGRectOffset(backButtonView.bounds, 16, 0);
-    [backButtonView addSubview:backButton];
-    vc.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:backButtonView];
-    
+    self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStyleBordered target:nil action:nil];
+
     [self.navigationController pushViewController:vc animated:YES];
 }
 
