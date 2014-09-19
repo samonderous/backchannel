@@ -122,10 +122,10 @@ djcelery.setup_loader()
 
 CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
 CELERYBEAT_PIDFILE = '/tmp/celerybeat.pid'
-CELERYBEAT_SCHEDULE = {
-    'add-every-10-seconds': {
-        'task': 'tasks.update_skills_index_long',
-        'schedule': timedelta(seconds=10),
-        'args': ()
-    },
-}
+#CELERYBEAT_SCHEDULE = {
+#    'add-every-10-seconds': {
+#        'task': 'tasks.update_skills_index_long',
+#        'schedule': timedelta(seconds=10),
+#        'args': ()
+#    },
+#}

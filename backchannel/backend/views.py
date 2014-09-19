@@ -15,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from backend import send_email
 from backend.models import *
+from backend.tasks import * 
 
 try:
         logging.basicConfig(
@@ -72,6 +73,8 @@ def verify(request):
         org = Org.objects.get(domain=domain)
         user.org = org
         user.save()
+        send_notification_on_new_coworkers_joined.delay(user)
+
         response = {'status': 0, 'name': org.name, 'domain': org.domain}
         return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
@@ -101,6 +104,8 @@ def vote(request):
     us.save() 
     secret.save()
 
+    send_notification_on_new_vote.delay(us)
+
     response = {'status': 0}
     return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
@@ -127,7 +132,7 @@ def createsecret(request):
     secret.disagrees = 0
 
     secret.save()
- 
+
     response = {'status': 0, 'sid': secret.id}
     return HttpResponse(simplejson.dumps(response), content_type="application/json")
 
@@ -302,6 +307,7 @@ def createcomment(request):
         co.save()
         secret.comment_count += 1
         secret.save()
+        send_notifications_on_new_comment.delay(secret, co)
     except Exception, e:
         response = {'status': 1}
         return HttpResponse(simplejson.dumps(response), content_type="application/json")

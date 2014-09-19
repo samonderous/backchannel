@@ -125,3 +125,129 @@ About to send email to emp
 About to send email to emp
 About to send email to emp
 About to send email to emp
+/usr/local/lib/python2.6/dist-packages/pytz-2011n-py2.6.egg/pytz/__init__.py:35: UserWarning: Module uuid was already imported from /usr/lib/python2.6/uuid.pyc, but /usr/local/lib/python2.6/dist-packages is being added to sys.path
+  from pkg_resources import resource_stream
+[2014-09-18 23:34:51,374: WARNING/MainProcess] /usr/local/lib/python2.6/dist-packages/djcelery/loaders.py:133: UserWarning: Using settings.DEBUG leads to a memory leak, never use this setting in production environments!
+  warnings.warn('Using settings.DEBUG leads to a memory leak, never '
+[2014-09-18 23:34:51,374: WARNING/MainProcess] celery@ip-10-123-167-30 ready.
+[2014-09-18 23:34:51,402: INFO/MainProcess] consumer: Connected to amqp://guest@localhost:5672//.
+
+celeryd: Hitting Ctrl+C again will terminate all running tasks!
+
+celeryd: Warm shutdown (MainProcess)
+ 
+ -------------- celery@ip-10-123-167-30 v3.0.19 (Chiastic Slide)
+---- **** ----- 
+--- * ***  * -- Linux-2.6.32-362-ec2-i686-with-Ubuntu-10.04-lucid
+-- * - **** --- 
+- ** ---------- [config]
+- ** ---------- .> broker:      amqp://guest@localhost:5672//
+- ** ---------- .> app:         default:0x901ebec (djcelery.loaders.DjangoLoader)
+- ** ---------- .> concurrency: 1 (processes)
+- *** --- * --- .> events:      OFF (enable -E to monitor this worker)
+-- ******* ---- 
+--- ***** ----- [queues]
+ -------------- .> celery:      exchange:celery(direct) binding:celery
+                
+
+[Tasks]
+  . backend.tasks.send_notification_on_new_coworkers_joined
+  . backend.tasks.send_notification_on_new_vote
+  . backend.tasks.send_notifications_on_new_comment
+
+/usr/local/lib/python2.6/dist-packages/pytz-2011n-py2.6.egg/pytz/__init__.py:35: UserWarning: Module uuid was already imported from /usr/lib/python2.6/uuid.pyc, but /usr/local/lib/python2.6/dist-packages is being added to sys.path
+  from pkg_resources import resource_stream
+[2014-09-18 23:36:46,866: WARNING/MainProcess] /usr/local/lib/python2.6/dist-packages/djcelery/loaders.py:133: UserWarning: Using settings.DEBUG leads to a memory leak, never use this setting in production environments!
+  warnings.warn('Using settings.DEBUG leads to a memory leak, never '
+[2014-09-18 23:36:46,866: WARNING/MainProcess] celery@ip-10-123-167-30 ready.
+[2014-09-18 23:36:46,883: INFO/MainProcess] consumer: Connected to amqp://guest@localhost:5672//.
+[2014-09-18 23:36:51,890: INFO/MainProcess] Got task from broker: backend.tasks.send_notification_on_new_vote[ac31d0c0-c9b4-4745-be18-b82159c17a9e]
+[2014-09-18 23:36:51,900: INFO/MainProcess] Got task from broker: backend.tasks.send_notification_on_new_coworkers_joined[884d42f1-5886-4ce3-9b9a-3961cac29a5d]
+[2014-09-18 23:36:52,102: INFO/MainProcess] Task backend.tasks.send_notification_on_new_vote[ac31d0c0-c9b4-4745-be18-b82159c17a9e] succeeded in 0.211224079132s: None
+[2014-09-18 23:36:52,128: INFO/MainProcess] Task backend.tasks.send_notification_on_new_coworkers_joined[884d42f1-5886-4ce3-9b9a-3961cac29a5d] succeeded in 0.024482011795s: None
+[2014-09-18 23:37:56,735: INFO/MainProcess] Got task from broker: backend.tasks.send_notification_on_new_vote[a278c7a1-92fb-4933-8752-95b17c6a1fd4]
+[2014-09-18 23:37:56,743: INFO/MainProcess] Got task from broker: backend.tasks.send_notification_on_new_coworkers_joined[c0a1ce75-374b-4b9e-818e-91579e8177b0]
+[2014-09-18 23:37:56,749: ERROR/MainProcess] Task backend.tasks.send_notification_on_new_vote[a278c7a1-92fb-4933-8752-95b17c6a1fd4] raised exception: error(32, 'Broken pipe')
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.6/dist-packages/celery/task/trace.py", line 228, in trace_task
+    R = retval = fun(*args, **kwargs)
+  File "/usr/local/lib/python2.6/dist-packages/celery/task/trace.py", line 415, in __protected_call__
+    return self.run(*args, **kwargs)
+  File "/home/ubuntu/Backchannel/backchannel/backend/tasks.py", line 50, in send_notification_on_new_vote
+    apns.gateway_server.send_notification(owner.device_token, payload)
+  File "/usr/local/lib/python2.6/dist-packages/apns.py", line 511, in send_notification
+    self.write(self._get_notification(token_hex, payload))
+  File "/usr/local/lib/python2.6/dist-packages/apns.py", line 260, in write
+    return self._connection().write(string)
+  File "/usr/lib/python2.6/ssl.py", line 148, in write
+    return self._sslobj.write(data)
+error: [Errno 32] Broken pipe
+[2014-09-18 23:37:56,764: ERROR/MainProcess] Task backend.tasks.send_notification_on_new_coworkers_joined[c0a1ce75-374b-4b9e-818e-91579e8177b0] raised exception: SSLError(1, '_ssl.c:1265: error:1409F07F:SSL routines:SSL3_WRITE_PENDING:bad write retry')
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.6/dist-packages/celery/task/trace.py", line 228, in trace_task
+    R = retval = fun(*args, **kwargs)
+  File "/usr/local/lib/python2.6/dist-packages/celery/task/trace.py", line 415, in __protected_call__
+    return self.run(*args, **kwargs)
+  File "/home/ubuntu/Backchannel/backchannel/backend/tasks.py", line 63, in send_notification_on_new_coworkers_joined
+    apns.gateway_server.send_notification(user.device_token, payload)
+  File "/usr/local/lib/python2.6/dist-packages/apns.py", line 511, in send_notification
+    self.write(self._get_notification(token_hex, payload))
+  File "/usr/local/lib/python2.6/dist-packages/apns.py", line 260, in write
+    return self._connection().write(string)
+  File "/usr/lib/python2.6/ssl.py", line 148, in write
+    return self._sslobj.write(data)
+SSLError: [Errno 1] _ssl.c:1265: error:1409F07F:SSL routines:SSL3_WRITE_PENDING:bad write retry
+
+celeryd: Hitting Ctrl+C again will terminate all running tasks!
+
+celeryd: Warm shutdown (MainProcess)
+ 
+ -------------- celery@ip-10-123-167-30 v3.0.19 (Chiastic Slide)
+---- **** ----- 
+--- * ***  * -- Linux-2.6.32-362-ec2-i686-with-Ubuntu-10.04-lucid
+-- * - **** --- 
+- ** ---------- [config]
+- ** ---------- .> broker:      amqp://guest@localhost:5672//
+- ** ---------- .> app:         default:0x961dbec (djcelery.loaders.DjangoLoader)
+- ** ---------- .> concurrency: 1 (processes)
+- *** --- * --- .> events:      OFF (enable -E to monitor this worker)
+-- ******* ---- 
+--- ***** ----- [queues]
+ -------------- .> celery:      exchange:celery(direct) binding:celery
+                
+
+[Tasks]
+  . backend.tasks.send_notification_on_new_coworkers_joined
+  . backend.tasks.send_notification_on_new_vote
+  . backend.tasks.send_notifications_on_new_comment
+
+/usr/local/lib/python2.6/dist-packages/pytz-2011n-py2.6.egg/pytz/__init__.py:35: UserWarning: Module uuid was already imported from /usr/lib/python2.6/uuid.pyc, but /usr/local/lib/python2.6/dist-packages is being added to sys.path
+  from pkg_resources import resource_stream
+[2014-09-18 23:39:02,192: WARNING/MainProcess] /usr/local/lib/python2.6/dist-packages/djcelery/loaders.py:133: UserWarning: Using settings.DEBUG leads to a memory leak, never use this setting in production environments!
+  warnings.warn('Using settings.DEBUG leads to a memory leak, never '
+[2014-09-18 23:39:02,192: WARNING/MainProcess] celery@ip-10-123-167-30 ready.
+[2014-09-18 23:39:02,216: INFO/MainProcess] consumer: Connected to amqp://guest@localhost:5672//.
+
+celeryd: Hitting Ctrl+C again will terminate all running tasks!
+
+celeryd: Warm shutdown (MainProcess)
+ 
+ -------------- celery@ip-10-123-167-30 v3.0.19 (Chiastic Slide)
+---- **** ----- 
+--- * ***  * -- Linux-2.6.32-362-ec2-i686-with-Ubuntu-10.04-lucid
+-- * - **** --- 
+- ** ---------- [config]
+- ** ---------- .> broker:      amqp://guest@localhost:5672//
+- ** ---------- .> app:         default:0xa540bec (djcelery.loaders.DjangoLoader)
+- ** ---------- .> concurrency: 1 (processes)
+- *** --- * --- .> events:      OFF (enable -E to monitor this worker)
+-- ******* ---- 
+--- ***** ----- [queues]
+ -------------- .> celery:      exchange:celery(direct) binding:celery
+                
+
+[Tasks]
+  . backend.tasks.send_notification_on_new_coworkers_joined
+  . backend.tasks.send_notification_on_new_vote
+  . backend.tasks.send_notifications_on_new_comment
+
