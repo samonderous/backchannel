@@ -850,6 +850,7 @@ static BOOL isSwipeLocked = NO;
 
 // Nasty Tutorial stuff
 @property (assign) BOOL inTutorialMode;
+@property (assign) BOOL isBackFromCommentsView;
 @property (strong, nonatomic) UIImageView *top;
 @property (strong, nonatomic) UIImageView *text;
 @property (strong, nonatomic) UIImageView *bluebar;
@@ -1105,6 +1106,8 @@ static BOOL isSwipeLocked = NO;
     self.navigationItem.rightBarButtonItems = actionButtonItems;
 
     [self setupStreamBar];
+    
+    _isBackFromCommentsView = NO;
 }
 
 - (void)shareButtonTap
@@ -1250,14 +1253,20 @@ static BOOL isSwipeLocked = NO;
 {
     [super viewWillAppear:animated];
     NSLog(@"Enterred view will appear");
+    
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     BOOL isShowStreamTutorial = [[defaults objectForKey:kStreamTutorialKey] boolValue];
-    [self getLatestPosts:^{
-        [self showStreamTutorial];
-        if (_toSid) {
-            [self transitionToDetailedView];
-        }
-    } forFirstTimeTutorial:!isShowStreamTutorial];
+    if (!_isBackFromCommentsView)
+    {
+        [self getLatestPosts:^{
+            [self showStreamTutorial];
+            if (_toSid) {
+                [self transitionToDetailedView];
+            }
+        } forFirstTimeTutorial:!isShowStreamTutorial];
+    } else {
+        _isBackFromCommentsView = NO;
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -1332,6 +1341,7 @@ static BOOL isSwipeLocked = NO;
         
         UITapGestureRecognizer *tapCell = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cellTapped:)];
         [cell addGestureRecognizer:tapCell];
+        
     }
 }
 
@@ -1381,7 +1391,11 @@ static BOOL isSwipeLocked = NO;
     BCCellTopLayerContainerView *tcv = [[BCCellTopLayerContainerView alloc] init:vc.secretModel withSize:size withBottomContainer:nil];
     vc.content = tcv;
     vc.postUpdateCallback = ^{
-        //[cell.cv setNeedsLayout];
+        NSArray *indexPaths = [_messageTable indexPathsForVisibleItems];
+        for (int i=0; i < indexPaths.count; i++) {
+            BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)[_messageTable cellForItemAtIndexPath:indexPaths[i]];
+            [cell.cv setNeedsLayout];
+        }
     };
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     vc.title = @"Backchannel";
@@ -1392,6 +1406,7 @@ static BOOL isSwipeLocked = NO;
 
 - (void)popCommentsViewController
 {
+    _isBackFromCommentsView = YES;
     [self.navigationController popViewControllerAnimated:YES];
 }
 
