@@ -852,7 +852,6 @@ static BOOL isSwipeLocked = NO;
 
 // Nasty Tutorial stuff
 @property (assign) BOOL inTutorialMode;
-@property (assign) BOOL isBackFromCommentsView;
 @property (strong, nonatomic) UIImageView *top;
 @property (strong, nonatomic) UIImageView *text;
 @property (strong, nonatomic) UIImageView *bluebar;
@@ -1108,7 +1107,7 @@ static BOOL isSwipeLocked = NO;
     self.navigationItem.rightBarButtonItems = actionButtonItems;
 
     self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style: UIBarButtonItemStylePlain target:self action:@selector(popCommentsViewController)];
-    
+
     [self setupStreamBar];
     
     _isBackFromCommentsView = NO;

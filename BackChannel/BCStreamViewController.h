@@ -77,6 +77,8 @@ typedef enum Direction {
                                                         UICollectionViewDelegateFlowLayout,
                                                         UITextViewDelegate, BCCellTopLayerContainerViewDelegate>
 
+@property (assign) BOOL isBackFromCommentsView;
+
 - (id)initWithTransition:(NSInteger)toSid;
 - (void)getLatestPosts:(void (^)(void))callback forFirstTimeTutorial:(BOOL)isForTutorial;
 - (void)getLatestNoscrollPosts;
