@@ -389,7 +389,9 @@ static const int kOldPostsBatchSize = 10;
                                    range: NSMakeRange(range.location + 1, voteText.length - 1 - range.location)];
         }
     } else {
-        NSString *voteText = [NSString stringWithFormat:@"%d votes", (int)model.agrees + (int)model.disagrees];
+        int numVotes = (int)model.agrees + (int)model.disagrees;
+        NSString *voteQualifer = numVotes == 1 ? @"vote" : @"votes";
+        NSString *voteText = [NSString stringWithFormat:@"%d %@", numVotes, voteQualifer];
         attributedText = [[NSMutableAttributedString alloc]
                           initWithString:voteText
                           attributes:@{ NSFontAttributeName:font,
@@ -1105,6 +1107,8 @@ static BOOL isSwipeLocked = NO;
     NSArray *actionButtonItems = @[_shareItem];
     self.navigationItem.rightBarButtonItems = actionButtonItems;
 
+    self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style: UIBarButtonItemStylePlain target:self action:@selector(popCommentsViewController)];
+    
     [self setupStreamBar];
     
     _isBackFromCommentsView = NO;
@@ -1399,7 +1403,6 @@ static BOOL isSwipeLocked = NO;
     };
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     vc.title = @"Backchannel";
-    self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStyleBordered target:nil action:nil];
 
     [self.navigationController pushViewController:vc animated:YES];
 }
