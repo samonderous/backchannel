@@ -361,14 +361,7 @@ static const CGFloat kCommentPadding = 30.0;
 
     [self getComments:nil];
 }
-/*
--(void) viewWillDisappear:(BOOL)animated {
-    if ([self.navigationController.viewControllers indexOfObject:self]==NSNotFound) {
-        ((BCStreamViewController *)self.navigationController.parentViewController).isBackFromCommentsView = YES;
-    }
-    [super viewWillDisappear:animated];
-}
-*/
+
 // Debug frame changes
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if([keyPath isEqualToString:@"frame"]) {
@@ -381,11 +374,6 @@ static const CGFloat kCommentPadding = 30.0;
             newFrame = [[object valueForKeyPath:keyPath] CGRectValue];
         }
     }
-}
-
-- (void)handleBackButtonTap:(id)sender
-{
-    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)scrollToBottom
