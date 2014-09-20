@@ -186,6 +186,10 @@ static const CGFloat kCommentPadding = 30.0;
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        
+        // Handle share logic
+        _shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonTap)];
+        _shareItem.tintColor = [UIColor whiteColor];
     }
     return self;
 }
@@ -271,10 +275,6 @@ static const CGFloat kCommentPadding = 30.0;
     [self.view bringSubviewToFront:_bar];
 
     [self registerForKeyboardNotifications];
-    
-    // Handle share logic
-    _shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonTap)];
-    _shareItem.tintColor = [UIColor whiteColor];
     
     NSArray *actionButtonItems = @[_shareItem];
     self.navigationItem.rightBarButtonItems = actionButtonItems;

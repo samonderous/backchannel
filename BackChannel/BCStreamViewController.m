@@ -866,6 +866,11 @@ static BOOL isSwipeLocked = NO;
 - (id)init
 {
     self = [super init];
+    
+    // Handle share logic
+    _shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonTap)];
+    _shareItem.tintColor = [UIColor whiteColor];
+    
     return self;
 }
 
@@ -1098,10 +1103,6 @@ static BOOL isSwipeLocked = NO;
         [self_ getOlderPosts];
     }];
     _messageTable.infiniteScrollingView.enabled = NO;
-    
-    // Handle share logic
-    _shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonTap)];
-    _shareItem.tintColor = [UIColor whiteColor];
     
     NSArray *actionButtonItems = @[_shareItem];
     self.navigationItem.rightBarButtonItems = actionButtonItems;
