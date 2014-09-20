@@ -365,10 +365,7 @@ static const CGFloat kCommentPadding = 30.0;
 -(void) viewWillDisappear:(BOOL)animated {
     if ([self.navigationController.viewControllers indexOfObject:self]==NSNotFound) {
         // set flag in stream view controller from navigation controller stack
-        NSInteger numberOfViewControllers = self.navigationController.viewControllers.count;
-        if (numberOfViewControllers > 1) {
-            ((BCStreamViewController *)[self.navigationController.viewControllers objectAtIndex:numberOfViewControllers - 2]).isBackFromCommentsView = YES;
-        }
+        _backViewController.isBackFromCommentsView = YES;
     }
     [super viewWillDisappear:animated];
 }

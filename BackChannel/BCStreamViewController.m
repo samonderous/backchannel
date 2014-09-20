@@ -1402,6 +1402,7 @@ static BOOL isSwipeLocked = NO;
     };
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     vc.title = @"Backchannel";
+    vc.backViewController = self;
 
     [self.navigationController pushViewController:vc animated:YES];
 }
