@@ -272,17 +272,6 @@ static const CGFloat kCommentPadding = 30.0;
 
     [self registerForKeyboardNotifications];
     
-    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    //[self.view addSubview:backButton];
-    [backButton setTitle:@"←" forState:UIControlStateNormal];
-    [backButton setContentEdgeInsets:UIEdgeInsetsMake(13, 14, 13, 14)];
-    [backButton sizeToFit];
-    [backButton setX:6];
-    [backButton setY:22];
-    backButton.titleLabel.font = [UIFont fontWithName:@"Poly" size:28.0];
-    [backButton setTitleColor:[[BCGlobalsManager globalsManager] blueColor] forState:UIControlStateNormal];
-    [backButton addTarget:self action:@selector(handleBackButtonTap:) forControlEvents: UIControlEventTouchUpInside];
-    
     // Handle share logic
     _shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonTap)];
     _shareItem.tintColor = [UIColor whiteColor];
@@ -385,11 +374,6 @@ static const CGFloat kCommentPadding = 30.0;
             newFrame = [[object valueForKeyPath:keyPath] CGRectValue];
         }
     }
-}
-
-- (void)handleBackButtonTap:(id)sender
-{
-    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)scrollToBottom

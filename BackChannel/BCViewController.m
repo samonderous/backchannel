@@ -137,6 +137,7 @@ typedef enum TransitionType {
 {
     UINavigationController *nc;
     BCStreamViewController *vc = [[BCStreamViewController alloc] init];
+    vc.navigationItem.rightBarButtonItem.tintColor = [UIColor whiteColor];
     
     // figure out what's in the notificationPayload dictionary
     if ([pushPayload[@"type"] isEqualToString:@"stream_view"]) {
