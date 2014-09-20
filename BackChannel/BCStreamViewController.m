@@ -1106,7 +1106,7 @@ static BOOL isSwipeLocked = NO;
     NSArray *actionButtonItems = @[_shareItem];
     self.navigationItem.rightBarButtonItems = actionButtonItems;
 
-    self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style: UIBarButtonItemStylePlain target:self action:@selector(popCommentsViewController)];
+    //self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style: UIBarButtonItemStylePlain target:self action:@selector(popCommentsViewController)];
 
     [self setupStreamBar];
     
@@ -1403,6 +1403,8 @@ static BOOL isSwipeLocked = NO;
     vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     vc.title = @"Backchannel";
 
+    vc.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"←" style:UIBarButtonItemStylePlain target:self action:@selector(popCommentsViewController)];
+    
     [self.navigationController pushViewController:vc animated:YES];
 }
 
