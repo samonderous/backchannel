@@ -18,11 +18,11 @@ except:
 
 @task()
 def send_notifications_on_new_comment(secret, comment):
-	if settings.DEBUG:
+	if not settings.PRODUCTION:
 		apns = APNs(use_sandbox=True, cert_file='/home/ubuntu/apns/BackchannelCert.pem', 
 					key_file='/home/ubuntu/apns/BackchannelKey.pem')
 	else:
-		apns = APNs(use_sandbox=True, cert_file='/home/ubuntu/apns/BackchannelProdCert.pem', 
+		apns = APNs(use_sandbox=False, cert_file='/home/ubuntu/apns/BackchannelProdCert.pem', 
 					key_file='/home/ubuntu/apns/BackchannelProdKey.pem')
 		
 
@@ -45,8 +45,9 @@ def send_notifications_on_new_comment(secret, comment):
 			user_followers.append(follower)
 
 	for follower in user_followers:
-		# owner == comment.user should be covered by follower.user == comment.user but anyway
-		if follower.user == comment.user or owner == comment.user:
+
+		# filter out the commenting user from getting his own push that he commented
+		if follower.user == comment.user:
 			continue
 
 		# IF the owner had previously commented on his own post and is the creator of the post 
@@ -66,11 +67,11 @@ def send_notifications_on_new_comment(secret, comment):
 
 @task()
 def send_notification_on_new_vote(usersecret):
-	if settings.DEBUG:
+	if not settings.PRODUCTION:
 		apns = APNs(use_sandbox=True, cert_file='/home/ubuntu/apns/BackchannelCert.pem', 
 					key_file='/home/ubuntu/apns/BackchannelKey.pem')
 	else:
-		apns = APNs(use_sandbox=True, cert_file='/home/ubuntu/apns/BackchannelProdCert.pem', 
+		apns = APNs(use_sandbox=False, cert_file='/home/ubuntu/apns/BackchannelProdCert.pem', 
 					key_file='/home/ubuntu/apns/BackchannelProdKey.pem')
 	owner = usersecret.secret.user
 	if not owner.device_token or owner == usersecret.user:
@@ -83,11 +84,11 @@ def send_notification_on_new_vote(usersecret):
 
 @task()
 def send_notification_on_new_coworkers_joined(newuser):
-	if settings.DEBUG:
+	if not settings.PRODUCTION:
 		apns = APNs(use_sandbox=True, cert_file='/home/ubuntu/apns/BackchannelCert.pem', 
 					key_file='/home/ubuntu/apns/BackchannelKey.pem')
 	else:
-		apns = APNs(use_sandbox=True, cert_file='/home/ubuntu/apns/BackchannelProdCert.pem', 
+		apns = APNs(use_sandbox=False, cert_file='/home/ubuntu/apns/BackchannelProdCert.pem', 
 					key_file='/home/ubuntu/apns/BackchannelProdKey.pem')
 
 	users = User.objects.filter(org=newuser.org).order_by('-id')
