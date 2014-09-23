@@ -25,14 +25,14 @@ except:
 	pass
 
 def pushonce():
-	apns = APNs(use_sandbox=True, cert_file='/home/ubuntu/apns/BackchannelCert.pem', 
-				key_file='/home/ubuntu/apns/BackchannelKey.pem')
-	user = User.objects.get(id=190)
+	apns = APNs(use_sandbox=False, cert_file='/home/ubuntu/apns/BackchannelProdCert.pem', 
+				key_file='/home/ubuntu/apns/BackchannelProdKey.pem')
+	user = User.objects.get(id=146)
 	token = user.device_token
 	print "%s" % token 
 
     # backchannel.it: 259
-	payload = Payload(alert="TEST: A few more coworkers joined your Backchannel", 
+	payload = Payload(alert="David, did you get this?", 
 						sound="default", 
 						custom={'type': 'stream_view'})
 	apns.gateway_server.send_notification(token, payload)
