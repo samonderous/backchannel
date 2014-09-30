@@ -343,8 +343,14 @@ static const CGFloat kCommentPadding = 30.0;
         NSLog(@"error code %d", (int)operation.response.statusCode);
     };
     
-    [[BCAPIClient sharedClient] fetchCommentsFor:_secretModel success:success failure:failure];
-    [_placeHolder showWaiting];
+    // In event creating new post didn't get response in time (sid assigned), just show
+    // no comments, otherwise request will fail.
+    if (_secretModel.sid != 0) {
+        [[BCAPIClient sharedClient] fetchCommentsFor:_secretModel success:success failure:failure];
+        [_placeHolder showWaiting];
+    } else {
+        success((NSMutableArray*)@[]);
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated
