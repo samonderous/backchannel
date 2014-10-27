@@ -14,7 +14,7 @@
 		<string>https://github.com/samonderous/backchannel.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>BackChannel.xcodeproj/project.xcworkspace</string>
+	<string>BackChannel.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>5AD4581C07B30E714D1D704F654EAF24704902C3</key>
@@ -34,7 +34,7 @@
 			<key>IDESourceControlWCCIdentifierKey</key>
 			<string>5AD4581C07B30E714D1D704F654EAF24704902C3</string>
 			<key>IDESourceControlWCCName</key>
-			<string>backchannel</string>
+			<string>BackChannel</string>
 		</dict>
 	</array>
 </dict>
