@@ -56,16 +56,10 @@
 
     //[[Crashlytics sharedInstance] setDebugMode:YES];
     [Crashlytics startWithAPIKey:@"f59d6a71a710bdff855cd287d71b64b426d0e957"];
-    
-#if RELEASE
-    NSLog(@"getting release");
-#else
-    NSLog(@"getting debug");
-#endif
-    
+
     //[Flurry setCrashReportingEnabled:YES];
     #if !TARGET_IPHONE_SIMULATOR
-    //[Flurry startSession:@"MWV2G8ZG3JTK75ZPRNMC"];
+        [Flurry startSession:@"MWV2G8ZG3JTK75ZPRNMC"];
     #endif
     
     [[BCGlobalsManager globalsManager] loadConfig];

@@ -17,6 +17,7 @@ NSString *kdeviceTokenAcceptedKey = @"deviceTokenAccepted";
 static NSString *kModalSeenKey = @"modalSeenKey";
 static NSString *kCreatePostKey = @"createPostKey";
 static NSString *kCommentPushKey = @"commentKey";
+static NSString *kVoteKey = @"voteKey";
 
 
 @implementation BCPushNotificationFlow
@@ -38,13 +39,57 @@ static NSString *kCommentPushKey = @"commentKey";
 - (void)showPushNotificationDialog
 {
     [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound];
+    
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     [_alertView dismissWithClickedButtonIndex:buttonIndex animated:YES];
-    [self showPushNotificationDialog];
-    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationSystemDialog withParams:nil];
+    if (buttonIndex == 1) {
+        [self showPushNotificationDialog];
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationSystemDialog withParams:nil];
+    } else {
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationSystemCancelDialog withParams:nil];
+    }
+}
+
+- (void)showOnVoteFlow
+{
+    NSString *title = @"Know when coworkers join your backchannel";
+    NSString *message = @"Tap OK when prompted about Push Notifications to know when new coworkers join your backchannel and vote on popular posts.";
+    NSString *buttonText = @"Next";
+    NSInteger voteCount;
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+    NSNumber *vote = [defaults objectForKey:kVoteKey];
+    if (!vote) {
+        voteCount = 0;
+    } else {
+        voteCount = [vote integerValue];
+    }
+
+    if (types != UIRemoteNotificationTypeNone || voteCount > 1) {
+        [self showPushNotificationDialog];
+        return;
+    }
+    
+    [defaults setObject:[NSNumber numberWithLong:voteCount + 1] forKey:kVoteKey];
+    if (voteCount < 1) {
+        return;
+    }
+    
+    if ([self hasUserDeniedPermission]) {
+        message = kFallbackMessage;
+        buttonText = kFallbackButtonText;
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationVoteFallbackFlow withParams:nil];
+    } else {
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationVoteFlow withParams:nil];
+    }
+    
+    [defaults setObject:@"YES" forKey:kModalSeenKey];
+    _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:buttonText, nil];
+    [_alertView show];
 }
 
 - (void)showOnCreatePostFlow
@@ -75,7 +120,7 @@ static NSString *kCommentPushKey = @"commentKey";
     
     [defaults setObject:@"YES" forKey:kModalSeenKey];
     [defaults setObject:@"YES" forKey:kCreatePostKey];
-    _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:buttonText otherButtonTitles:nil, nil];
+    _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:buttonText, nil];
     [_alertView show];
 }
 
@@ -104,7 +149,7 @@ static NSString *kCommentPushKey = @"commentKey";
     
     [defaults setObject:@"YES" forKey:kCommentPushKey];
     [defaults setObject:@"YES" forKey:kModalSeenKey];
-    _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:buttonText otherButtonTitles:nil, nil];
+    _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:buttonText, nil];
     [_alertView show];
 }
 

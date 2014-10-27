@@ -68,18 +68,12 @@ NSString *kEventNotificationPostFlow = @"notification_post_flow";
 NSString *kEventNotificationPostFallbackFlow = @"notification_post_fallback_flow";
 NSString *kEventNotificationCommentFlow = @"notification_comment_flow";
 NSString *kEventNotificationCommentFallbackFlow = @"notification_comment_fallback_flow";
+NSString *kEventNotificationVoteFlow = @"notification_vote_flow";
+NSString *kEventNotificationVoteFallbackFlow = @"notification_vote_fallback_flow";
 NSString *kEventNotificationSystemDialog = @"notification_system_dialog_shown_from_opt_in_flow";
 NSString *kEventNotificationDeviceToken = @"notification_system_device_token_received";
 NSString *kEventNotificationDeviceTokenFromDelegates = @"notification_device_token_requested_from_delegates";
-
-
-
-
-
-
-
-
-
+NSString *kEventNotificationSystemCancelDialog = @"notification_system_dialog_shown_from_opt_in_flow_cancelled";
 
 
 @implementation BCGlobalsManager

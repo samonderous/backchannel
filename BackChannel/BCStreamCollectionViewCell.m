@@ -23,11 +23,6 @@
 - (void)prepareForReuse
 {
     [super prepareForReuse];
-
-    for (UIGestureRecognizer *recognizer in self.gestureRecognizers) {
-        [self removeGestureRecognizer:recognizer];
-    }
-    
     
     for (UIGestureRecognizer *recognizer in self.contentView.gestureRecognizers) {
         [self.contentView removeGestureRecognizer:recognizer];
@@ -44,9 +39,12 @@
     [_cv removeFromSuperview];
     [_ccv removeFromSuperview];
     [_separator removeFromSuperview];
+    
     _cv = nil;
     _ccv = nil;
     _separator = nil;
 }
+
+
 
 @end

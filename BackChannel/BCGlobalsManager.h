@@ -72,9 +72,12 @@ extern NSString *kEventNotificationPostFlow;
 extern NSString *kEventNotificationPostFallbackFlow;
 extern NSString *kEventNotificationCommentFlow;
 extern NSString *kEventNotificationCommentFallbackFlow;
+extern NSString *kEventNotificationVoteFlow;
+extern NSString *kEventNotificationVoteFallbackFlow;
 extern NSString *kEventNotificationSystemDialog;
 extern NSString *kEventNotificationDeviceToken;
 extern NSString *kEventNotificationDeviceTokenFromDelegates;
+extern NSString *kEventNotificationSystemCancelDialog;
 
 
 
