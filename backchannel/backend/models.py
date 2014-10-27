@@ -175,6 +175,8 @@ class TrackClickAdmin(admin.ModelAdmin):
 class WaitlistOrgAdmin(admin.ModelAdmin):
     pass
 
+class CommentAdmin(admin.ModelAdmin):
+    pass
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Org, OrgAdmin)
@@ -182,3 +184,4 @@ admin.site.register(Secret, SecretAdmin)
 admin.site.register(UserSecret, UserSecretAdmin)
 admin.site.register(TrackClick, TrackClickAdmin)
 admin.site.register(WaitlistOrg, WaitlistOrgAdmin)
+admin.site.register(Comment, CommentAdmin)
