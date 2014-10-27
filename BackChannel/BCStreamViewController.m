@@ -591,10 +591,20 @@ static BOOL isSwipeLocked = NO;
     self.backgroundColor = [UIColor whiteColor];
     
     _animator = [[UIDynamicAnimator alloc] initWithReferenceView:self.superview];
+    _animator.delegate = self;
+    
     _swipeCellStartX = 0;
     _thresholdCrossed = NO;
     
     return self;
+}
+
+- (void)dynamicAnimatorDidPause:(UIDynamicAnimator *)animator
+{
+    [animator removeAllBehaviors];
+    if (_thresholdCrossed) {
+        [[BCAppDelegate sharedAppDelegate].pushFlow showOnVoteFlow];
+    }
 }
 
 - (void)layoutSubviews
@@ -1078,7 +1088,8 @@ static BOOL isSwipeLocked = NO;
     _messages = [[NSMutableArray alloc] init];
     _messageTable.dataSource = self;
     _messageTable.delegate = self;
-    [_messageTable registerClass:[BCStreamCollectionViewCell class] forCellWithReuseIdentifier:@"BCStreamCollectionViewCell"];
+    [_messageTable registerClass:[BCStreamCollectionViewCell class] forCellWithReuseIdentifier:@"BCStreamCollectionViewCellCompose"];
+    [_messageTable registerClass:[BCStreamCollectionViewCell class] forCellWithReuseIdentifier:@"BCStreamCollectionViewCellPost"];
     [_messageTable setShowsHorizontalScrollIndicator:NO];
     [_messageTable setShowsVerticalScrollIndicator:NO];
     _messageTable.backgroundColor = [UIColor whiteColor];
@@ -1307,7 +1318,7 @@ static BOOL isSwipeLocked = NO;
     static const float separatorLineWidth = 80.0;
     UIView *separatorLine = [[UIView alloc] init];
     separatorLine.frame = CGRectMake(CGRectGetMidX(cell.contentView.bounds) - (separatorLineWidth / 2.0),
-                                     CGRectGetMaxY(cell.contentView.bounds) - 1.0,
+                                     CGRectGetHeight(cell.contentView.bounds) - 1.0,
                                      separatorLineWidth,
                                      1.0);
     [cell.contentView addSubview:separatorLine];
@@ -1323,7 +1334,6 @@ static BOOL isSwipeLocked = NO;
         BCCellComposeView *cv = [[BCCellComposeView alloc] init:CGRectGetWidth(cell.bounds)];
         [cell.contentView addSubview:cv];
         [self setSeparator:cell indexPath:indexPath];
-        [cv placeIn:cell.contentView alignedAt:CENTER_LEFT];
         cell.cv = cv;
     } else {
         BCSecretModel *secretModel = [_messages objectAtIndex:indexPath.item - 1];
@@ -1341,10 +1351,6 @@ static BOOL isSwipeLocked = NO;
         [bcv placeIn:cell.contentView alignedAt:CENTER];
         
         [self setSeparator:cell indexPath:indexPath];
-        
-        UITapGestureRecognizer *tapCell = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cellTapped:)];
-        [cell addGestureRecognizer:tapCell];
-        
     }
 }
 
@@ -1372,16 +1378,14 @@ static BOOL isSwipeLocked = NO;
     [self showDetailedView:(BCSecretModel*)_messages[i]];
 }
 
-- (void)cellTapped:(UITapGestureRecognizer*)sender
+- (void)cellTapped:(UICollectionViewCell*)cell
 {
     if (_inTutorialMode) {
         return;
     }
     
-    BCStreamCollectionViewCell *cell = (BCStreamCollectionViewCell*)sender.view;
     [[BCGlobalsManager globalsManager] logFlurryEvent:kEventTappedToComments withParams:nil];
-    
-    [self showDetailedView:(BCSecretModel*)[_messages objectAtIndex:[_messageTable indexPathForCell:cell].row - 1]];
+    [self showDetailedView:(BCSecretModel*)[_messages objectAtIndex:[_messageTable indexPathForCell:cell].item - 1]];
 }
 
 - (void)showDetailedView:(BCSecretModel*)model
@@ -1416,9 +1420,19 @@ static BOOL isSwipeLocked = NO;
 - (BCStreamCollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 
 {
-    BCStreamCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCStreamCollectionViewCell" forIndexPath:indexPath];
+    BCStreamCollectionViewCell *cell;
+    
+    if (indexPath.item == 0) {
+        cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCStreamCollectionViewCellCompose" forIndexPath:indexPath];
+    } else {
+        cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"BCStreamCollectionViewCellPost" forIndexPath:indexPath];
+    }
+    //[cell debug];
     [self prepareCell:cell collectionView:(UICollectionView*)collectionView indexPath:(NSIndexPath*)indexPath];
 
+    if (indexPath.item == 0) {
+        [Utils debugRect:cell withName:@"cell"];
+    }
     return cell;
 }
 
@@ -1736,6 +1750,8 @@ static BOOL isSwipeLocked = NO;
             [self setupCompose:collectionView indexPath:indexPath];
         } completion:^(BOOL finished) {
         }];
+    } else {
+        [self cellTapped:[collectionView cellForItemAtIndexPath:indexPath]];
     }
 
     [[BCGlobalsManager globalsManager] logFlurryEvent:kEventCreatePost withParams:nil];
