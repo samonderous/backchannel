@@ -22,8 +22,6 @@ SECRET_KEY = 'epy39e-z_fp3^6=k2g^6t97!qa181g9h#)^7(6h1lbr3+l%n^j'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-PRODUCTION = True
-
 TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -52,9 +50,6 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'backchannel.urls'
-
-WSGI_APPLICATION = 'backchannel.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
@@ -131,3 +126,13 @@ CELERYBEAT_PIDFILE = '/tmp/celerybeat.pid'
 #        'args': ()
 #    },
 #}
+
+
+if os.environ.get('BACKCHANNEL_MODE') == 'PROD':
+    WSGI_APPLICATION = 'backchannel.wsgi.application'
+    PRODUCTION = True
+    DOMAIN = 'https://bckchannelapp.com'
+else:
+    WSGI_APPLICATION = 'backchannel.wsgi_dev.application'
+    PRODUCTION = False
+    DOMAIN = 'http://ec2-54-92-236-21.compute-1.amazonaws.com'
