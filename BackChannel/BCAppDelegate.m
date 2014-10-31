@@ -81,8 +81,8 @@
     
     // Scenario where user went to settings, allowed push. Launch dialog flow so delegate gets called
     // to write device token to server.
-    UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
-    if (types != UIRemoteNotificationTypeNone) {
+    BOOL isRemoteReceived = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
+    if (isRemoteReceived) {
         [_pushFlow showPushNotificationDialog];
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceTokenFromDelegates withParams:nil];
     }
@@ -104,6 +104,11 @@
         UIViewController *vc = [BCViewController performSegueOnPushNotification:userInfo];
         self.window.rootViewController = vc;
     }
+}
+
+- (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
+{
+    [application registerForRemoteNotifications];
 }
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
@@ -149,8 +154,8 @@
     NSLog(@"Came into will enter fg");
     // Scenario where user went to settings, allowed push. App is in bg and WILL NOT call viewWillAppear
     // or call didFinishLaunching... delegate. So write out device token to server.
-    UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
-    if (types != UIRemoteNotificationTypeNone) {
+    BOOL isRemoteReceived = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
+    if (isRemoteReceived) {
         [_pushFlow showPushNotificationDialog];
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceTokenFromDelegates withParams:nil];
     }

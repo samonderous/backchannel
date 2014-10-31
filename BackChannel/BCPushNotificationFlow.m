@@ -38,8 +38,8 @@ static NSString *kVoteKey = @"voteKey";
 
 - (void)showPushNotificationDialog
 {
-    [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound];
-    
+    //[[UIApplication sharedApplication] registerForRemoteNotifications];
+    [[UIApplication sharedApplication] registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound categories:nil]];
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
@@ -61,7 +61,8 @@ static NSString *kVoteKey = @"voteKey";
     NSInteger voteCount;
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+    BOOL isReceivedRemote = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
+    
     NSNumber *vote = [defaults objectForKey:kVoteKey];
     if (!vote) {
         voteCount = 0;
@@ -69,7 +70,7 @@ static NSString *kVoteKey = @"voteKey";
         voteCount = [vote integerValue];
     }
 
-    if (types != UIRemoteNotificationTypeNone || voteCount > 1) {
+    if (isReceivedRemote || voteCount > 1) {
         [self showPushNotificationDialog];
         return;
     }
@@ -83,12 +84,14 @@ static NSString *kVoteKey = @"voteKey";
         message = kFallbackMessage;
         buttonText = kFallbackButtonText;
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationVoteFallbackFlow withParams:nil];
+        _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:buttonText otherButtonTitles:nil, nil];
     } else {
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationVoteFlow withParams:nil];
+        _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:buttonText, nil];
     }
     
     [defaults setObject:@"YES" forKey:kModalSeenKey];
-    _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:buttonText, nil];
+
     [_alertView show];
 }
 
@@ -99,13 +102,13 @@ static NSString *kVoteKey = @"voteKey";
     NSString *buttonText = @"Next";
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+    BOOL isReceivedRemote = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
     NSString *createKey = [defaults objectForKey:kCreatePostKey];
     
     
     // If user has already given us permission for something either by tapping OK in dialog
     // or from settings. Regardless if we're good to go then no need to show our modal.
-    if (types != UIRemoteNotificationTypeNone || createKey) {
+    if (isReceivedRemote || createKey) {
         [self showPushNotificationDialog];
         return;
     }
@@ -114,13 +117,14 @@ static NSString *kVoteKey = @"voteKey";
         message = kFallbackMessage;
         buttonText = kFallbackButtonText;
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationPostFallbackFlow withParams:nil];
+        _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:buttonText otherButtonTitles:nil, nil];
     } else {
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationPostFlow withParams:nil];
+        _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:buttonText, nil];
     }
     
     [defaults setObject:@"YES" forKey:kModalSeenKey];
     [defaults setObject:@"YES" forKey:kCreatePostKey];
-    _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:buttonText, nil];
     [_alertView show];
 }
 
@@ -131,10 +135,10 @@ static NSString *kVoteKey = @"voteKey";
     NSString *buttonText = @"Next";
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+    BOOL isReceivedRemote = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
     NSString *commentKey = [defaults objectForKey:kCommentPushKey];
 
-    if (types != UIRemoteNotificationTypeNone || commentKey) {
+    if (isReceivedRemote || commentKey) {
         [self showPushNotificationDialog];
         return;
     }
@@ -143,13 +147,14 @@ static NSString *kVoteKey = @"voteKey";
         message = kFallbackMessage;
         buttonText = kFallbackButtonText;
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationCommentFallbackFlow withParams:nil];
+        _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:buttonText otherButtonTitles:nil, nil];
     } else {
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationCommentFlow withParams:nil];
+        _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:buttonText, nil];
     }
     
     [defaults setObject:@"YES" forKey:kCommentPushKey];
     [defaults setObject:@"YES" forKey:kModalSeenKey];
-    _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:buttonText, nil];
     [_alertView show];
 }
 
