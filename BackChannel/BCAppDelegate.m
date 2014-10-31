@@ -81,10 +81,18 @@
     
     // Scenario where user went to settings, allowed push. Launch dialog flow so delegate gets called
     // to write device token to server.
-    BOOL isRemoteReceived = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
-    if (isRemoteReceived) {
-        [_pushFlow showPushNotificationDialog];
-        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceTokenFromDelegates withParams:nil];
+    if ([application respondsToSelector:@selector(isRegisteredForRemoteNotifications)]) {
+        BOOL isReceivedRemote = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
+        if (isReceivedRemote) {
+            [_pushFlow showPushNotificationDialog];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceTokenFromDelegates withParams:nil];
+        }
+    } else {
+        UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+        if (types != UIRemoteNotificationTypeNone) {
+            [_pushFlow showPushNotificationDialog];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceTokenFromDelegates withParams:nil];
+        }
     }
     
     return YES;
@@ -154,12 +162,20 @@
     NSLog(@"Came into will enter fg");
     // Scenario where user went to settings, allowed push. App is in bg and WILL NOT call viewWillAppear
     // or call didFinishLaunching... delegate. So write out device token to server.
-    BOOL isRemoteReceived = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
-    if (isRemoteReceived) {
-        [_pushFlow showPushNotificationDialog];
-        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceTokenFromDelegates withParams:nil];
+    if ([application respondsToSelector:@selector(isRegisteredForRemoteNotifications)]) {
+        BOOL isReceivedRemote = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
+        if (isReceivedRemote) {
+            [_pushFlow showPushNotificationDialog];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceTokenFromDelegates withParams:nil];
+        }
+    } else {
+        UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+        if (types != UIRemoteNotificationTypeNone) {
+            [_pushFlow showPushNotificationDialog];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationDeviceTokenFromDelegates withParams:nil];
+        }
     }
-    
+
     [[BCGlobalsManager globalsManager] logFlurryEvent:kEventBackgroundToForeground withParams:nil];
 }
 

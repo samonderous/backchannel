@@ -38,8 +38,13 @@ static NSString *kVoteKey = @"voteKey";
 
 - (void)showPushNotificationDialog
 {
-    //[[UIApplication sharedApplication] registerForRemoteNotifications];
-    [[UIApplication sharedApplication] registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound categories:nil]];
+    UIApplication *application = [UIApplication sharedApplication];
+    if ([application respondsToSelector:@selector(registerUserNotificationSettings:)]) {
+        [application registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound categories:nil]];
+    } else {
+        UIRemoteNotificationType types = UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeSound;
+        [application registerForRemoteNotificationTypes:types];
+    }
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
@@ -61,8 +66,6 @@ static NSString *kVoteKey = @"voteKey";
     NSInteger voteCount;
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    BOOL isReceivedRemote = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
-    
     NSNumber *vote = [defaults objectForKey:kVoteKey];
     if (!vote) {
         voteCount = 0;
@@ -70,9 +73,19 @@ static NSString *kVoteKey = @"voteKey";
         voteCount = [vote integerValue];
     }
 
-    if (isReceivedRemote || voteCount > 1) {
-        [self showPushNotificationDialog];
-        return;
+    UIApplication *application = [UIApplication sharedApplication];
+    if ([application respondsToSelector:@selector(isRegisteredForRemoteNotifications)]) {
+        BOOL isReceivedRemote = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
+        if (isReceivedRemote || voteCount > 1) {
+            [self showPushNotificationDialog];
+            return;
+        }
+    } else {
+        UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+        if (types != UIRemoteNotificationTypeNone || voteCount > 1) {
+            [self showPushNotificationDialog];
+            return;
+        }
     }
     
     [defaults setObject:[NSNumber numberWithLong:voteCount + 1] forKey:kVoteKey];
@@ -102,15 +115,23 @@ static NSString *kVoteKey = @"voteKey";
     NSString *buttonText = @"Next";
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    BOOL isReceivedRemote = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
     NSString *createKey = [defaults objectForKey:kCreatePostKey];
     
-    
-    // If user has already given us permission for something either by tapping OK in dialog
-    // or from settings. Regardless if we're good to go then no need to show our modal.
-    if (isReceivedRemote || createKey) {
-        [self showPushNotificationDialog];
-        return;
+    UIApplication *application = [UIApplication sharedApplication];
+    if ([application respondsToSelector:@selector(isRegisteredForRemoteNotifications)]) {
+        BOOL isReceivedRemote = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
+        // If user has already given us permission for something either by tapping OK in dialog
+        // or from settings. Regardless if we're good to go then no need to show our modal.
+        if (isReceivedRemote || createKey) {
+            [self showPushNotificationDialog];
+            return;
+        }
+    } else {
+        UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+        if (types != UIRemoteNotificationTypeNone || createKey) {
+            [self showPushNotificationDialog];
+            return;
+        }
     }
     
     if ([self hasUserDeniedPermission]) {
@@ -135,12 +156,23 @@ static NSString *kVoteKey = @"voteKey";
     NSString *buttonText = @"Next";
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    BOOL isReceivedRemote = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
     NSString *commentKey = [defaults objectForKey:kCommentPushKey];
 
-    if (isReceivedRemote || commentKey) {
-        [self showPushNotificationDialog];
-        return;
+    UIApplication *application = [UIApplication sharedApplication];
+    if ([application respondsToSelector:@selector(isRegisteredForRemoteNotifications)]) {
+        BOOL isReceivedRemote = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
+        // If user has already given us permission for something either by tapping OK in dialog
+        // or from settings. Regardless if we're good to go then no need to show our modal.
+        if (isReceivedRemote || commentKey) {
+            [self showPushNotificationDialog];
+            return;
+        }
+    } else {
+        UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+        if (types != UIRemoteNotificationTypeNone || commentKey) {
+            [self showPushNotificationDialog];
+            return;
+        }
     }
     
     if ([self hasUserDeniedPermission]) {
