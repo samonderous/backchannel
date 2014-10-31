@@ -11,7 +11,7 @@ import sys
 
 sys.path.append('/home/ubuntu/Backchannel/backchannel')
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backchannel.settings")
-os.environ.setdefault("BACKCHANNEL_MODE", "PROD")
+os.environ.setdefault("BACKCHANNEL_MODE", "DEV")
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()

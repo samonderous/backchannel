@@ -4,6 +4,8 @@ import logging
 import os.path
 import re
 
+from backchannel import settings as app_settings 
+
 from django.conf import settings
 from django.core import mail
 from django.core.mail import EmailMultiAlternatives, SafeMIMEMultipart
@@ -116,7 +118,7 @@ def send_verify_email(org, email, udid):
 	to_email = email or 'saureen@gmail.com'
 	subject = "Your access link to %s's Backchannel" % org.name
 
-	link = "<a href='https://bckchannelapp.com/backend/verify/?u=%s'>here to access</a>" % udid
+	link = "<a href='%s/backend/verify/?u=%s'>here to access</a>" % (app_settings.DOMAIN, udid)
 	item_html = "Thanks for joining!<br /><br />On your iPhone, tap %s your Backchannel and start sharing workplace thoughts anonymously with your coworkers." % link
 
 	footer = "<br /><br />The Backchannel Team<br /><a href='http://backchannel.it'>backchannel.it</a>"
@@ -137,9 +139,9 @@ def send_share_email(email, code, photo):
 	# HTML + image container 
 	related = MIMEMultipart("related")
 
-        link = '<a href="https://bckchannelapp.com/backend/signup/?c=%s">View more anonymous posts on your company\'s Backchannel</a>' % code
+        link = '<a href="%s/backend/signup/?c=%s">View more anonymous posts on your company\'s Backchannel</a>' % (app_settings.DOMAIN, code)
 	#link = '<a href="backchannel://backchannel.it/">View more anonymous posts on your company\'s Backchannel</a>'
-        photo_url = '<a href="https://bckchannelapp.com/backend/signup/?c=%s">' % code
+        photo_url = '<a href="%s/backend/signup/?c=%s">' % (app_settings.DOMAIN, code)
         image_link = '<img src="cid:%s"' % photo 
         image_link += ' width="80%" height="auto"/></a>'
 
