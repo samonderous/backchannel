@@ -50,12 +50,8 @@ static NSString *kVoteKey = @"voteKey";
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     [_alertView dismissWithClickedButtonIndex:buttonIndex animated:YES];
-    if (buttonIndex == 1) {
-        [self showPushNotificationDialog];
-        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationSystemDialog withParams:nil];
-    } else {
-        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationSystemCancelDialog withParams:nil];
-    }
+    [self showPushNotificationDialog];
+    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationSystemDialog withParams:nil];
 }
 
 - (void)showOnVoteFlow
@@ -100,7 +96,7 @@ static NSString *kVoteKey = @"voteKey";
         _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:buttonText otherButtonTitles:nil, nil];
     } else {
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationVoteFlow withParams:nil];
-        _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:buttonText, nil];
+        _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:buttonText otherButtonTitles:nil, nil];
     }
     
     [defaults setObject:@"YES" forKey:kModalSeenKey];
@@ -141,7 +137,7 @@ static NSString *kVoteKey = @"voteKey";
         _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:buttonText otherButtonTitles:nil, nil];
     } else {
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationPostFlow withParams:nil];
-        _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:buttonText, nil];
+        _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:buttonText otherButtonTitles:nil, nil];
     }
     
     [defaults setObject:@"YES" forKey:kModalSeenKey];
@@ -182,7 +178,7 @@ static NSString *kVoteKey = @"voteKey";
         _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:buttonText otherButtonTitles:nil, nil];
     } else {
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationCommentFlow withParams:nil];
-        _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:buttonText, nil];
+        _alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:buttonText otherButtonTitles:nil, nil];
     }
     
     [defaults setObject:@"YES" forKey:kCommentPushKey];
