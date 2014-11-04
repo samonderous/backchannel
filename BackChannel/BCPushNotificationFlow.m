@@ -22,6 +22,14 @@ static NSString *kVoteKey = @"voteKey";
 
 @implementation BCPushNotificationFlow
 
+- (BOOL)hadOnceAcceptedPermission
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *deviceTokenAccepted = (NSString*)[defaults objectForKey:kdeviceTokenAcceptedKey];
+    return deviceTokenAccepted;
+}
+
+
 - (BOOL)hasUserAcceptedPermission
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -89,7 +97,7 @@ static NSString *kVoteKey = @"voteKey";
         return;
     }
     
-    if ([self hasUserDeniedPermission]) {
+    if ([self hasUserDeniedPermission] || [self hadOnceAcceptedPermission]) {
         message = kFallbackMessage;
         buttonText = kFallbackButtonText;
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationVoteFallbackFlow withParams:nil];
@@ -130,7 +138,7 @@ static NSString *kVoteKey = @"voteKey";
         }
     }
     
-    if ([self hasUserDeniedPermission]) {
+    if ([self hasUserDeniedPermission] || [self hadOnceAcceptedPermission]) {
         message = kFallbackMessage;
         buttonText = kFallbackButtonText;
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationPostFallbackFlow withParams:nil];
@@ -171,7 +179,7 @@ static NSString *kVoteKey = @"voteKey";
         }
     }
     
-    if ([self hasUserDeniedPermission]) {
+    if ([self hasUserDeniedPermission] || [self hadOnceAcceptedPermission]) {
         message = kFallbackMessage;
         buttonText = kFallbackButtonText;
         [[BCGlobalsManager globalsManager] logFlurryEvent:kEventNotificationCommentFallbackFlow withParams:nil];
