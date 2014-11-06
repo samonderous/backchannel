@@ -75,6 +75,9 @@ NSString *kEventNotificationDeviceToken = @"notification_system_device_token_rec
 NSString *kEventNotificationDeviceTokenFromDelegates = @"notification_device_token_requested_from_delegates";
 NSString *kEventNotificationSystemCancelDialog = @"notification_system_dialog_shown_from_opt_in_flow_cancelled";
 
+NSString *kEventServerErrorResponse = @"server_error_response";
+NSString *kEventServerSuccessResponse = @"server_success_response";
+
 
 @implementation BCGlobalsManager
 

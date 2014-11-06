@@ -78,7 +78,8 @@ extern NSString *kEventNotificationSystemDialog;
 extern NSString *kEventNotificationDeviceToken;
 extern NSString *kEventNotificationDeviceTokenFromDelegates;
 extern NSString *kEventNotificationSystemCancelDialog;
-
+extern NSString *kEventServerErrorResponse;
+extern NSString *kEventServerSuccessResponse;
 
 
 @interface BCGlobalsManager : NSObject

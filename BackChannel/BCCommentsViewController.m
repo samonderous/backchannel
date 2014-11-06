@@ -407,7 +407,7 @@ static const CGFloat kCommentPadding = 30.0;
 {
     NSString *commentString = [[_bar.commentsTextView.text copy] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     
-    if ([commentString  isEqual: @""]) {
+    if ([commentString isEqual: @""]) {
         return;
     }
     
@@ -425,7 +425,8 @@ static const CGFloat kCommentPadding = 30.0;
 
             [[BCAppDelegate sharedAppDelegate].pushFlow showOnCommentFlow];
             
-            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventPostedComment withParams:nil];
+            NSMutableDictionary *pparams = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"cid", responseObject[@"cid"], nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventPostedComment withParams:pparams];
         }];
     };
     
@@ -433,6 +434,10 @@ static const CGFloat kCommentPadding = 30.0;
         NSLog(@"Error in get stream: %@", error);
         NSLog(@"error code %d", (int)operation.response.statusCode);
         [_bar hideIndicator];
+        NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"type", @"posted comment response", nil];
+        [params setValue:error forKey:@"error message"];
+        [params setValue:[NSNumber numberWithLong:operation.response.statusCode] forKey:@"status code"];
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventServerErrorResponse withParams:params];
     };
     
     [[BCAPIClient sharedClient] createComment:commentString onSecret:_secretModel success:success failure:failure];

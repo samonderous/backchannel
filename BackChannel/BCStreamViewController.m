@@ -917,14 +917,20 @@ static BOOL isSwipeLocked = NO;
                                      withCommentCount:0];
     secret.isNew = YES;
     
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"type", @"added new post response", nil];
     SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"Create success");
         secret.sid = [((NSString*)responseObject[@"sid"]) integerValue];
+        [params setValue:responseObject[@"sid"] forKey:@"sid"];
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventServerSuccessResponse withParams:params];
     };
 
     FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"Error in create: %@", error);
         NSLog(@"error code %d", (int)operation.response.statusCode);
+        [params setValue:error forKey:@"error message"];
+        [params setValue:[NSNumber numberWithLong:operation.response.statusCode] forKey:@"status code"];
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventServerErrorResponse withParams:params];
     };
     
     [[BCAPIClient sharedClient] createSecret:secret.text success:success failure:failure];
@@ -1750,11 +1756,10 @@ static BOOL isSwipeLocked = NO;
             [self setupCompose:collectionView indexPath:indexPath];
         } completion:^(BOOL finished) {
         }];
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventCreatePost withParams:nil];
     } else {
         [self cellTapped:[collectionView cellForItemAtIndexPath:indexPath]];
     }
-
-    [[BCGlobalsManager globalsManager] logFlurryEvent:kEventCreatePost withParams:nil];
 }
 
 # pragma Text View Delegate
@@ -1780,37 +1785,41 @@ static BOOL isSwipeLocked = NO;
         [self switchToGotIt];
     }
     
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"sid", [NSNumber numberWithLong:secretModel.sid], nil];
     if (direction == LEFT_DIRECTION) {
         secretModel.disagrees++;
         secretModel.vote = VOTE_DISAGREE;
         if (_inTutorialMode) {
-            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVoteNegOneTutorial withParams:nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVoteNegOneTutorial withParams:params];
         } else {
-            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVoteNegOne withParams:nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVoteNegOne withParams:params];
         }
         
     } else if (direction == RIGHT_DIRECTION) {
         secretModel.agrees++;
         secretModel.vote = VOTE_AGREE;
         if (_inTutorialMode) {
-            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVotePlusOneTutorial withParams:nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVotePlusOneTutorial withParams:params];
         } else {
-            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVotePlusOne withParams:nil];
+            [[BCGlobalsManager globalsManager] logFlurryEvent:kEventVotePlusOne withParams:params];
         }
     }
 
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
-            NSLog(@"Vote success");
-        };
+    [params setValue:@"vote" forKey:@"type"];
+    SuccessCallback success = ^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"Vote success");
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventServerSuccessResponse withParams:params];
+    };
         
-        FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
-            NSLog(@"Error in vote: %@", error);
-            NSLog(@"error code %d", (int)operation.response.statusCode);
-        };
+    FailureCallback failure = ^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error in vote: %@", error);
+        NSLog(@"error code %d", (int)operation.response.statusCode);
+        [params setValue:error forKey:@"error message"];
+        [params setValue:[NSNumber numberWithLong:operation.response.statusCode] forKey:@"status code"];
+        [[BCGlobalsManager globalsManager] logFlurryEvent:kEventServerErrorResponse withParams:params];
+    };
         
-        [[BCAPIClient sharedClient] setVote:secretModel withVote:secretModel.vote success:success failure:failure];
-    });
+    [[BCAPIClient sharedClient] setVote:secretModel withVote:secretModel.vote success:success failure:failure];
     
     secretModel.isVoted = YES;
     [containerView updateVoteView:YES];
